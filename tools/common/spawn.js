@@ -2,7 +2,7 @@ import cp from 'child_process';
 
 export default function spawn(name, path, arg = [], opt) {
 	const out = stdout.bind(null, name);
-	const err = stdout.bind(null, name);
+	const err = stderr.bind(null, name);
 
 	out(`execute: ${path} ${arg.join(' ')}\n`);
 	const handle = cp.spawn('node', [].concat(path, arg), opt);

@@ -19,7 +19,10 @@ export default class Server extends EventEmitter {
 				env: process.env,
 				cwd: process.cwd()
 			});
-			this._handle.on('error', e => this.emit('error', e));
+			this._handle.on('error', e => {
+				this.emit('error', e);
+				this.stop();
+			});
 			this._handle.on('exit', () => {
 				this._handle = null;
 				this.emit('stop');

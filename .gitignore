@@ -7,7 +7,9 @@ npm-debug.log*
 pids
 *.pid
 *.seed
-transpiled
+
+# build
+build
 
 # Coverage directory used by tools like istanbul
 coverage
@@ -28,3 +30,5 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 
+# OSX
+.DS_Store
