@@ -1,7 +1,6 @@
 import path from 'path';
 import webpack from 'webpack';
 import AssetsPlugin from 'assets-webpack-plugin';
-import CopyPlugin from 'copy-webpack-plugin';
 import setup from '../config.build';
 
 const CWD = process.cwd();
