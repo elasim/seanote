@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import webpack from 'webpack';
 import './common/setup';
@@ -8,7 +9,8 @@ const serverCompiler = webpack(config.server);
 
 Promise.all([
 	runCompiler(clientCompiler),
-	runCompiler(serverCompiler)
+	runCompiler(serverCompiler),
+	makePackage(),
 ])
 	.then(() => {
 		console.log('Build Success');
@@ -27,5 +29,17 @@ function runCompiler(compiler) {
 			}));
 			e ? reject(e) : resolve();
 		});
+	});
+}
+
+function makePackage() {
+	const pkg = require(path.join(process.cwd(), './package.json'));
+	return new Promise((resolve, reject) => {
+		fs.writeFile(
+			path.join(config.server.output.path, './package.json'),
+			JSON.stringify(pkg, (key, val) => {
+				return key === 'devDependencies' ? undefined : val;
+			}, 4),
+			(e) => e ? reject(e) : resolve());
 	});
 }
