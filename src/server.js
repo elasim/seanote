@@ -4,13 +4,10 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { RouterContext, match } from 'react-router';
 
-import { engine } from './lib/simple-template';
-import routes from './routes';
+import { engine } from './server/lib/simple-template';
+import routes from './common/routes';
 import assets from './assets';
 import config from './config';
-
-import './html/index.html';
-import './html/error.html';
 
 const app = express();
 
@@ -29,7 +26,7 @@ app.get('*', (req, res) => {
 			res.redirect(302, redirect.pathname + redirect.search);
 		} else if (props) {
 			res.status(200).render('index', {
-				title: 'App',
+				title: 'App!',
 				body: renderToString(<RouterContext {...props} />),
 				bundle: assets.main.js
 			});
@@ -50,3 +47,7 @@ const http = app.listen(config.port, config.host, e => {
 	const addr = http.address();
 	console.log('Server Listening on '+addr.address+':'+addr.port);
 });
+
+// Copy required assets
+require('./html/index.html');
+require('./html/error.html');

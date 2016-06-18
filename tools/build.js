@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
 import webpack from 'webpack';
+import mkdirp from 'mkdirp';
 import './common/setup';
 
 const config = global.config;
@@ -48,9 +49,18 @@ function makePackage() {
 		delete pkg[field];
 	});
 	Object.assign(pkg, overwriteFields);
+	return mkdir(path.dirname(outputPath))
+		.then(writeFile(outputPath, JSON.stringify(pkg, null, 4)));
+}
+
+function mkdir(dirPath) {
 	return new Promise((resolve, reject) => {
-		fs.writeFile(outputPath, JSON.stringify(pkg, null, 4), (e) => {
-			e ? reject(e) : resolve();
-		});
+		mkdir(dirPath, (e) => e ? reject(e) : resolve());
+	});
+}
+
+function writeFile(filePath, content) {
+	return new Promise((resolve, reject) => {
+		fs.writeFile(filePath, content, (e) => e ? reject(e) : resolve());
 	});
 }

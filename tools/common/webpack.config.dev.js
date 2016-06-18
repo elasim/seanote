@@ -1,6 +1,12 @@
 import path from 'path';
+import _ from 'lodash';
 import webpack from 'webpack';
+
 import AssetsPlugin from 'assets-webpack-plugin';
+
+import precss from 'precss';
+import autoprefixer from 'autoprefixer';
+
 import setup from '../config.build';
 
 const CWD = process.cwd();
@@ -38,11 +44,16 @@ const common = {
 				test: /\.(html|png|jpeg|gif|jpg)$/,
 				loader: 'file?name=[path][name].[ext]'
 			},
+			{
+				test: /\.css$/,
+				loader: 'ignore-loader',
+				css: true
+			}
 		]
 	}
 };
 
-const client = Object.assign({}, common, {
+const client = Object.assign(_.cloneDeep(common), {
 	entry: [].concat(setup.client.main),
 	output: {
 		publicPath: '/assets/',
@@ -67,8 +78,17 @@ const client = Object.assign({}, common, {
 		new webpack.NoErrorsPlugin()
 	]
 });
+// inject style-loader for client compiler
+client.postcss = [
+	autoprefixer({
+		browsers: ['last 2 versions']
+	}),
+	precss(),
+];
+client.module.loaders.filter(cfg => cfg.css === true)
+	.forEach(cfg => cfg.loader = 'style!css!postcss');
 
-const server = Object.assign({}, common, {
+const server = Object.assign(_.cloneDeep(common), {
 	entry: setup.server.main,
 	output: {
 		filename: setup.server.output,
