@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import _ from 'lodash';
 import webpack from 'webpack';
 import './common/setup';
 
@@ -33,13 +34,23 @@ function runCompiler(compiler) {
 }
 
 function makePackage() {
-	const pkg = require(path.join(process.cwd(), './package.json'));
+	const ejectFields = [
+		'devDependencies',
+		'scripts'
+	];
+	const overwriteFields = {
+		'main': './server.js'
+	};
+	const inputPath = path.join(process.cwd(), './package.json');
+	const outputPath = path.join(config.server.output.path, './package.json');
+	let pkg = _.cloneDeep(require(inputPath));
+	ejectFields.forEach(field => {
+		delete pkg[field];
+	});
+	Object.assign(pkg, overwriteFields);
 	return new Promise((resolve, reject) => {
-		fs.writeFile(
-			path.join(config.server.output.path, './package.json'),
-			JSON.stringify(pkg, (key, val) => {
-				return key === 'devDependencies' ? undefined : val;
-			}, 4),
-			(e) => e ? reject(e) : resolve());
+		fs.writeFile(outputPath, JSON.stringify(pkg, null, 4), (e) => {
+			e ? reject(e) : resolve();
+		});
 	});
 }
