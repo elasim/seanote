@@ -1,0 +1,46 @@
+.view.board-detail {
+	> .list {
+		@media (max-width: 420px) {
+			.item {
+				width: 100%;
+				background-color: #fff;
+				overflow: auto;
+
+				> .drag-handle {
+					float: left;
+					padding: 5px;
+				}
+				> .body {
+
+				}
+			}
+		}
+
+		@media (min-width: 420px) {
+			.item {
+				width: 200px;
+				background-color: #fff;
+				overflow: auto;
+				> .drag-handle {
+					float: left;
+					padding: 5px;
+				}
+				> .body {
+
+				}
+			}
+		}
+		.item.preview {
+			position: fixed;
+			z-index: 100;
+			left: 0;
+			top: 0;
+			opacity: 0.7;
+		}
+	}
+	> .fab {
+		position: fixed;
+		right: 20px;
+		bottom: 20px;
+	}
+}

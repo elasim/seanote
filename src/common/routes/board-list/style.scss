@@ -1,0 +1,38 @@
+$item-width: 200px;
+$item-padding: 5px;
+$item-margin: 5px;
+$single-col-limit: ($item-width + $item-padding * 2 + $item-margin * 2) * 2;
+
+.view.board-list {
+	background-color: #eee;
+	> .list {
+		position: relative;
+		margin: 0 auto;
+		padding: 10px;
+	}
+	> .list > .item {
+		a {
+			text-decoration: none;
+			color: #000;
+		}
+		margin: 20px $item-margin;
+		padding: 5px $item-padding;
+		border-radius: 10px;
+		background-color: #fff;
+
+		.header {
+			font-size: 1.4rem;
+			word-break: break-all;
+			font-weight: bold;
+			margin-bottom: 0.5rem;
+		}
+
+		@media (min-width: $single-col-limit) {
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: $item-width;
+			transition: left 0.2s, top 0.2s;
+		}
+	}
+}

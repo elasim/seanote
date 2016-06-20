@@ -1,0 +1,95 @@
+/* Base Application Styles */
+body {
+	color: #000;
+	//width: 100%;
+	//height: 100%;
+	overflow: hidden;
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	padding-bottom: 20px;
+}
+
+#app {
+	width: 100%;
+	height: 100%;
+}
+
+.app {
+	@media (min-width: 1025px) {
+		.mdl-layout__drawer-button {
+			//display: none;
+			color: #fff;
+		}
+	}
+
+	@media (max-width: 1023px) {
+		.mdl-layout__drawer-button {
+			// color: #2e2e2e;
+			color: #fff;
+		}
+	}
+
+	@media (max-width: 600px) {
+		.app.navigation {
+			display: none;
+		}
+	}
+
+	.app.navigation,
+	.app.header {
+		background-color: #2e2e2e;
+	}
+	.app.header {
+		.title {
+			button {
+				color: #fff;
+			}
+		}
+		.mdl-textfield__label::after {
+			background-color: #fff;
+		}
+		.mdl-badge::after {
+			color: #fff;
+		}
+		.mdl-button {
+			text-transform: capitalize;
+		}
+		.mdl-button--primary {
+			color: #ccc;
+			&:hover {
+				color: #fff;
+			}
+		}
+		.mdl-navigation {
+			a {
+				margin: 0 5px;
+				padding: 10px 0;
+			}
+		}
+	}
+
+	.app.brand {
+		color: #fff;
+		text-align: center;
+		font-size: 1.5rem;
+		line-height: 2.5rem;
+		margin: 1rem 0 2.5rem;
+	}
+
+	.app.container {
+		padding: 1em;
+		background-color: #ccc;
+	}
+
+	.app.notice {
+		padding: 15px 0;
+		text-align: center;
+		border: 1px solid #000;
+		border-width: 1px 0;
+		background: #666;
+	}
+
+}

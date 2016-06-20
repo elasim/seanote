@@ -74,7 +74,7 @@ async function startServer(stat) {
 		if (global.DEBUG) {
 			bs = await initBrowserSync({
 				proxy: {
-					target: config.user.host + ':' + config.user.port,
+					target: 'https://' + config.user.host + ':8443',
 					middleware: [
 						webpackDev(clientCompiler, {
 							noInfo: !global.VERBOSE,
@@ -130,7 +130,7 @@ function initBrowserSync(config) {
 		const timeout = setTimeout(() => {
 			console.log('browser-sync initialization timeout');
 			reject();
-		}, 5000);
+		}, 15000);
 		bs.init(config, e => {
 			clearTimeout(timeout);
 			e ? reject(e) : resolve(bs);

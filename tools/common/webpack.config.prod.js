@@ -48,6 +48,11 @@ const common = {
 				test: /\.css$/,
 				loader: 'ignore-loader',
 				css: true
+			},
+			{
+				test: /\.scss$/,
+				loader: 'ignore-loader',
+				scss: true
 			}
 		]
 	}
@@ -85,15 +90,25 @@ const client = Object.assign(_.cloneDeep(common), {
 	]
 });
 // inject style-loader for client compiler
-client.postcss = [
-	autoprefixer({
-		browsers: ['last 2 versions']
-	}),
-	precss(),
-];
+client.postcss = function () {
+	return {
+		plugins: [
+			autoprefixer({
+				browsers: [
+					'> 5%',
+					'last 2 versions',
+					'ie >= 8'
+				]
+			}),
+			precss(),
+		],
+		syntax: require('postcss-scss')
+	};
+};
 client.module.loaders.filter(cfg => cfg.css === true)
 	.forEach(cfg => cfg.loader = 'style!css!postcss');
-
+client.module.loaders.filter(cfg => cfg.scss === true)
+	.forEach(cfg => cfg.loader = 'style!css!postcss!sass');
 const server = Object.assign(_.cloneDeep(common), {
 	entry: setup.server.main,
 	output: {
