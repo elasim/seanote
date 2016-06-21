@@ -1,0 +1,30 @@
+.card {
+	width: 100%;
+	overflow: auto;
+	background-color: #fff;
+	transition: opacity 0.5s;
+	display: table;
+}
+
+.body {
+	display: table-cell;
+}
+
+.dragging {
+	opacity: 0;
+}
+
+.handle {
+	display: table-cell;
+	vertical-align: middle;
+	padding: 5px;
+}
+
+.preview {
+	background-color: #fff;
+	position: fixed;
+	z-index: 100;
+	left: 0;
+	top: 0;
+	opacity: 0.7;
+}

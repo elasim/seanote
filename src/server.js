@@ -34,8 +34,6 @@ app.get(assets.main.js, (req, res) => {
 });
 app.use('/api', require('./server/routes/api').default);
 
-
-
 if (0) {
 	const routes = require('./common/routes').default;
 	const { Provider } = require('react-redux');

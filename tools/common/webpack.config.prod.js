@@ -46,13 +46,28 @@ const common = {
 			},
 			{
 				test: /\.css$/,
-				loader: 'ignore-loader',
-				css: true
+				loaders: [
+					'css?modules&localIdentName=[name]__[local]__[hash:base64:5]',
+					'postcss',
+				],
+				exclude: /(node_modules|bower_components|thirds|global\.css)/,
 			},
 			{
 				test: /\.scss$/,
-				loader: 'ignore-loader',
-				scss: true
+				loaders: [
+					'css?modules&localIdentName=[name]__[local]__[hash:base64:5]',
+					'postcss',
+					'sass',
+				],
+				exclude: /(node_modules|bower_components)/,
+			},
+			{
+				test: /(global|material\.custom|normalize)\.css$/,
+				loader: 'css',
+			},
+			{
+				test:/\.(wav)$/,
+				loader: 'url?limit=200',
 			}
 		]
 	}
@@ -105,10 +120,7 @@ client.postcss = function () {
 		syntax: require('postcss-scss')
 	};
 };
-client.module.loaders.filter(cfg => cfg.css === true)
-	.forEach(cfg => cfg.loader = 'style!css!postcss');
-client.module.loaders.filter(cfg => cfg.scss === true)
-	.forEach(cfg => cfg.loader = 'style!css!postcss!sass');
+
 const server = Object.assign(_.cloneDeep(common), {
 	entry: setup.server.main,
 	output: {
@@ -149,6 +161,41 @@ const server = Object.assign(_.cloneDeep(common), {
 		__dirname: false,
 	}
 });
+
+// inject style-loader for browser
+client.module.loaders
+	.filter(cfg => {
+		let loader = cfg.loaders ? cfg.loaders.join('!') : cfg.loader;
+		return loader.indexOf('css') !== -1;
+	})
+	.forEach(cfg => {
+		if (cfg.loaders) {
+			cfg.loaders.splice(0, 0, 'style');
+		} else {
+			cfg.loader = 'style!' + cfg.loader;
+		}
+	});
+
+// replace css-loader to localname loader
+const cssLoaderReplacer = /^css(?:-loader)?|!css(?:-loader)?/;
+server.module.loaders
+	.filter(cfg => {
+		let loader = cfg.loaders ? cfg.loaders.join('!') : cfg.loader;
+		return loader.indexOf('css') !== -1;
+	})
+	.forEach(cfg => {
+		if (cfg.loaders) {
+			cfg.loaders = cfg.loaders.map(loader => {
+				if (loader.indexOf('css') !== -1) {
+					return loader.replace(cssLoaderReplacer, 'css-loader/locals');
+				} else {
+					return loader;
+				}
+			});
+		} else {
+			cfg.loader = cfg.loader.replace(cssLoaderReplacer, 'css-loader/locals');
+		}
+	});
 
 export default {
 	server,

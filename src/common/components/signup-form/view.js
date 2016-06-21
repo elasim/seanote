@@ -5,7 +5,7 @@ import {
 	Button,
 	Icon
 } from 'react-mdl';
-import './style.css';
+import css from './style.css';
 import User from '../user-mock.js';
 
 const FIELD_EMAIL = 'email';
@@ -107,7 +107,7 @@ export default class SignupForm extends Component {
 	render() {
 		const canSubmit = this.state.valid && !this.state.sent;
 		return (
-			<div className="control signup-form">
+			<div className={css.root}>
 				<form method="post" onSubmit={this._onSubmit}>
 					<Textfield floatingLabel className="row"
 						ref="email" type="email" label="Email" name={FIELD_EMAIL}
@@ -133,7 +133,7 @@ export default class SignupForm extends Component {
 						onChange={::this.onChangeValue}
 						disabled={this.state.sent}
 					/>
-					<div className="row center">
+					<div className={css.center}>
 						<Button type="submit"
 							ripple accent disabled={!canSubmit} >
 							<Icon name="done" />

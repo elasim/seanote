@@ -12,10 +12,11 @@ import {
 } from 'react-mdl';
 // import ContentWrapper from '../../components/content';
 import Header from './header';
-import './style.scss';
+import css from './style.scss';
+import './global.css';
 
 if (process.env.BROWSER) {
-	require('react-mdl/extra/material.css');
+	require('../../thirds/material.custom.css');
 	require('../../thirds/material.custom.js');
 }
 
@@ -33,7 +34,7 @@ class App extends React.Component {
 	render() {
 		const { title, contextMenu } = this.props;
 		const titleLink = (
-			<Link to="/" className="title">
+			<Link to="/" className={css.title}>
 				<Button primary ripple>{title}</Button>
 			</Link>
 		);
@@ -55,6 +56,7 @@ class App extends React.Component {
 				<Link key={0} to="/">Home</Link>,
 				<Link key={1} to="/about">About</Link>,
 				<Link key={2} to="/board">Try Demo</Link>,
+				<Link key={5} to="/board2">Board 2</Link>,
 				<Link key={3} to="/signin">Sign In</Link>,
 				<a key={4} href="https://github.com/elasim" target="_blank">
 					<Icon name="link" style={{ marginRight: '8px', verticalAlign: 'middle' }} />
@@ -63,13 +65,13 @@ class App extends React.Component {
 			];
 		}
 		return (
-			<div className="app">
+			<div className={css.app}>
 				<Layout fixedHeader>
-					<Header seamed title={titleLink} className="app header"
+					<Header seamed title={titleLink} className={css.header}
 						contextIcon={contextMenuIcon}
 						contextAction={contextMenuAction}>
 						<Textfield label="Search" expandable expandableIcon="search" />
-						<Navigation className="app navigation">
+						<Navigation className={css.navigation}>
 							<Link to="/"><Button primary ripple>Home</Button></Link>
 							<Link to="/board"><Button primary ripple>Dashboard</Button></Link>
 							<Link to="/board/demo"><Button raised accent ripple>demo</Button></Link>

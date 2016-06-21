@@ -4,7 +4,8 @@ import SigninForm from '../../components/signin-form';
 
 import {
 	Grid,
-	Cell
+	Cell,
+	Button,
 } from 'react-mdl';
 
 export default class SignIn extends Component {
@@ -16,6 +17,11 @@ export default class SignIn extends Component {
 	}
 	onSuccess() {
 		console.log('Success');
+	}
+	onClickSignUp() {
+		this.setState({
+			showSignUp: true
+		});
 	}
 	onSignUpCancelled() {
 		this.setState({
@@ -41,6 +47,7 @@ export default class SignIn extends Component {
 				<Grid>
 					<Cell col={4}>
 						Some Description Here
+						<Button onClick={::this.onClickSignUp}>Sign-Up</Button>
 					</Cell>
 					<Cell col={4}>
 						<div>{controls}</div>

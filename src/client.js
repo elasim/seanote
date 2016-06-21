@@ -1,7 +1,6 @@
 import 'normalize.css';
 import 'core-js/fn/array/find-index';
 import 'core-js/fn/array/fill';
-import './hotfix.css';
 
 import { addLocaleData } from 'react-intl';
 import en from 'react-intl/locale-data/en';

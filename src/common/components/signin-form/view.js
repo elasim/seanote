@@ -7,7 +7,7 @@ import {
 	Icon
 } from 'react-mdl';
 
-import './style.css';
+import css from './style.css';
 import User from '../user-mock.js';
 
 const FIELD_EMAIL = 'email';
@@ -85,21 +85,21 @@ export default class SigninForm extends Component {
 			});
 	}
 	render() {
-		const errorStyle = cx('error', {
-			'visible': !!this.state.error
+		const errorStyle = cx(css.error, {
+			[css.visible]: !!this.state.error
 		});
 		return (
-			<div className="control signin-form">
+			<div className={css.root}>
 				<form method="post" onSubmit={::this.onSubmit}>
 					<div className={errorStyle}>{this.state.error||' '}</div>
 					<Textfield type="email" name={FIELD_EMAIL} label="Email"
 						onChange={::this.onChangeValue} disabled={this.state.sent}
-						className="row" ref={FIELD_EMAIL}/>
+						className={css.row} ref={FIELD_EMAIL}/>
 					<Textfield type="password" name={FIELD_PASSWORD} label="Password"
 						onChange={::this.onChangeValue} disabled={this.state.sent}
-						className="row" ref={FIELD_PASSWORD}/>
-					<div className="row">
-						<Button type="submit" raised colored className="stretch"
+						className={css.row} ref={FIELD_PASSWORD}/>
+					<div className={css.row}>
+						<Button type="submit" raised colored className={css.stretch}
 							disabled={this.state.sent}>
 							<Icon name="vpn_key" /> Sign-In
 						</Button>
