@@ -1,12 +1,14 @@
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
+import update from 'react/lib/update';
 import emptyFunction from 'fbjs/lib/emptyFunction';
 import { findDOMNode } from 'react-dom';
 import { DragSource, DropTarget } from 'react-dnd';
 
+import { Textfield } from 'react-mdl';
 import Board from '../../models/board';
 import SortableList from '../../components/sortable-list';
-import css from './style.scss';
+import css from './grid-item-template.scss';
 
 /// @TODO Extract as Sortable Decorator
 ///
@@ -15,11 +17,21 @@ const itemSource = {
 		return {
 			id: props.id,
 			index: props.index,
+			container: props.container,
 		};
 	}
 };
 const itemTarget = {
-	hover: (props, monitor, component) => component.onHover(props, monitor),
+	hover: (props, monitor, component) => {
+		switch (monitor.getItemType()) {
+			case 'BoardListItem':
+				component.onHover(props, monitor);
+				break;
+			case 'SortableListItem':
+				component.move(props, monitor);
+				return;
+		}
+	}
 };
 
 @DragSource('BoardListItem', itemSource, (connect, monitor) => ({
@@ -27,7 +39,10 @@ const itemTarget = {
 	connectDragPreview: connect.dragPreview(),
 	isDragging: monitor.isDragging(),
 }))
-@DropTarget('BoardListItem', itemTarget, (connect) => ({
+@DropTarget([
+	'BoardListItem',
+	'SortableListItem',
+], itemTarget, (connect) => ({
 	connectDropTarget: connect.dropTarget(),
 }))
 export default class GridItemTemplate extends Component {
@@ -45,29 +60,13 @@ export default class GridItemTemplate extends Component {
 			nameEditable: false,
 			items: props.items,
 			name: props.name,
+			newText: '',
 		};
-	}
-	toggleEditName(e) {
-		if (!this.state.nameEditable) {
-			this.setState({
-				nameEditable: !this.state.nameEditable,
-			});
-			setTimeout(() => {
-				findDOMNode(this.refs.name).focus();
-			}, 0);
-		} else {
-			this.setState({
-				nameEditable: !this.state.nameEditable,
-				name: e.target.innerHTML,
-			});
-			this.onNameChanged('name', e.target.innerHTML);
-		}
 	}
 	render() {
 		const {
 			className,
 			style,
-			...data,
 			connectDropTarget,
 			connectDragSource,
 			connectDragPreview,
@@ -83,7 +82,7 @@ export default class GridItemTemplate extends Component {
 				<div className={css['item-header']}>
 					{connectDragSource(
 						<div className={css.handle}>
-							<i className="material-icons">drag_handle</i>
+							<i className="material-icons">open_with</i>
 						</div>
 					)}
 					<div className={css.title} ref="name"
@@ -93,15 +92,110 @@ export default class GridItemTemplate extends Component {
 						dangerouslySetInnerHTML={{__html:name||' '}} />
 				</div>
 				<SortableList items={items} allowIn allowOut
-					onSort={::this.onListOrderChanged} />
+					onChange={::this.onListChanged} ref="list"/>
+				<div>
+					<Textfield label="Type to add new text" onKeyUp={::this.addItem}
+						value={this.state.newText} onChange={::this.onChangeText}/>
+				</div>
 			</div>
 		));
 	}
-	onListOrderChanged(orderedItems) {
-		this.props.onDataChanged(this.props.id, 'items', orderedItems);
+	onChangeText(e) {
+		this.setState({
+			newText: e.target.value
+		});
 	}
-	onNameChanged(name, value) {
-		this.props.onDataChanged(this.props.id, name, value);
+	toggleEditName(e) {
+		if (!this.state.nameEditable) {
+			setTimeout(() => {
+				findDOMNode(this.refs.name).focus();
+			}, 0);
+		} else {
+			this.setState({
+				nameEditable: !this.state.nameEditable,
+				name: e.target.innerHTML,
+			});
+			this.onNameChanged(e.target.innerHTML);
+		}
+	}
+	addItem(e) {
+		if (e.keyCode === 13) {
+			const changes = {
+				items: {
+					$push: [
+						{
+							id: 'new' + Date.now(),
+							type: 'Note',
+							detail: {
+								text: this.state.newText
+							}
+						}
+					]
+				}
+			};
+
+			this.refs.list.setState(update(this.refs.list.state, changes));
+			this.onListChanged(changes);
+			this.setState({
+				newText: ''
+			});
+			e.target.blur();
+		}
+	}
+	onListChanged(changes) {
+		this.props.onDataChanged(this.props.id, changes);
+	}
+	onNameChanged(value) {
+		this.props.onDataChanged(this.props.id, {
+			name: {
+				$set: value
+			}
+		});
+	}
+	move(props, monitor) {
+		clearTimeout(this._moveTimeout);
+		this._moveTimeout = setTimeout(::this.move_, 1000/30, props, monitor);
+	}
+
+	move_(props, monitor) {
+		if (!monitor.isOver({ shallow: true })) {
+			return;
+		}
+		const dragItem = monitor.getItem();
+		if (!dragItem) {
+			return;
+		}
+		const dragIndex = dragItem.index;
+		if (this.refs.list === dragItem.container) {
+			return;
+		}
+		if (!this.refs.list.props.allowIn || !dragItem.container.props.allowOut) {
+			return;
+		}
+		// @TODO FIX (performance, critical)
+		// Issue#2
+		// Because of performance issue,
+		// I didn't define componentWillReceiveProps method on SortableList
+		// also, directly access list state and mutate them
+		const data = dragItem.container.state.items[dragIndex];
+		dragItem.container.setState(update(dragItem.container.state, {
+			items: {
+				$splice: [
+					[dragIndex, 1]
+				]
+			}
+		}));
+		const newIndex = this.refs.list.state.items.length;
+		this.refs.list.setState(update(this.refs.list.state, {
+			items: {
+				$push: [
+					data
+				]
+			}
+		}));
+		dragItem.index = newIndex;
+		dragItem.container = this;
+		return;
 	}
 	onHover(props, monitor) {
 		const dragItem = monitor.getItem();
@@ -111,8 +205,38 @@ export default class GridItemTemplate extends Component {
 		if (dragIndex === hoverIndex) {
 			return;
 		}
+		const clientOffset = monitor.getClientOffset();
+		const clientBoundingRect = findDOMNode(dragItem.container).getBoundingClientRect();
+		const hoverBoundingRect = findDOMNode(this).getBoundingClientRect();
+		const hoverMiddleX = hoverBoundingRect.width / 2;
+		const hoverMiddleY = hoverBoundingRect.height / 2;
+		const hoverClientX = clientOffset.x - hoverBoundingRect.left;
+		const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
-		this.props.onSwapIndex(dragIndex, hoverIndex);
-		monitor.getItem().index = hoverIndex;
+		if (clientBoundingRect.left < hoverBoundingRect.left) {
+			if (hoverClientX > hoverMiddleX) {
+				return;
+			}
+		}
+		if (clientBoundingRect.left > hoverBoundingRect.left) {
+			if (hoverClientX < hoverMiddleX) {
+				return;
+			}
+		}
+		if (clientBoundingRect.top < hoverBoundingRect.top) {
+			if (hoverClientY > hoverMiddleY) {
+				return;
+			}
+		}
+		if (clientBoundingRect.top > hoverBoundingRect.top) {
+			if (hoverClientY < hoverMiddleY) {
+				return;
+			}
+		}
+		clearTimeout(this._swapDelay);
+		this._swapDelay = setTimeout(() => {
+			this.props.onSwapIndex(dragIndex, hoverIndex);
+			dragItem.index = hoverIndex;
+		}, 50);
 	}
 }

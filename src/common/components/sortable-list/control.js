@@ -6,21 +6,35 @@ import { DragSource, DropTarget } from 'react-dnd';
 import uuid from 'uuid';
 import css from './style.scss';
 
-@DropTarget('SortableListItem', {}, (connect, monitor) => ({
-	connectDropTarget: connect.dropTarget(),
-	dropTargetMonitor: monitor,
-}))
+const itemSource = {
+	beginDrag(props) {
+		return {
+			container: props.container,
+			id: props.id,
+			index: props.index,
+		};
+	}
+};
+
+const itemTarget = {
+	hover(props, monitor, component) {
+		if (component && component.onHover) {
+			component.onHover(props, monitor);
+		}
+	}
+};
+
 export default class SortableList extends Component {
 	static propTypes = {
 		items: PropTypes.arrayOf(PropTypes.any),
-		allowInsert: PropTypes.bool,
-		allowExtract: PropTypes.bool,
-		onSort: PropTypes.func,
+		allowIn: PropTypes.bool,
+		allowOut: PropTypes.bool,
+		onChange: PropTypes.func,
 	};
 	static defaultProps = {
-		allowInsert: false,
-		allowExtract: false,
-		onSort: emptyFunction,
+		allowIn: false,
+		allowOut: false,
+		onChange: emptyFunction,
 	};
 	constructor(props, context) {
 		super(props, context);
@@ -41,94 +55,11 @@ export default class SortableList extends Component {
 				/>
 			);
 		});
-		if (renderedItems.length === 0) {
-			renderedItems.push(
-				<SortableListEmptyItem
-					id="empty-item"
-					container={this}
-					key="sortable-list-empty"
-					index={0}
-				/>
-			);
-		}
 		return (
-			<div className={css.root}>
+			<div>
 				{renderedItems}
 			</div>
 		);
-	}
-}
-
-const itemSource = {
-	beginDrag(props) {
-		return {
-			container: props.container,
-			id: props.id,
-			index: props.index,
-		};
-	}
-};
-
-const itemTarget = {
-	hover(props, monitor, component) {
-		component.onHover(props, monitor);
-	}
-};
-
-@DropTarget(
-	'SortableListItem',
-	itemTarget,
-	(connect, monitor) => ({
-		connectDropTarget: connect.dropTarget(),
-		dropTargetMonitor: monitor,
-	})
-)
-class SortableListEmptyItem extends Component {
-	render() {
-		const { connectDropTarget } = this.props;
-		return connectDropTarget(
-			<div className={css.item}>&nbsp;</div>
-		);
-	}
-	onHover(props, monitor) {
-		const dragItem = monitor.getItem();
-		const dragIndex = dragItem.index;
-		const hoverIndex = props.index;
-		let containerChanged = false;
-
-		if (props.container !== dragItem.container) {
-			containerChanged = true
-				& props.container.props.allowIn
-				& dragItem.container.props.allowOut
-				;
-			if (!containerChanged) {
-				return;
-			}
-		} else {
-			if (dragIndex === hoverIndex) {
-				return;
-			}
-		}
-
-		if (containerChanged) {
-			const data = dragItem.container.state.items[dragIndex];
-			dragItem.container.setState(update(dragItem.container.state, {
-				items: {
-					$splice: [
-						[dragIndex, 1]
-					]
-				}
-			}));
-			props.container.setState(update(props.container.state, {
-				items: {
-					$splice: [
-						[hoverIndex, 1, data]
-					]
-				}
-			}));
-			monitor.getItem().index = hoverIndex;
-			monitor.getItem().container = props.container;
-		}
 	}
 }
 
@@ -149,12 +80,22 @@ class SortableListEmptyItem extends Component {
 	})
 )
 class SortableListItem extends Component {
+	static propTypes = {
+		template: PropTypes.func,
+	};
+	static defaultProps = {
+		template: (props) => (
+			<div>{JSON.stringify(props.id)}</div>
+		)
+	}
 	render() {
 		const {
 			connectDropTarget,
 			connectDragSource,
 			isDragging,
 			dragItem,
+			template,
+			...restProps
 		} = this.props;
 		const style = {
 			opacity: 1,
@@ -169,7 +110,7 @@ class SortableListItem extends Component {
 					<i className="material-icons">drag_handle</i>
 				</div>
 				<div className={css.body}>
-					{JSON.stringify(this.props.id)}
+					{React.createElement(template, restProps)}
 				</div>
 			</div>
 		));
@@ -197,27 +138,31 @@ class SortableListItem extends Component {
 		if (containerChanged) {
 			/// @TODO WRONG!!!!!!!!!!!!!!!! REFACTORING THIS
 			/// I SHOULD HAVE TO PUT THIS STUB ON CONTAINER
+			let changes;
 			const data = dragItem.container.state.items[dragIndex];
 
-			const originNewState = update(dragItem.container.state, {
+			changes = {
 				items: {
 					$splice: [
 						[dragIndex, 1]
 					]
 				}
-			});
+			};
+			const originNewState = update(dragItem.container.state, changes);
 			dragItem.container.setState(originNewState);
-			dragItem.container.props.onSort(originNewState.items);
+			dragItem.container.props.onChange(changes);
 			
-			const destNewState = update(props.container.state, {
+			changes = {
 				items: {
 					$splice: [
 						[hoverIndex, 0, data]
 					]
 				}
-			});
+			};
+			const destNewState = update(props.container.state, changes);
 			props.container.setState(destNewState);
-			props.container.props.onSort(destNewState.items);
+			props.container.props.onChange(changes);
+
 			dragItem.index = hoverIndex;
 			dragItem.container = props.container;
 		} else {
@@ -238,16 +183,17 @@ class SortableListItem extends Component {
 			// props.container === dragItem.container
 			// so, I'll use dragItem.container to maintain code consistency
 			const item = dragItem.container.state.items[dragIndex];
-			const newState = update(dragItem.container.state, {
+			const changes = {
 				items: {
 					$splice: [
 						[dragIndex, 1],
 						[hoverIndex, 0, item]
 					]
 				}
-			});
+			};
+			const newState = update(dragItem.container.state, changes);
 			dragItem.container.setState(newState);
-			dragItem.container.props.onSort(newState.items);
+			dragItem.container.props.onChange(changes);
 			dragItem.index = hoverIndex;
 		}
 	}

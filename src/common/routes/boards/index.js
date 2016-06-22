@@ -1,3 +1,4 @@
+import Rx from 'rx';
 import cx from 'classnames';
 import uuid from 'uuid';
 import React, { Component } from 'react';
@@ -22,7 +23,10 @@ import SEODocumentTitle from '../../components/seo-document-title/decorator';
 @connect(null, (dispatch) => ({
 	setTitle: (title) => dispatch({ type: 'setTitle', payload: title })
 }))
-@DragDropContext(dragType, createDropEventHandler())
+@DragDropContext([
+	'BoardListItem',
+	'SortableListItem'
+], createDropEventHandler())
 export default class Boards extends Component {
 	constructor(props, context) {
 		super(props, context);
@@ -30,8 +34,14 @@ export default class Boards extends Component {
 			items: BoardData.all().map(item => {
 				item.gridKey = uuid.v4();
 				return item;
-			})
+			}),
+			addMenuOpened: false,
 		};
+	}
+	openAddMenu() {
+		this.setState({
+			addMenuOpened: true
+		});
 	}
 	render() {
 		const {
@@ -40,6 +50,9 @@ export default class Boards extends Component {
 			preview
 		} = this.props;
 		let previewRendered = null;
+		// @NOTE
+		// This stub is remained to implement preview for react-dnd-touch-backend
+		// <<
 		const dragItemType = dropTargetMonitor.getItemType();
 		if (preview && dragItemType !== undefined) {
 			previewRendered = React.createElement(preview.layer, {
@@ -47,6 +60,7 @@ export default class Boards extends Component {
 				className: css.preview
 			});
 		}
+		// >>
 		return connectDropTarget(
 			<div className={cx('mdl-layout__content', css.root)}>
 				<CascadeGrid columnWidth={220} items={this.state.items}
@@ -54,7 +68,20 @@ export default class Boards extends Component {
 				</CascadeGrid>
 				{previewRendered}
 				<div className={css['instant-menu']}>
-					<FABButton><Icon name="add" /></FABButton>
+					<FABButton
+						onMouseOver={::this.openAddMenu}
+						onTouchTap={::this.openAddMenu}
+						><Icon name="add" /></FABButton>
+					<div className={cx(css['menu-container'], {
+						[css.open]: this.state.addMenuOpened
+					})}>
+						<div className={css['menu-offset']}>
+							<FABButton><Icon name="delete" /></FABButton>
+							<FABButton><Icon name="delete" /></FABButton>
+							<FABButton><Icon name="delete" /></FABButton>
+							<FABButton><Icon name="delete" /></FABButton>
+						</div>
+					</div>
 					<FABButton><Icon name="delete" /></FABButton>
 				</div>
 			</div>
@@ -67,8 +94,9 @@ export default class Boards extends Component {
 				<GridItemTemplate {...props}
 					id={props.id}
 					index={props.index}
+					container={this}
 					onSwapIndex={::this.swapIndex}
-					onDataChanged={::this.updateData}
+					onDataChanged={::this.onDataChanged}
 				/>
 			);
 		};
@@ -85,24 +113,27 @@ export default class Boards extends Component {
 			}
 		}));
 	}
-	updateData(id, key, value) {
-		const { items } = this.state;
-		const updateIdx = items.findIndex(item => item.id === id);
-		this.setState(update(this.state, {
+	onDataChanged(id, changes) {
+		const idx = this.state.items.findIndex(item => item.id === id);
+		if (idx === undefined) {
+			console.warn('Unknown Data ID');
+			return;
+		}
+		const newState = update(this.state, {
 			items: {
-				[updateIdx]: {
-					[key]: {
-						$set: value
-					}
-				}
+				[idx]: changes
 			}
-		}));
+		});
+		this.setState(newState);
 	}
 }
 
 function createDropEventHandler() {
 	return {
 		hover(props, monitor, component) {
+			if (!monitor.isOver({ shallow: true })) {
+				return;
+			}
 			// Scroll on edge
 			const dom = findDOMNode(component);
 			const bound = dom.getBoundingClientRect();

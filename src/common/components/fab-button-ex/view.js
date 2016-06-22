@@ -6,7 +6,7 @@ import './style.css';
 
 const emptyFunc = () => {};
 
-export default function HOC(type) {
+export default function CreateDroppableFABButton(type) {
 	@DropTarget(type, {
 		drop(props, monitor, component) {
 			component.props.onDrop.apply(component, arguments);
