@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import React, { Component, PropTypes } from 'react';
+import { findDOMNode } from 'react-dom';
 import {
 	Textfield,
 	Button,
@@ -31,27 +32,30 @@ export default class SignupForm extends Component {
 	constructor(props, context) {
 		super(props, context);
 		this.state = {
-			valid: false,
+			validation: {
+				usernameError: undefined,
+				emailError: undefined,
+				passwordError: undefined,
+				valid: false,
+			},
 			sent: false,
-			usernameError: undefined,
-			emailError: undefined,
-			passwordError: undefined,
-			values: {}
 		};
 	}
 	componentDidMount() {
 		this._onSubmit = ::this.onSubmit;
 	}
 	onSubmit(e) {
-		e.preventDefault();		
 		const { onSuccess, onFailure } = this.props;
-		this.setState({
-			sent: true
-		});
+		const form = e.target;
+		const email = form[FIELD_EMAIL];
+		const username = form[FIELD_USERNAME];
+		const password = form[FIELD_PASSWORD];
+		e.preventDefault();
+		this.setState({ sent: true });
 		User.signUp({
-			email: this.state.values[FIELD_EMAIL],
-			username: this.state.values[FIELD_USERNAME],
-			password: this.state.values[FIELD_PASSWORD]
+			email: email.value,
+			username: username.value,
+			password: password.value
 		})
 			.then(onSuccess)
 			.catch(e => {
@@ -63,73 +67,80 @@ export default class SignupForm extends Component {
 		return false;
 	}
 	async onChangeValue(e) {
-		const { name, value } = e.currentTarget;
-		const state = this.state;
-		switch (name) {
-			case FIELD_PASSWORD:
-			case FIELD_PASSWORD_CONFIRM:
-			case FIELD_EMAIL:
-			case FIELD_USERNAME:
-				state.values[name] = value;
-				break;
-			default:
-				console.error('unknown input field');
-				return;
-		}
-		const validation = await this.validateForm();
-		Object.assign(this.state, validation);
-		this.setState(this.state);
+		this.setState({
+			validation: await this.validateForm(e.target)
+		});
 	}
-	async validateForm() {
-		const { values } = this.state;
-		let usernameError;
-		let passwordError;
-		let emailError;
-		// password validation
-		if (values[FIELD_PASSWORD] !== values[FIELD_PASSWORD_CONFIRM]) {
-			passwordError = ErrorString.PasswordMismatch;
+	async validateForm(field) {
+		const { validation } = this.state;
+		switch (field.name) {
+			case FIELD_EMAIL: {
+				if (await User.isAvailableEmail(field.value) !== true) {
+					validation.emailError = ErrorString.EmailUnavailable;
+				}
+				validation.emailError = undefined;
+				break;
+			}
+			case FIELD_PASSWORD:
+			case FIELD_PASSWORD_CONFIRM: {
+				const passwd = findDOMNode(this.refs.password)
+					.querySelector('input');
+				const passConfirm = findDOMNode(this.refs.passwordConfirm)
+					.querySelector('input');
+				if (passwd.value !== passConfirm.value) {
+					validation.passwordError = ErrorString.PasswordMismatch;
+					break;
+				}
+				if (passwd.value.length === 0) {
+					validation.passwordError = ErrorString.PasswordEmpty;
+					break;
+				}
+				validation.passwordError = undefined;
+				break;
+			}
+			case FIELD_USERNAME: {
+				if (await User.isAvailableName(field.value) !== true) {
+					validation.usernameError = ErrorString.UsernameUnavailable;
+				}
+				validation.usernameError = undefined;
+				break;
+			}
 		}
-		// username validation
-		if (await User.isAvailableName(values[FIELD_USERNAME]) !== true) {
-			usernameError = ErrorString.UsernameUnavailable;
-		}
-		// email validation
-		if (await User.isAvailableEmail(values[FIELD_EMAIL]) !== true) {
-			emailError = ErrorString.EmailUnavailable;
-		}
-		return {
-			usernameError,
-			passwordError,
-			emailError,
-			valid: (!usernameError && !passwordError && !emailError)
-		};
+		validation.valid = Object.keys(validation)
+		.map(key => !validation[key])
+			.reduce((prev, current) => prev & current);
+		return validation;
 	}
 	render() {
-		const canSubmit = this.state.valid && !this.state.sent;
+		const canSubmit = this.state.validation.valid && !this.state.sent;
 		return (
 			<div className={css.root}>
 				<form method="post" onSubmit={this._onSubmit}>
 					<Textfield floatingLabel className="row"
-						ref="email" type="email" label="Email" name={FIELD_EMAIL}
-						error={this.state.emailError}
+						ref="email" type="email" label="Email"
+						name={FIELD_EMAIL}
+						error={this.state.validation.emailError}
 						onChange={::this.onChangeValue}
 						disabled={this.state.sent}
 					/>
 					<Textfield floatingLabel className="row"
-						ref="username" label="Username" name={FIELD_USERNAME}
-						error={this.state.usernameError}
+						ref="username" label="Username"
+						name={FIELD_USERNAME}
+						error={this.state.validation.usernameError}
 						onChange={::this.onChangeValue}
 						disabled={this.state.sent}
 					/>
-					<Textfield floatingLabel className="row"
-						type="password" label="Password" name={FIELD_PASSWORD}
-						error={this.state.passwordError}
+					<Textfield floatingLabel className="row" ref="password"
+						type="password" label="Password"
+						name={FIELD_PASSWORD}
+						error={this.state.validation.passwordError}
 						onChange={::this.onChangeValue}
 						disabled={this.state.sent}
 					/>
-					<Textfield floatingLabel className="row"
+					<Textfield floatingLabel className="row" ref="passwordConfirm"
 						type="password" label="Password Confirm"
-						error={this.state.passwordError} name={FIELD_PASSWORD_CONFIRM}
+						name={FIELD_PASSWORD_CONFIRM}
+						error={this.state.validation.passwordError}
 						onChange={::this.onChangeValue}
 						disabled={this.state.sent}
 					/>

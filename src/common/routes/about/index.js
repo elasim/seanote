@@ -1,15 +1,9 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, { Component, PropTypes } from 'react';
+//import { connect } from 'react-redux';
+import SEODocumentTitle from '../../components/seo-document-title/decorator';
 
-@connect(null, (dispatch) => ({
-	setTitle(title) {
-		dispatch({ type: 'setTitle', payload: title });
-	}
-}))
+@SEODocumentTitle('About')
 export default class AboutView extends Component {
-	componentWillMount() {
-		this.props.setTitle('About');
-	}
 	render() {
 		return (
 			<div className="mdl-layout__content">ABOUT</div>

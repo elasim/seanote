@@ -1,58 +1,52 @@
 import cx from 'classnames';
-import Rx from 'rx';
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 import { connect } from 'react-redux';
 
-import Board from '../../models/board';
+import BoardData from '../../models/board';
 import DragDropContext from '../../components/drag-drop-context';
-import BoardItemList, { dragItemType } from '../../components/board';
-import TightGrid from '../../components/tight-grid';
+import CascadeGrid from '../../components/cascade-grid';
 
+import GridItemTemplate from './grid-item-template';
+import { dragType } from './constant';
 import css from './style.scss';
+import SEODocumentTitle from '../../components/seo-document-title/decorator';
 
-console.log(dragItemType);
-
+@SEODocumentTitle('Board')
 @connect(null, (dispatch) => ({
-	setTitle(title) {
-		dispatch({ type: 'setTitle', payload: title });
-	},
+	setTitle: (title) => dispatch({ type: 'setTitle', payload: title })
 }))
-@DragDropContext('BoardDetailItem', createDropEventHandler())
-export default class BoardView extends Component {
+@DragDropContext(dragType, createDropEventHandler())
+export default class Boards extends Component {
 	constructor(props, context) {
 		super(props, context);
 		this.state = {
-			items: Board.all(),
+			items: BoardData.all(),
 		};
 	}
 	componentWillMount() {
-		this.props.setTitle('Board Impl2');
-		this._childRenderer = (props) => {
-			const item = props.data;
-			return (<div>
-				<div className={css['item-header']}>{item.name}</div>
-				<BoardItemList data={Board.getDetails(item.id)}
-					notifyPreviewChanged={::this.props.onPreviewChanged} />
-			</div>);
-		};
+	//	this.props.setTitle('Board');
 	}
 	render() {
-		const { connectDropTarget, dropTargetMonitor } = this.props;
-		let preview = null;
-		if (this.props.preview && dropTargetMonitor.getItemType() !== undefined) {
-			const Layer = this.props.preview.layer;
-			const renderer = this.props.preview.renderer;
-			preview = <Layer component={renderer} className={css.preview}/>;
+		const {
+			connectDropTarget,
+			dropTargetMonitor,
+			preview
+		} = this.props;
+		let previewRendered = null;
+		const dragItemType = dropTargetMonitor.getItemType();
+		if (preview && dragItemType !== undefined) {
+			previewRendered = React.createElement(preview.layer, {
+				component: preview.renderer,
+				className: css.preview
+			});
 		}
 		return connectDropTarget(
 			<div className={cx('mdl-layout__content', css.root)}>
-				<TightGrid className={css.list}
-					items={this.state.items}
-					childElement={this._childRenderer}
-					childClass={cx(css.item, 'mdl-shadow--2dp')}>
-					{preview}
-				</TightGrid>
+				<CascadeGrid columnWidth={220} items={this.state.items}
+					itemTemplate={GridItemTemplate} >
+				</CascadeGrid>
+				{previewRendered}
 			</div>
 		);
 	}
@@ -69,7 +63,6 @@ function createDropEventHandler() {
 			const top = bound.top + edgeHeight;
 			const bottom = bound.height - edgeHeight;
 			clearInterval(component._hoverScroll);
-
 			if (cursor.y <= top) {
 				component._hoverScroll = setInterval(() => {
 					dom.scrollTop += cursor.y - top;
@@ -85,9 +78,7 @@ function createDropEventHandler() {
 		},
 		drop(drop, monitor, component) {
 			clearInterval(component._hoverScroll);
-			console.log(monitor.didDrop());
 			return;
 		},
 	};
 }
-

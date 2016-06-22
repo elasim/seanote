@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { DragDropContext, DropTarget } from 'react-dnd';
 import TouchBackend from 'react-dnd-touch-backend';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 export default function DragDropContextEx(types, spec) {
 	return (ComposedComponent) => {
-		@DragDropContext(TouchBackend({ enableMouseEvents: true }))
+		// @DragDropContext(TouchBackend({ enableMouseEvents: true }))
+		@DragDropContext(HTML5Backend)
 		@DropTarget(types, spec, (connect, monitor) => ({
 			connectDropTarget: connect.dropTarget(),
 			dropTargetMonitor: monitor

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import {
@@ -21,21 +21,23 @@ if (process.env.BROWSER) {
 }
 
 @connect((state) => ({
+	contextMenu: state.app.contextMenu,
 	title: state.app.title,
-	contextMenu: state.app.contextMenu
 }))
 class App extends React.Component {
-	componentDidMount() {
-		console.log('AppComponent Did Mount');
+	constructor(props, context) {
+		super(props, context);
 	}
-	componentWillUnmount() {
-		console.log('AppComponent will Unmount');
+	componentWillReceiveProps(nextProps) {
+		if (this.props.title != nextProps.title) {
+			document.title = nextProps.title;
+		}
 	}
 	render() {
-		const { title, contextMenu } = this.props;
+		const { contextMenu } = this.props;
 		const titleLink = (
 			<Link to="/" className={css.title}>
-				<Button primary ripple>{title}</Button>
+				<Button primary ripple>{this.props.title}</Button>
 			</Link>
 		);
 		let contextMenuIcon = null;
@@ -55,8 +57,7 @@ class App extends React.Component {
 			contextMenuItems = [
 				<Link key={0} to="/">Home</Link>,
 				<Link key={1} to="/about">About</Link>,
-				<Link key={2} to="/board">Try Demo</Link>,
-				<Link key={5} to="/board2">Board 2</Link>,
+				<Link key={5} to="/board">Board</Link>,
 				<Link key={3} to="/signin">Sign In</Link>,
 				<a key={4} href="https://github.com/elasim" target="_blank">
 					<Icon name="link" style={{ marginRight: '8px', verticalAlign: 'middle' }} />
@@ -88,9 +89,12 @@ class App extends React.Component {
 			</div>
 		);
 	}
+	componentDidMount() {
+		console.log('AppComponent Did Mount');
+	}
+	componentWillUnmount() {
+		console.log('AppComponent will Unmount');
+	}
 }
-
-App.defaultProps = {
-};
 
 export default App;

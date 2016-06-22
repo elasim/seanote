@@ -1,0 +1,9 @@
+.col {
+	float: left;
+	word-break: break-all;
+}
+
+.align {
+	margin: 0 auto;
+	overflow: auto;
+}

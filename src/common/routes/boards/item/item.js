@@ -1,23 +1,23 @@
 import React, { Component, PropTypes } from 'react';
 import { DropTarget } from 'react-dnd';
 
+import { dragType } from './constant';
 import Card from './card';
 
 import css from './style.scss';
 
-const dragItemType = 'BoardDetailItem';
-@DropTarget(dragItemType, {}, (connect, monitor) => ({
+@DropTarget(dragType, {}, (connect, monitor) => ({
 	connectDropTarget: connect.dropTarget(),
 	dropTargetMonitor: monitor,
 }))
-export default class BoardDetailView extends Component {
+export default class Board extends Component {
 	static propTypes = {
-		data: PropTypes.object.isRequired,
+		items: PropTypes.arrayOf(PropTypes.object).isRequired,
 		notifyPreviewChanged: PropTypes.func.isRequired,
 	};
 	render() {
-		const { data, connectDropTarget } = this.props;
-		const cards = data.items.map(item => {
+		const { items, connectDropTarget } = this.props;
+		const cards = items.map(item => {
 			return <Card type={item.type} data={item} key={item.id}
 				notifyPreviewChanged={this.props.notifyPreviewChanged} />;
 		});
@@ -30,4 +30,3 @@ export default class BoardDetailView extends Component {
 		);
 	}
 }
-export { dragItemType };

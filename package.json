@@ -18,6 +18,7 @@
     "protobufjs": "^5.0.1",
     "react": "^15.1.0",
     "react-dnd": "^2.1.4",
+    "react-dnd-html5-backend": "^2.1.2",
     "react-dnd-touch-backend": "^0.2.7",
     "react-dom": "^15.1.0",
     "react-intl": "^2.1.3",

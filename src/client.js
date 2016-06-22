@@ -14,6 +14,7 @@ import { render } from 'react-dom';
 import { Router, browserHistory } from 'react-router';
 import { Provider } from 'react-redux';
 
+import AppContext from './context';
 import routes from './common/routes';
 import { configureStore } from './common/store';
 
@@ -23,12 +24,23 @@ const store = configureStore({
 	locale: navigator.language || 'en'
 });
 
+const context = {
+	getTitle() {
+		return document.title;
+	},
+	setTitle(value) {
+		document.title = value;
+	}
+};
+
 render(
 	<Provider store={store}>
 		<LocaleSelector>
-			<Router history={browserHistory}>
-				{routes}
-			</Router>
+			<AppContext context={context}>
+				<Router history={browserHistory}>
+					{routes}
+				</Router>
+			</AppContext>
 		</LocaleSelector>
 	</Provider>
 	, document.getElementById('app')

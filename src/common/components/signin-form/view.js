@@ -31,36 +31,28 @@ export default class SigninForm extends Component {
 		this.state = {
 			sent: false,
 			error: undefined,
-			values: {}
 		};
-	}
-	onChangeValue(e) {
-		const { name, value } = e.target;
-		switch (name) {
-			case FIELD_EMAIL:
-			case FIELD_PASSWORD:
-				this.state.values[name] = value;
-				break;
-			default:
-				console.error('unknown field input');
-		}
-		this.setState(this.state);
-		console.log(this.state);
 	}
 	onSubmit(e) {
 		e.preventDefault();
 		const { onSuccess, onFailure } = this.props;
-		const email = this.state.values[FIELD_EMAIL];
-		const password = this.state.values[FIELD_PASSWORD];		
-		if (!email || String(email).trim().length === 0) {
-			findDOMNode(this.refs[FIELD_EMAIL]).querySelector('input').focus();
+		const form = e.target;
+		const inputEmail = form[FIELD_EMAIL];
+		const inputPassword = form[FIELD_PASSWORD];
+
+		if (!inputEmail.value
+			|| String(inputEmail.value).trim().length === 0)
+		{
+			inputEmail.value.select();
 			this.setState({
 				error: ErrorString.EmailRequired
 			});
 			return;
 		}
-		if (!password || String(password).trim().length === 0) {
-			findDOMNode(this.refs[FIELD_PASSWORD]).querySelector('input').focus();
+		if (!inputPassword.value
+			|| String(inputPassword.value).trim().length === 0)
+		{
+			inputPassword.select();
 			this.setState({
 				error: ErrorString.PasswordRequired
 			});
@@ -71,8 +63,8 @@ export default class SigninForm extends Component {
 			sent: true
 		});
 		User.signIn({
-			email,
-			password
+			email: inputEmail.value,
+			password: inputPassword.value,
 		})
 			.then(onSuccess)
 			.catch(e => {
@@ -93,11 +85,11 @@ export default class SigninForm extends Component {
 				<form method="post" onSubmit={::this.onSubmit}>
 					<div className={errorStyle}>{this.state.error||' '}</div>
 					<Textfield type="email" name={FIELD_EMAIL} label="Email"
-						onChange={::this.onChangeValue} disabled={this.state.sent}
-						className={css.row} ref={FIELD_EMAIL}/>
+						disabled={this.state.sent} className={css.row}
+						ref={FIELD_EMAIL}/>
 					<Textfield type="password" name={FIELD_PASSWORD} label="Password"
-						onChange={::this.onChangeValue} disabled={this.state.sent}
-						className={css.row} ref={FIELD_PASSWORD}/>
+						disabled={this.state.sent} className={css.row}
+						ref={FIELD_PASSWORD}/>
 					<div className={css.row}>
 						<Button type="submit" raised colored className={css.stretch}
 							disabled={this.state.sent}>

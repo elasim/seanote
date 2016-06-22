@@ -1,13 +1,15 @@
+import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
-import NoteItem from './types/note';
 
 import { DragSource } from 'react-dnd';
-import {
-	Icon
-} from 'react-mdl';
+import { Icon } from 'react-mdl';
+
+import { dragType } from './constant';
+import CardPreview from './preview';
+import css from './style.scss';
 
 const componentMapping = {
-	'Note': NoteItem,
+	'Note': require('./card-note').default,
 };
 
 function getItemInnerComponent(type) {
@@ -19,7 +21,7 @@ function getItemInnerComponent(type) {
 	}
 }
 
-@DragSource('BoardDetailItem', {
+@DragSource(dragType, {
 	beginDrag(props) {
 		return props.data;
 	}
@@ -36,22 +38,24 @@ export default class CardItem extends Component {
 	componentWillReceiveProps(nextProps) {
 		if (!this.props.isDragging && nextProps.isDragging) {
 			const innerComponent = getItemInnerComponent(nextProps.type);
-			nextProps.notifyPreviewChanged(this, innerComponent);
-			return;
+			nextProps.notifyPreviewChanged(CardPreview, innerComponent);
 		}
 	}
 	render() {
-		const { connectDragSource, data, type } = this.props;
+		const { connectDragSource, data, type, isDragging } = this.props;
 		const dragHandle = connectDragSource(
-			<div className="drag-handle">
+			<div className={css.handle}>
 				<Icon name="drag_handle" />
 			</div>
 		);
 		const component = React.createElement(
-			getItemInnerComponent(type), { data	}
+			getItemInnerComponent(type), { data }
 		);
+		const classes = cx(css.card, 'mdl-shadow--2dp', {
+			[css.dragging]: isDragging
+		});
 		return (
-			<div className="item mdl-shadow--2dp">
+			<div className={classes}>
 				{dragHandle}
 				{component}
 			</div>

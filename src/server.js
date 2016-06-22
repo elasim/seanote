@@ -54,15 +54,17 @@ if (0) {
 				const store = configureStore({
 					locale
 				});
+				// it must be called to get app state
+				const body = renderToString(
+					<Provider store={store}>
+						<LocaleSelector>
+							<RouterContext {...props} />
+						</LocaleSelector>
+					</Provider>
+				);
 				res.status(200).render('index', {
-					title: 'App!',
-					body: renderToString(
-						<Provider store={store}>
-							<LocaleSelector>
-								<RouterContext {...props} />
-							</LocaleSelector>
-						</Provider>
-					),
+					title: store.getState().app.title,
+					body,
 					bundle: assets.main.js
 				});
 			} else {
