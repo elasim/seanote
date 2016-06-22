@@ -1,8 +1,14 @@
 import cx from 'classnames';
+import uuid from 'uuid';
 import React, { Component } from 'react';
+import update from 'react/lib/update';
 import { findDOMNode } from 'react-dom';
 import { connect } from 'react-redux';
 
+import {
+	FABButton,
+	Icon
+} from 'react-mdl';
 import BoardData from '../../models/board';
 import DragDropContext from '../../components/drag-drop-context';
 import CascadeGrid from '../../components/cascade-grid';
@@ -21,11 +27,11 @@ export default class Boards extends Component {
 	constructor(props, context) {
 		super(props, context);
 		this.state = {
-			items: BoardData.all(),
+			items: BoardData.all().map(item => {
+				item.gridKey = uuid.v4();
+				return item;
+			})
 		};
-	}
-	componentWillMount() {
-	//	this.props.setTitle('Board');
 	}
 	render() {
 		const {
@@ -44,11 +50,53 @@ export default class Boards extends Component {
 		return connectDropTarget(
 			<div className={cx('mdl-layout__content', css.root)}>
 				<CascadeGrid columnWidth={220} items={this.state.items}
-					itemTemplate={GridItemTemplate} >
+					itemTemplate={this._renderGridItem} >
 				</CascadeGrid>
 				{previewRendered}
+				<div className={css['instant-menu']}>
+					<FABButton><Icon name="add" /></FABButton>
+					<FABButton><Icon name="delete" /></FABButton>
+				</div>
 			</div>
 		);
+	}
+	componentWillMount() {
+		// Maybe, I can figure out index from id,
+		this._renderGridItem = (props) => {
+			return (
+				<GridItemTemplate {...props}
+					id={props.id}
+					index={props.index}
+					onSwapIndex={::this.swapIndex}
+					onDataChanged={::this.updateData}
+				/>
+			);
+		};
+	}
+	swapIndex(a, b) {
+		const { items } = this.state;
+		const dragItem = items[a];
+		this.setState(update(this.state, {
+			items: {
+				$splice: [
+					[a, 1],
+					[b, 0, dragItem]
+				]
+			}
+		}));
+	}
+	updateData(id, key, value) {
+		const { items } = this.state;
+		const updateIdx = items.findIndex(item => item.id === id);
+		this.setState(update(this.state, {
+			items: {
+				[updateIdx]: {
+					[key]: {
+						$set: value
+					}
+				}
+			}
+		}));
 	}
 }
 

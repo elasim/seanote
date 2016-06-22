@@ -37,7 +37,6 @@ export default class SortableList extends Component {
 				<SortableListItem {...item}
 					container={this}
 					key={'sortable-list-key-'+item.id}
-					onItemMoved={::this.onItemMoved}
 					index={i}
 				/>
 			);
@@ -57,21 +56,6 @@ export default class SortableList extends Component {
 				{renderedItems}
 			</div>
 		);
-	}
-	onItemMoved(a, b) {
-		const { onSort } = this.props;
-		const { items } = this.state;
-		const item = items[a];
-		const newState = update(this.state, {
-			items: {
-				$splice: [
-					[a, 1],
-					[b, 0, item]
-				]
-			}
-		});
-		this.setState(newState);
-		onSort(newState.items);
 	}
 }
 
@@ -165,12 +149,6 @@ class SortableListEmptyItem extends Component {
 	})
 )
 class SortableListItem extends Component {
-	static propTypes = {
-		onItemMoved: PropTypes.func,
-	};
-	static defaultProps = {
-		onItemMoved: emptyFunction,
-	};
 	render() {
 		const {
 			connectDropTarget,
@@ -185,15 +163,14 @@ class SortableListItem extends Component {
 		if (isDragging || (dragItem && dragItem.id === this.props.id)) {
 			style.opacity = 0;
 		}
-		if (this.props.id === 'id40') {
-			console.log(dragItem, this.props.id);
-		}
 		return connectDropTarget(connectDragSource(
 			<div className={css.item} style={style}>
 				<div className={css.handle}>
 					<i className="material-icons">drag_handle</i>
 				</div>
-				{JSON.stringify(this.props.id)}
+				<div className={css.body}>
+					{JSON.stringify(this.props.id)}
+				</div>
 			</div>
 		));
 	}
@@ -218,26 +195,35 @@ class SortableListItem extends Component {
 		}
 
 		if (containerChanged) {
+			/// @TODO WRONG!!!!!!!!!!!!!!!! REFACTORING THIS
+			/// I SHOULD HAVE TO PUT THIS STUB ON CONTAINER
 			const data = dragItem.container.state.items[dragIndex];
-			dragItem.container.setState(update(dragItem.container.state, {
+
+			const originNewState = update(dragItem.container.state, {
 				items: {
 					$splice: [
 						[dragIndex, 1]
 					]
 				}
-			}));
-			props.container.setState(update(props.container.state, {
+			});
+			dragItem.container.setState(originNewState);
+			dragItem.container.props.onSort(originNewState.items);
+			
+			const destNewState = update(props.container.state, {
 				items: {
 					$splice: [
 						[hoverIndex, 0, data]
 					]
 				}
-			}));
-			monitor.getItem().index = hoverIndex;
-			monitor.getItem().container = props.container;
+			});
+			props.container.setState(destNewState);
+			props.container.props.onSort(destNewState.items);
+			dragItem.index = hoverIndex;
+			dragItem.container = props.container;
 		} else {
 			const clientOffset = monitor.getClientOffset();
-			const hoverBoundingRect = findDOMNode(this).getBoundingClientRect();
+			const hoverBoundingRect = findDOMNode(props.container)
+				.getBoundingClientRect();
 
 			const hoverMiddleY = hoverBoundingRect.height / 2;
 			const hoverClientY = clientOffset.y - hoverBoundingRect.top;
@@ -248,8 +234,21 @@ class SortableListItem extends Component {
 			if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
 				return;
 			}
-			this.props.onItemMoved(dragIndex, hoverIndex);
-			monitor.getItem().index = hoverIndex;
+			// because container wasn't changed
+			// props.container === dragItem.container
+			// so, I'll use dragItem.container to maintain code consistency
+			const item = dragItem.container.state.items[dragIndex];
+			const newState = update(dragItem.container.state, {
+				items: {
+					$splice: [
+						[dragIndex, 1],
+						[hoverIndex, 0, item]
+					]
+				}
+			});
+			dragItem.container.setState(newState);
+			dragItem.container.props.onSort(newState.items);
+			dragItem.index = hoverIndex;
 		}
 	}
 }

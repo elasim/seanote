@@ -32,6 +32,15 @@ $single-col-limit: ($item-width + $item-padding * 2 + $item-margin * 2) * 2;
 	}
 }
 
+.instant-menu {
+	position: fixed;
+	right: 30px;
+	bottom: 30px;
+	button {
+		margin: 0 3px;
+	}
+}
+
 .item-header {
 	font-size: 1.5rem;
 	line-height: 1.5rem;

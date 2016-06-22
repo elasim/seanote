@@ -1,7 +1,16 @@
 .root {
-	
+
 }
 
 .item {
+	display: table;
+}
 
+.handle,
+.body {
+	display: table-cell;
+}
+
+.body {
+	vertical-align: top;
 }

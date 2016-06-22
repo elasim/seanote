@@ -62,8 +62,9 @@ export default class CascadeGrid extends Component {
 			columns[i % numCols].push(
 				React.createElement(itemTemplate, {
 					...item,
-					key: itemKey + i,
+					key: itemKey + (item.gridKey || i),
 					className: css.item,
+					index: i,
 				})
 			);
 		});
