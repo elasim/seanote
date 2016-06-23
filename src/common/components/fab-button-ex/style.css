@@ -1,9 +1,0 @@
-.control.drop-fab-btn {
-	display: inline-block;
-	button {
-		transition: background-color 1s ease;
-	}
-	&.drop-over button {
-		background-color: #f00;
-	}
-}
