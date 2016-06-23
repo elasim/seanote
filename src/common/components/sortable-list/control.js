@@ -124,8 +124,7 @@ class SortableListItem extends Component {
 		if (props.container !== dragItem.container) {
 			containerChanged = true
 				& props.container.props.allowIn
-				& dragItem.container.props.allowOut
-				;
+				& dragItem.container.props.allowOut;
 			if (!containerChanged) {
 				return;
 			}
@@ -138,30 +137,29 @@ class SortableListItem extends Component {
 		if (containerChanged) {
 			/// @TODO WRONG!!!!!!!!!!!!!!!! REFACTORING THIS
 			/// I SHOULD HAVE TO PUT THIS STUB ON CONTAINER
-			let changes;
 			const data = dragItem.container.state.items[dragIndex];
 
-			changes = {
+			const srcChanges = {
 				items: {
 					$splice: [
 						[dragIndex, 1]
 					]
 				}
 			};
-			const originNewState = update(dragItem.container.state, changes);
+			const originNewState = update(dragItem.container.state, srcChanges);
 			dragItem.container.setState(originNewState);
-			dragItem.container.props.onChange(changes);
-			
-			changes = {
+			dragItem.container.props.onChange(srcChanges);
+
+			const destChanges = {
 				items: {
 					$splice: [
 						[hoverIndex, 0, data]
 					]
 				}
 			};
-			const destNewState = update(props.container.state, changes);
+			const destNewState = update(props.container.state, destChanges);
 			props.container.setState(destNewState);
-			props.container.props.onChange(changes);
+			props.container.props.onChange(destChanges);
 
 			dragItem.index = hoverIndex;
 			dragItem.container = props.container;

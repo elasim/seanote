@@ -152,13 +152,13 @@ export default class GridItemTemplate extends Component {
 			}
 		});
 	}
-	move(props, monitor) {
-		clearTimeout(this._moveTimeout);
-		this._moveTimeout = setTimeout(::this.move_, 1000 / 30, props, monitor);
-	}
+	//move(props, monitor) {
+		//clearTimeout(this._moveTimeout);
+		// this._moveTimeout = setTimeout(::this.move_, 1000 / 30, props, monitor);
+	//}
 
-	/// @ISSUE #2, #3
-	move_(props, monitor) {
+	/// @ISSUE #2, #4
+	move(props, monitor) {
 		if (!monitor.isOver({ shallow: true })) {
 			return;
 		}
@@ -180,23 +180,29 @@ export default class GridItemTemplate extends Component {
 		// I didn't define componentWillReceiveProps method on SortableList
 		// also, directly access list state and mutate them
 		const data = dragItem.container.state.items[dragIndex];
-		dragItem.container.setState(update(dragItem.container.state, {
+		const srcChanges = {
 			items: {
 				$splice: [
 					[dragIndex, 1]
 				]
 			}
-		}));
+		};
+		dragItem.container.setState(update(dragItem.container.state, srcChanges));
+		dragItem.container.props.onChange(srcChanges);
 		const newIndex = this.refs.list.state.items.length;
-		this.refs.list.setState(update(this.refs.list.state, {
+		const destChanges = {
 			items: {
 				$push: [
 					data
 				]
 			}
-		}));
+		};
+		this.refs.list.setState(update(this.refs.list.state, destChanges));
+		this.onListChanged(destChanges);
+
 		dragItem.index = newIndex;
 		dragItem.container = this.refs.list;
+		console.log('template', dragItem);
 		return;
 	}
 	onHover(props, monitor) {
