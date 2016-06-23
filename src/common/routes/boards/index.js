@@ -58,6 +58,8 @@ export default class Boards extends Component {
 			[css.open]: this.state.addMenuOpened
 		});
 		const primaryAddIcon = this.state.addMenuOpened ? 'note_add' : 'add';
+		const primaryAddAction = this.state.addMenuOpened
+			? ::this.createBoard : ::this.toggleAddMenu;
 		return connectDropTarget(
 			<div className={cx('mdl-layout__content', css.root)}>
 				<CascadeGrid columnWidth={220} items={this.state.items}
@@ -65,11 +67,11 @@ export default class Boards extends Component {
 				</CascadeGrid>
 				{previewRendered}
 				<div className={css['instant-menu']}>
-					<FABButton
-						className={css.topmost}
-						onMouseOver={::this.openAddMenu}
-						onTouchTap={::this.toggleAddMenu}
-						><Icon name={primaryAddIcon} /></FABButton>
+					<FABButton className={css.topmost}
+						onClick={primaryAddAction} onTouchTap={primaryAddAction}
+					>
+						<Icon name={primaryAddIcon} />
+					</FABButton>
 					<div className={menuClasses}>
 						<div className={css['menu-offset']}>
 							<FABButton><Icon name="add_location" /></FABButton>
@@ -99,10 +101,22 @@ export default class Boards extends Component {
 			);
 		};
 	}
-	openAddMenu() {
-		this.setState({
-			addMenuOpened: true
-		});
+	createBoard() {
+		// fix this later using ORM
+		this.setState(update(this.state, {
+			items: {
+				$push: [{
+					id: 'Board-' + Date.now(),
+					name: 'Untitled',
+					text: '',
+					items: [],
+					createdAt: new Date(),
+				}]
+			},
+			addMenuOpened: {
+				$set: false
+			}
+		}));
 	}
 	toggleAddMenu() {
 		this.setState({
