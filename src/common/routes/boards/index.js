@@ -36,11 +36,6 @@ export default class Boards extends Component {
 			addMenuOpened: false,
 		};
 	}
-	openAddMenu() {
-		this.setState({
-			addMenuOpened: true
-		});
-	}
 	render() {
 		const {
 			connectDropTarget,
@@ -59,6 +54,10 @@ export default class Boards extends Component {
 			});
 		}
 		// >>
+		const menuClasses = cx(css['menu-container'], {
+			[css.open]: this.state.addMenuOpened
+		});
+		const primaryAddIcon = this.state.addMenuOpened ? 'note_add' : 'add';
 		return connectDropTarget(
 			<div className={cx('mdl-layout__content', css.root)}>
 				<CascadeGrid columnWidth={220} items={this.state.items}
@@ -67,20 +66,21 @@ export default class Boards extends Component {
 				{previewRendered}
 				<div className={css['instant-menu']}>
 					<FABButton
+						className={css.topmost}
 						onMouseOver={::this.openAddMenu}
-						onTouchTap={::this.openAddMenu}
-						><Icon name="add" /></FABButton>
-					<div className={cx(css['menu-container'], {
-						[css.open]: this.state.addMenuOpened
-					})}>
+						onTouchTap={::this.toggleAddMenu}
+						><Icon name={primaryAddIcon} /></FABButton>
+					<div className={menuClasses}>
 						<div className={css['menu-offset']}>
-							<FABButton><Icon name="delete" /></FABButton>
-							<FABButton><Icon name="delete" /></FABButton>
-							<FABButton><Icon name="delete" /></FABButton>
-							<FABButton><Icon name="delete" /></FABButton>
+							<FABButton><Icon name="add_location" /></FABButton>
+							<FABButton><Icon name="add_alarm" /></FABButton>
+							<FABButton><Icon name="person_add" /></FABButton>
+							<FABButton><Icon name="add_a_photo" /></FABButton>
 						</div>
+						<div onClick={::this.toggleAddMenu}
+							className={cx(css.back, css.open)} />
 					</div>
-					<FABButton><Icon name="delete" /></FABButton>
+					<FABButton className={css.topmost}><Icon name="delete" /></FABButton>
 				</div>
 			</div>
 		);
@@ -98,6 +98,16 @@ export default class Boards extends Component {
 				/>
 			);
 		};
+	}
+	openAddMenu() {
+		this.setState({
+			addMenuOpened: true
+		});
+	}
+	toggleAddMenu() {
+		this.setState({
+			addMenuOpened: !this.state.addMenuOpened
+		});
 	}
 	swapIndex(a, b) {
 		const { items } = this.state;

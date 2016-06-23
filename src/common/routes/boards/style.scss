@@ -1,3 +1,5 @@
+$back-index: 10;
+
 .root {
 	background-color: #eee;
 }
@@ -11,23 +13,41 @@
 	}
 }
 
+.topmost {
+	z-index: $back-index + 2;
+	position: relative;
+}
 .menu-container {
 	max-height: 0;
-	transition: max-height 0.2s linear;
+	transition: display 0.2s linear;
 	position: absolute;
-	overflow: hidden;
+	bottom: 30px;
+	padding-bottom: 30px;
+	display: none;
 
 	button {
 		display: block;
 	}
-
 	.menu-offset {
 		position: relative;
+		z-index: $back-index + 1;
+	}
+
+	.back {
+		position: fixed;
+		left: 0;
+		right: 0;
 		bottom: 0;
+		top: 0;
+		z-index: $back-index;
+		display: none;
+	}
+	.back.open {
+		display: block;
 	}
 
 	&.open {
 		max-height: 300px;
-		overflow: hidden;
+		display: block;
 	}
 }
