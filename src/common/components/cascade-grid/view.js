@@ -92,7 +92,7 @@ export default class CascadeGrid extends Component {
 	}
 	componentDidMount() {
 		this._adjustingLayout = Rx.Observable.fromEvent(window, 'resize')
-			.throttle(1000 / 30)
+			.debounce(100)
 			.subscribe(::this.adjustLayout);
 		this.adjustLayout();
 	}
