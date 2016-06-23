@@ -1,0 +1,5 @@
+// grid-item-template
+$item-width: 220px;
+$item-padding: 5px;
+$item-margin: 5px;
+$single-col-limit: ($item-width + $item-padding * 2 + $item-margin * 2) * 2;
