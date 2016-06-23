@@ -154,9 +154,10 @@ export default class GridItemTemplate extends Component {
 	}
 	move(props, monitor) {
 		clearTimeout(this._moveTimeout);
-		this._moveTimeout = setTimeout(::this.move_, 1000/30, props, monitor);
+		this._moveTimeout = setTimeout(::this.move_, 1000 / 30, props, monitor);
 	}
 
+	/// @ISSUE #2, #3
 	move_(props, monitor) {
 		if (!monitor.isOver({ shallow: true })) {
 			return;
@@ -172,6 +173,7 @@ export default class GridItemTemplate extends Component {
 		if (!this.refs.list.props.allowIn || !dragItem.container.props.allowOut) {
 			return;
 		}
+		console.log('move');
 		// @TODO FIX (performance, critical)
 		// Issue#2
 		// Because of performance issue,
@@ -194,7 +196,7 @@ export default class GridItemTemplate extends Component {
 			}
 		}));
 		dragItem.index = newIndex;
-		dragItem.container = this;
+		dragItem.container = this.refs.list;
 		return;
 	}
 	onHover(props, monitor) {
