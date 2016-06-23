@@ -1,4 +1,3 @@
-import Rx from 'rx';
 import cx from 'classnames';
 import uuid from 'uuid';
 import React, { Component } from 'react';
@@ -15,7 +14,6 @@ import DragDropContext from '../../components/drag-drop-context';
 import CascadeGrid from '../../components/cascade-grid';
 
 import GridItemTemplate from './grid-item-template';
-import { dragType } from './constant';
 import css from './style.scss';
 import SEODocumentTitle from '../../components/seo-document-title/decorator';
 

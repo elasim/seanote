@@ -10,6 +10,7 @@
   "license": "MIT",
   "repository": "https://github.com/elasim/express-universal-react.git",
   "dependencies": {
+    "classnames": "^2.2.5",
     "core-js": "^2.4.0",
     "express": "^4.13.4",
     "helmet": "^2.1.1",
