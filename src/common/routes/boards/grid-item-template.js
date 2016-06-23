@@ -57,9 +57,9 @@ export default class GridItemTemplate extends Component {
 	constructor(props, context) {
 		super(props, context);
 		this.state = {
-			nameEditable: false,
 			items: props.items,
 			name: props.name,
+			namefieldEditable: false,
 			newText: '',
 		};
 	}
@@ -72,7 +72,7 @@ export default class GridItemTemplate extends Component {
 			connectDragPreview,
 			isDragging,
 		} = this.props;
-		const { items, name, nameEditable } = this.state;
+		const { items, name, namefieldEditable } = this.state;
 		const containerStyle = Object.assign({}, style, {
 			opacity: isDragging ? 0 : 1
 		});
@@ -86,39 +86,52 @@ export default class GridItemTemplate extends Component {
 						</div>
 					)}
 					<div className={css.title} ref="name"
-						onClick={::this.toggleEditName}
-						onBlur={::this.toggleEditName}
-						contentEditable={nameEditable}
+						onClick={::this.onNameClick}
+						onKeyDown={::this.onNameKeyDown}
+						contentEditable={namefieldEditable}
 						dangerouslySetInnerHTML={{__html:name||' '}} />
 				</div>
-				<SortableList items={items} allowIn allowOut
-					onChange={::this.onListChanged} ref="list"/>
+				<SortableList items={items} ref="list" allowIn allowOut
+					onChange={::this.onDataChanged} />
 				<div>
-					<Textfield label="Type to add new text" onKeyUp={::this.addItem}
-						value={this.state.newText} onChange={::this.onChangeText}/>
+					<Textfield label="Type to add new text"
+						onKeyDown={::this.onTextfieldKeyDown}
+						onChange={::this.onTextfieldChange}
+						value={this.state.newText} />
 				</div>
 			</div>
 		));
 	}
-	onChangeText(e) {
+	onNameClick() {
+		this.setState({
+			namefieldEditable: true,
+		});
+		setTimeout(() => {
+			findDOMNode(this.refs.name).focus();
+		}, 0);
+	}
+	onNameKeyDown(e) {
+		if (e.keyCode === 13) {
+			e.preventDefault();
+			e.stopPropagation();
+			this.setState({
+				namefieldEditable: false,
+				name: e.target.innerHTML
+			});
+			this.onDataChanged({
+				name: {
+					$set: e.target.innerHTML
+				}
+			});
+			return;
+		}
+	}
+	onTextfieldChange(e) {
 		this.setState({
 			newText: e.target.value
 		});
 	}
-	toggleEditName(e) {
-		if (!this.state.nameEditable) {
-			setTimeout(() => {
-				findDOMNode(this.refs.name).focus();
-			}, 0);
-		} else {
-			this.setState({
-				nameEditable: !this.state.nameEditable,
-				name: e.target.innerHTML,
-			});
-			this.onNameChanged(e.target.innerHTML);
-		}
-	}
-	addItem(e) {
+	onTextfieldKeyDown(e) {
 		if (e.keyCode === 13) {
 			const changes = {
 				items: {
@@ -133,31 +146,18 @@ export default class GridItemTemplate extends Component {
 					]
 				}
 			};
-
+			// #2
 			this.refs.list.setState(update(this.refs.list.state, changes));
-			this.onListChanged(changes);
+			this.onDataChanged(changes);
 			this.setState({
 				newText: ''
 			});
 			e.target.blur();
 		}
 	}
-	onListChanged(changes) {
+	onDataChanged(changes) {
 		this.props.onDataChanged(this.props.id, changes);
 	}
-	onNameChanged(value) {
-		this.props.onDataChanged(this.props.id, {
-			name: {
-				$set: value
-			}
-		});
-	}
-	//move(props, monitor) {
-		//clearTimeout(this._moveTimeout);
-		// this._moveTimeout = setTimeout(::this.move_, 1000 / 30, props, monitor);
-	//}
-
-	/// @ISSUE #2, #4
 	move(props, monitor) {
 		if (!monitor.isOver({ shallow: true })) {
 			return;
@@ -173,11 +173,6 @@ export default class GridItemTemplate extends Component {
 		if (!this.refs.list.props.allowIn || !dragItem.container.props.allowOut) {
 			return;
 		}
-		// @TODO FIX (performance, critical)
-		// Issue#2
-		// Because of performance issue,
-		// I didn't define componentWillReceiveProps method on SortableList
-		// also, directly access list state and mutate them
 		const data = dragItem.container.state.items[dragIndex];
 		const srcChanges = {
 			items: {
@@ -186,6 +181,7 @@ export default class GridItemTemplate extends Component {
 				]
 			}
 		};
+		// #2
 		dragItem.container.setState(update(dragItem.container.state, srcChanges));
 		dragItem.container.props.onChange(srcChanges);
 		const newIndex = this.refs.list.state.items.length;
@@ -196,8 +192,9 @@ export default class GridItemTemplate extends Component {
 				]
 			}
 		};
+		// #2
 		this.refs.list.setState(update(this.refs.list.state, destChanges));
-		this.onListChanged(destChanges);
+		this.onDataChanged(destChanges);
 
 		dragItem.index = newIndex;
 		dragItem.container = this.refs.list;
