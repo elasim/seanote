@@ -173,7 +173,6 @@ export default class GridItemTemplate extends Component {
 		if (!this.refs.list.props.allowIn || !dragItem.container.props.allowOut) {
 			return;
 		}
-		console.log('move');
 		// @TODO FIX (performance, critical)
 		// Issue#2
 		// Because of performance issue,
@@ -202,7 +201,6 @@ export default class GridItemTemplate extends Component {
 
 		dragItem.index = newIndex;
 		dragItem.container = this.refs.list;
-		console.log('template', dragItem);
 		return;
 	}
 	onHover(props, monitor) {
