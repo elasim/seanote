@@ -1,16 +1,15 @@
 import React, { Component, PropTypes } from 'react';
-import update from 'react/lib/update';
-import emptyFunction from 'fbjs/lib/emptyFunction';
 import { findDOMNode } from 'react-dom';
 import { DragSource, DropTarget } from 'react-dnd';
-import uuid from 'uuid';
 import css from './style.scss';
 
 const itemSource = {
 	beginDrag(props) {
+		const { keyName } = props.source.props;
 		return {
-			container: props.container,
-			id: props.id,
+			// It required to identify dragging state
+			key: props.value[keyName],
+			source: props.source,
 			index: props.index,
 		};
 	}
@@ -26,37 +25,30 @@ const itemTarget = {
 
 export default class SortableList extends Component {
 	static propTypes = {
-		items: PropTypes.arrayOf(PropTypes.any),
+		items: PropTypes.arrayOf(PropTypes.object),
+		keyName: PropTypes.string.isRequired,
+		onIndexChange: PropTypes.func.isRequired,
+		onReassign: PropTypes.func,
+		style: PropTypes.object,
+		className: PropTypes.string,
 		allowIn: PropTypes.bool,
 		allowOut: PropTypes.bool,
-		onChange: PropTypes.func,
 	};
 	static defaultProps = {
 		allowIn: false,
 		allowOut: false,
-		onChange: emptyFunction,
 	};
-	constructor(props, context) {
-		super(props, context);
-		this.state = {
-			items: props.items.map(item => ({
-				id: uuid.v4(),
-				...item,
-			}))
-		};
-	}
 	render() {
-		const renderedItems = this.state.items.map((item, i) => {
+		const { items, keyName, className, style } = this.props;
+		const renderedItems = items.map((item, i) => {
 			return (
-				<SortableListItem {...item}
-					container={this}
-					key={'sortable-list-key-'+item.id}
-					index={i}
+				<SortableListItem value={item} index={i} source={this}
+					key={'sortable-list-key-'+item[keyName]}
 				/>
 			);
 		});
 		return (
-			<div>
+			<div className={className} style={style}>
 				{renderedItems}
 			</div>
 		);
@@ -66,9 +58,9 @@ export default class SortableList extends Component {
 @DragSource(
 	'SortableListItem',
 	itemSource,
-	(connect, monitor) => ({
+	(connect) => ({
 		connectDragSource: connect.dragSource(),
-		isDragging: monitor.isDragging(),
+		connectDragPreview: connect.dragPreview(),
 	})
 )
 @DropTarget(
@@ -81,51 +73,75 @@ export default class SortableList extends Component {
 )
 class SortableListItem extends Component {
 	static propTypes = {
+		value: PropTypes.object.isRequired,
 		template: PropTypes.func,
+		disableHandle: PropTypes.bool,
+		disablePreview: PropTypes.bool,
 	};
 	static defaultProps = {
 		template: (props) => (
-			<div>{JSON.stringify(props.id)}</div>
-		)
+			<div>{JSON.stringify(props.value.id)}</div>
+		),
+		disableHandle: false,
+		disablePreview: false,
 	}
 	render() {
 		const {
 			connectDropTarget,
 			connectDragSource,
-			isDragging,
+			connectDragPreview,
 			dragItem,
+			source,
 			template,
-			...restProps
+			disableHandle,
+			disablePreview,
+			value
 		} = this.props;
 		const style = {
 			opacity: 1,
 			transition: 'opacity 0.2s linear',
 		};
-		if (isDragging || (dragItem && dragItem.id === this.props.id)) {
+		// Its dragging or draging over container
+		if (dragItem && dragItem.key === value[source.props.keyName]) {
 			style.opacity = 0;
 		}
-		return connectDropTarget(connectDragSource(
-			<div className={css.item} style={style}>
+		let handle;
+		let rendered;
+		if (!disableHandle) {
+			handle = connectDragSource(
 				<div className={css.handle}>
 					<i className="material-icons">drag_handle</i>
 				</div>
-				<div className={css.body}>
-					{React.createElement(template, restProps)}
+			);
+			rendered = connectDropTarget(
+				<div className={css.item} style={style}>
+					{handle}
+					<div className={css.body}>
+						{React.createElement(template, this.props)}
+					</div>
 				</div>
-			</div>
-		));
+			);
+		} else {
+			rendered = connectDropTarget(
+				React.createElement(template, this.props)
+			);
+		}
+		if (!disablePreview) {
+			rendered = connectDragPreview(rendered);
+		}
+		return rendered;
 	}
 	onHover(props, monitor) {
 		const dragItem = monitor.getItem();
 		const dragIndex = dragItem.index;
 		const hoverIndex = props.index;
-		let containerChanged = false;
+		let reassignContainer = false;
 
-		if (props.container !== dragItem.container) {
-			containerChanged = true
-				& props.container.props.allowIn
-				& dragItem.container.props.allowOut;
-			if (!containerChanged) {
+		if (props.source !== dragItem.source) {
+			const destAllowIn = props.source.props.allowIn;
+			const srcAllowOut = dragItem.source.props.allowOut;
+			reassignContainer = destAllowIn && srcAllowOut;
+			if (!reassignContainer) {
 				return;
 			}
 		} else {
@@ -133,65 +149,28 @@ class SortableListItem extends Component {
 				return;
 			}
 		}
-
-		if (containerChanged) {
-			/// @TODO WRONG!!!!!!!!!!!!!!!! REFACTORING THIS
-			/// I SHOULD HAVE TO PUT THIS STUB ON CONTAINER
-			const data = dragItem.container.state.items[dragIndex];
-
-			const srcChanges = {
-				items: {
-					$splice: [
-						[dragIndex, 1]
-					]
-				}
-			};
-			const originNewState = update(dragItem.container.state, srcChanges);
-			dragItem.container.setState(originNewState);
-			dragItem.container.props.onChange(srcChanges);
-
-			const destChanges = {
-				items: {
-					$splice: [
-						[hoverIndex, 0, data]
-					]
-				}
-			};
-			const destNewState = update(props.container.state, destChanges);
-			props.container.setState(destNewState);
-			props.container.props.onChange(destChanges);
-
+		// Updating property is not responsible of this component.
+		// Only notify them to update data
+		if (reassignContainer) {
+			dragItem.source.props.onReassign(
+				dragIndex,
+				props.source,
+				hoverIndex);
 			dragItem.index = hoverIndex;
-			dragItem.container = props.container;
+			dragItem.source = props.source;
 		} else {
 			const clientOffset = monitor.getClientOffset();
-			const hoverBoundingRect = findDOMNode(props.container)
+			const hoverBoundingRect = findDOMNode(props.source)
 				.getBoundingClientRect();
-
 			const hoverMiddleY = hoverBoundingRect.height / 2;
 			const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-
 			if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
 				return;
 			}
 			if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
 				return;
 			}
-			// because container wasn't changed
-			// props.container === dragItem.container
-			// so, I'll use dragItem.container to maintain code consistency
-			const item = dragItem.container.state.items[dragIndex];
-			const changes = {
-				items: {
-					$splice: [
-						[dragIndex, 1],
-						[hoverIndex, 0, item]
-					]
-				}
-			};
-			const newState = update(dragItem.container.state, changes);
-			dragItem.container.setState(newState);
-			dragItem.container.props.onChange(changes);
+			dragItem.source.props.onIndexChange(dragIndex, hoverIndex);
 			dragItem.index = hoverIndex;
 		}
 	}
