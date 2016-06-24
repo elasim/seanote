@@ -1,13 +1,11 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-@connect(null, (dispatch) => ({
-	setTitle(title) {
-		dispatch({ type: 'setTitle', payload: title });
-	}
-}))
+import React, { Component, PropTypes } from 'react';
+
 export default class HomeView extends Component {
+	static contextTypes = {
+		setTitle: PropTypes.func.isRequired,
+	};
 	componentWillMount() {
-		this.props.setTitle('Home');
+		this.context.setTitle('Home');
 	}
 	render() {
 		return (

@@ -1,105 +1,120 @@
 import cx from 'classnames';
 import uuid from 'uuid';
-import React, { Component } from 'react';
+import _ from 'lodash';
+import React, { Component, PropTypes } from 'react';
 import update from 'react/lib/update';
 import { findDOMNode } from 'react-dom';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import { DragDropContext, DropTarget } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import * as Board from '../../actions/board';
 
-import {
-	FABButton,
-	Icon
-} from 'react-mdl';
-import BoardData from '../../models/board';
-import DragDropContext from '../../components/drag-drop-context';
 import CascadeGrid from '../../components/cascade-grid';
-
+import AddButton from './buttons/add';
+import TrashButton from './buttons/trash';
 import GridItemTemplate from './grid-item-template';
 import css from './style.scss';
-import SEODocumentTitle from '../../components/seo-document-title/decorator';
 
-@SEODocumentTitle('Board')
-@connect(null, (dispatch) => ({
-	setTitle: (title) => dispatch({ type: 'setTitle', payload: title })
-}))
-@DragDropContext([
-	'BoardListItem',
-	'SortableListItem'
-], createDropEventHandler())
+@DragDropContext(HTML5Backend)
+// @DropTarget(
+// 	[
+// 		'BoardListItem',
+// 		'SortableListItem',
+// 		'Command',
+// 	],
+// 	createDropEventHandler(),
+// 	(connect, monitor) => ({
+// 		connectDropTarget: connect.dropTarget(),
+// 		dragItemType: monitor.getItemType(),
+// 		dragItem: monitor.getItem(),
+// 	})
+// )
+@connect(
+	state => ({
+		items: state.board.items,
+	}),
+	dispatch => ({
+		boardAction: bindActionCreators({
+			getData: Board.getData,
+			createCard: Board.createCard,
+			moveCard: Board.moveCard,
+			setName: Board.setName,
+		}, dispatch)
+	})
+)
 export default class Boards extends Component {
+	static defaultProps = {
+		connectDropTarget: (x)=>x
+	};
+	static contextTypes = {
+		setTitle: PropTypes.func.isRequired,
+	};
 	constructor(props, context) {
 		super(props, context);
 		this.state = {
-			items: BoardData.all().map(item => {
-				item.gridKey = uuid.v4();
-				return item;
-			}),
-			addMenuOpened: false,
+			showAddMenu: false,
+		};
+		const onDataChange = ::this.onDataChange;
+		const onIndexChange = ::this.changeCardIndex;
+		const onReassign = ::this.reassignCard;
+		const createTextCard = ::this.createTextCard;
+		const updateName = ::this.updateBoardName;
+		this._gridItemTemplate = (props) => {
+			return (
+				<GridItemTemplate value={props}
+					id={props.id}
+					index={props.index}
+					container={this}
+					onIndexChange={onIndexChange}
+					onReassign={onReassign}
+					onNameChange={updateName}
+					onDataChange={onDataChange}
+					onNewText={createTextCard}
+				/>
+			);
 		};
 	}
+	componentWillMount() {
+		this.context.setTitle('Board');
+		this.props.boardAction.getData();
+	}
 	render() {
-		const {
-			connectDropTarget,
-			dropTargetMonitor,
-			preview
-		} = this.props;
-		let previewRendered = null;
-		// @NOTE
-		// This stub is remained to implement preview for react-dnd-touch-backend
-		// <<
-		const dragItemType = dropTargetMonitor.getItemType();
-		if (preview && dragItemType !== undefined) {
-			previewRendered = React.createElement(preview.layer, {
-				component: preview.renderer,
-				className: css.preview
-			});
-		}
-		// >>
-		const menuClasses = cx(css['menu-container'], {
-			[css.open]: this.state.addMenuOpened
-		});
-		const primaryAddIcon = this.state.addMenuOpened ? 'note_add' : 'add';
-		const primaryAddAction = this.state.addMenuOpened
-			? ::this.createBoard : ::this.toggleAddMenu;
+		const { connectDropTarget } = this.props;
 		return connectDropTarget(
 			<div className={cx('mdl-layout__content', css.root)}>
-				<CascadeGrid columnWidth={220} items={this.state.items}
-					itemTemplate={this._renderGridItem} >
-				</CascadeGrid>
-				{previewRendered}
-				<div className={css['instant-menu']}>
-					<FABButton className={css.topmost}
-						onClick={primaryAddAction} onTouchTap={primaryAddAction}
-					>
-						<Icon name={primaryAddIcon} />
-					</FABButton>
-					<div className={menuClasses}>
-						<div className={css['menu-offset']}>
-							<FABButton><Icon name="add_location" /></FABButton>
-							<FABButton><Icon name="add_alarm" /></FABButton>
-							<FABButton><Icon name="person_add" /></FABButton>
-							<FABButton><Icon name="add_a_photo" /></FABButton>
-						</div>
-						<div onClick={::this.toggleAddMenu}
-							className={cx(css.back, css.open)} />
-					</div>
-					<FABButton className={css.topmost}><Icon name="delete" /></FABButton>
+				<CascadeGrid columnWidth={220}
+					items={this.props.items} keyName="id"
+					itemTemplate={this._gridItemTemplate} />
+				<div className={css.fabs}>
+					<AddButton className={css.topmost}
+						duplicate={::this.duplicate}/>
+					<TrashButton className={css.topmost}
+						getTrashCounts={::this.getTrashCounts} />
 				</div>
 			</div>
 		);
 	}
-	componentWillMount() {
-		// Maybe, I can figure out index from id,
-		this._renderGridItem = (props) => {
-			return (
-				<GridItemTemplate {...props}
-					id={props.id}
-					index={props.index}
-					container={this}
-					onSwapIndex={::this.swapIndex}
-					onDataChanged={::this.onDataChanged}
-				/>
-			);
-		};
+	changeCardIndex(id, a, b) {
+		this.props.boardAction.moveCard(id, a, id, b);
+	}
+	reassignCard(src, srcIdx, dst, dstIdx) {
+		this.props.boardAction.moveCard(src, srcIdx, dst, dstIdx);
+	}
+	createTextCard(id, text) {
+		this.props.boardAction.createCard(id, 'Note', { text });
+	}
+	updateBoardName(id, name) {
+		this.props.boardAction.setName(id, name);
+	}
+	duplicate(type, item) {
+
+	}
+	getTrashCounts() {
+		const count = this.props.items.reduce((acc, item) => {
+			return Number(acc) + item.trashItems.length;
+		}, 0);
+		return count;
 	}
 	createBoard() {
 		// fix this later using ORM
@@ -110,18 +125,14 @@ export default class Boards extends Component {
 					name: 'Untitled',
 					text: '',
 					items: [],
+					trashItems: [],
 					createdAt: new Date(),
 				}]
 			},
-			addMenuOpened: {
+			showAddMenu: {
 				$set: false
 			}
 		}));
-	}
-	toggleAddMenu() {
-		this.setState({
-			addMenuOpened: !this.state.addMenuOpened
-		});
 	}
 	swapIndex(a, b) {
 		const { items } = this.state;
@@ -135,12 +146,13 @@ export default class Boards extends Component {
 			}
 		}));
 	}
-	onDataChanged(id, changes) {
+	onDataChange(id, changes) {
 		const idx = this.state.items.findIndex(item => item.id === id);
 		if (idx === undefined) {
 			console.warn('Unknown Data ID');
 			return;
 		}
+		console.log('data Change');
 		const newState = update(this.state, {
 			items: {
 				[idx]: changes
@@ -148,6 +160,20 @@ export default class Boards extends Component {
 		});
 		this.setState(newState);
 	}
+}
+
+function isEqualDeep(a, b) {
+	const keyA = Object.keys(a);
+	const keyB = Object.keys(b);
+	if (!_.isEqual(keyA, keyB)) {
+		return false;
+	}
+	for (let key of keyA) {
+		if (a[key] instanceof Object && !isEqualDeep(a[key], b[key])) {
+			return false;
+		}
+	}
+	return true;
 }
 
 function createDropEventHandler() {

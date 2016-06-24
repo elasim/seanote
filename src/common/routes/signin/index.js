@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import SignupForm from '../../components/signup-form';
 import SigninForm from '../../components/signin-form';
 
@@ -9,24 +9,14 @@ import {
 } from 'react-mdl';
 
 export default class SignIn extends Component {
+	static contextTypes = {
+		setTitle: PropTypes.func.isRequired,
+	};
 	constructor(props, context) {
 		super(props, context);
 		this.state = {
 			showSignUp: false
 		};
-	}
-	onSuccess() {
-		console.log('Success');
-	}
-	onClickSignUp() {
-		this.setState({
-			showSignUp: true
-		});
-	}
-	onSignUpCancelled() {
-		this.setState({
-			showSignUp: false
-		});
 	}
 	render() {
 		let controls;
@@ -56,4 +46,21 @@ export default class SignIn extends Component {
 			</div>
 		);
 	}
+	componentWillMount() {
+		this.context.setTitle('Sign-In');
+	}
+	onSuccess() {
+		console.log('Success');
+	}
+	onClickSignUp() {
+		this.setState({
+			showSignUp: true
+		});
+	}
+	onSignUpCancelled() {
+		this.setState({
+			showSignUp: false
+		});
+	}
+
 }

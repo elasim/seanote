@@ -1,7 +1,15 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 
-export default function () {
-	return (
-		<div className="mdl-layout__content">404 NOT FOUND</div>
-	);
+export default class Error extends Component {
+	static contextTypes = {
+		setTitle: PropTypes.func.isRequired,
+	};
+	render() {
+		return (
+			<div className="mdl-layout__content">404 NOT FOUND</div>
+		);
+	}
+	componentWillMount() {
+		this.context.setTitle('Error');
+	}
 }

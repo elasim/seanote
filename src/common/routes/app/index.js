@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import { Link } from 'react-router';
+import { IntlProvider } from 'react-intl';
 import { connect } from 'react-redux';
 import {
 // Header,
@@ -10,7 +11,8 @@ import {
 	Textfield,
 	Icon
 } from 'react-mdl';
-// import ContentWrapper from '../../components/content';
+
+import { setTitle } from '../../actions/app';
 import Header from './header';
 import css from './style.scss';
 import './global.css';
@@ -20,13 +22,25 @@ if (process.env.BROWSER) {
 	require('../../thirds/material.custom.js');
 }
 
-@connect((state) => ({
-	contextMenu: state.app.contextMenu,
-	title: state.app.title,
-}))
+@connect(state => state.app, { setTitle })
 class App extends React.Component {
+	static childContextTypes = {
+		getTitle: PropTypes.func,
+		setTitle: PropTypes.func,
+	};
 	constructor(props, context) {
 		super(props, context);
+		this._context = {
+			getTitle() {
+				return props.title;
+			},
+			setTitle(title) {
+				props.setTitle(title);
+			}
+		};
+	}
+	getChildContext() {
+		return this._context;
 	}
 	componentWillReceiveProps(nextProps) {
 		if (this.props.title != nextProps.title) {
@@ -34,7 +48,7 @@ class App extends React.Component {
 		}
 	}
 	render() {
-		const { contextMenu } = this.props;
+		const { locale, contextMenu } = this.props;
 		const titleLink = (
 			<Link to="/" className={css.title}>
 				<Button primary ripple>{this.props.title}</Button>
@@ -66,27 +80,29 @@ class App extends React.Component {
 			];
 		}
 		return (
-			<div className={css.app}>
-				<Layout fixedHeader>
-					<Header seamed title={titleLink} className={css.header}
-						contextIcon={contextMenuIcon}
-						contextAction={contextMenuAction}>
-						<Textfield label="Search" expandable expandableIcon="search" />
-						<Navigation className={css.navigation}>
-							<Link to="/"><Button primary ripple>Home</Button></Link>
-							<Link to="/board"><Button primary ripple>Dashboard</Button></Link>
-							<Link to="/board/demo"><Button raised accent ripple>demo</Button></Link>
-							<Link to="/signin"><Button raised colored ripple>Sign In</Button></Link>
-						</Navigation>
-					</Header>
-					<Drawer>
-						<Navigation>
-							{contextMenuItems}
-						</Navigation>
-					</Drawer>
-					{this.props.children}
-				</Layout>
-			</div>
+			<IntlProvider locale={locale}>
+				<div className={css.app}>
+					<Layout fixedHeader>
+						<Header seamed title={titleLink} className={css.header}
+							contextIcon={contextMenuIcon}
+							contextAction={contextMenuAction}>
+							<Textfield label="Search" expandable expandableIcon="search" />
+							<Navigation className={css.navigation}>
+								<Link to="/"><Button primary ripple>Home</Button></Link>
+								<Link to="/board"><Button primary ripple>Dashboard</Button></Link>
+								<Link to="/board/demo"><Button raised accent ripple>demo</Button></Link>
+								<Link to="/signin"><Button raised colored ripple>Sign In</Button></Link>
+							</Navigation>
+						</Header>
+						<Drawer>
+							<Navigation>
+								{contextMenuItems}
+							</Navigation>
+						</Drawer>
+						{this.props.children}
+					</Layout>
+				</div>
+			</IntlProvider>
 		);
 	}
 	componentDidMount() {

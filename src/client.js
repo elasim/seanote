@@ -1,47 +1,41 @@
 import 'normalize.css';
 import 'core-js/fn/array/find-index';
 import 'core-js/fn/array/fill';
-
-import { addLocaleData } from 'react-intl';
-import en from 'react-intl/locale-data/en';
-import fr from 'react-intl/locale-data/fr';
-import es from 'react-intl/locale-data/es';
-import ko from 'react-intl/locale-data/ko';
-addLocaleData([...en, ...fr, ...es, ...ko]);
-
 import React from 'react';
 import { render } from 'react-dom';
-import { Router, browserHistory } from 'react-router';
-import { Provider } from 'react-redux';
-
-import AppContext from './context';
-import routes from './common/routes';
+import { addLocaleData } from 'react-intl';
+import en from 'react-intl/locale-data/en';
+import ko from 'react-intl/locale-data/ko';
 import { configureStore } from './common/store';
+import { Provider } from 'react-redux';
+import { Router, browserHistory } from 'react-router';
+import routes from './common/routes';
 
-import LocaleSelector from './common/components/locale-selector';
+addLocaleData([
+	...en,
+	...ko,
+]);
 
-const store = configureStore({
-	locale: navigator.language || 'en'
-});
 
-const context = {
-	getTitle() {
-		return document.title;
-	},
-	setTitle(value) {
-		document.title = value;
+const initialState = {
+	app: {
+		locale: navigator.language || 'en'
 	}
 };
-
+if (window.__APP) {
+	const { data, time } = window.__APP;
+	delete window.__APP;
+	// data is usable. it's not too old.
+	if (time < Date.now() - (60 * 5)) {
+		Object.assign(initialState, data);
+	}
+}
+const store = configureStore(initialState);
 render(
 	<Provider store={store}>
-		<LocaleSelector>
-			<AppContext context={context}>
-				<Router history={browserHistory}>
-					{routes}
-				</Router>
-			</AppContext>
-		</LocaleSelector>
+		<Router history={browserHistory}>
+			{routes}
+		</Router>
 	</Provider>
 	, document.getElementById('app')
 );

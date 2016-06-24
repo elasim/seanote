@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux';
 import app from './app';
-import locale from './locale';
+import board from './board';
 
 export default combineReducers({
 	app,
-	locale,
+	board,
 });

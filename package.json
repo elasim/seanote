@@ -1,5 +1,6 @@
 {
-  "name": "express-universal-react",
+  "name": "website1-backend",
+  "private": true,
   "version": "0.1.0",
   "scripts": {
     "build": "node build/tools/build",
@@ -8,12 +9,13 @@
     "start": "npm run server development"
   },
   "license": "MIT",
-  "repository": "https://github.com/elasim/express-universal-react.git",
+  "repository": "https://github.com/elasim/website1-backend.git",
   "dependencies": {
     "classnames": "^2.2.5",
     "core-js": "^2.4.0",
     "express": "^4.13.4",
     "helmet": "^2.1.1",
+    "immutable": "^3.8.1",
     "jsonwebtoken": "^7.0.1",
     "material-ui": "^0.15.1",
     "passport": "^0.3.2",
@@ -28,6 +30,9 @@
     "react-redux": "^4.4.5",
     "react-router": "^2.4.1",
     "redux": "^3.5.2",
+    "redux-actions": "^0.10.0",
+    "redux-rx": "^0.5.0",
+    "redux-thunk": "^2.1.0",
     "rx": "^4.1.0",
     "sequelize": "^3.23.3",
     "sqlite3": "^3.1.4",

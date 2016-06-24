@@ -6,12 +6,10 @@ import { findDOMNode } from 'react-dom';
 import { DragSource, DropTarget } from 'react-dnd';
 
 import { Textfield } from 'react-mdl';
-import Board from '../../models/board';
 import SortableList from '../../components/sortable-list';
+import EditableDiv from './editable-div';
 import css from './grid-item-template.scss';
 
-/// @TODO Extract as Sortable Decorator
-///
 const itemSource = {
 	beginDrag(props) {
 		return {
@@ -41,90 +39,91 @@ const itemTarget = {
 }))
 @DropTarget([
 	'BoardListItem',
-	'SortableListItem',
+//	'SortableListItem',
 ], itemTarget, (connect) => ({
 	connectDropTarget: connect.dropTarget(),
 }))
 export default class GridItemTemplate extends Component {
 	static propTypes = {
-		onSwapIndex: PropTypes.func,
-		onDataChanged: PropTypes.func,
-	};
-	static defaultProps = {
-		onSwapIndex: emptyFunction,
-		onDataChanged: emptyFunction,
+		onIndexChange: PropTypes.func.isRequired,
+		onReassign: PropTypes.func.isRequired,
+		onNameChange: PropTypes.func.isRequired,
+		onNewText: PropTypes.func.isRequired,
 	};
 	constructor(props, context) {
 		super(props, context);
 		this.state = {
-			items: props.items,
-			name: props.name,
-			namefieldEditable: false,
 			newText: '',
 		};
+		this.updateHandlers(props);
+	}
+	componentWillReceiveProps(nextProps) {
+		if (nextProps.value.id !== this.props.value.id) {
+			this.updateHandlers(nextProps);
+		}
+		this.state.newText = '';
+		console.log('C Receive Prop');
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		console.log('C Should UPdate?');
+		return true;
 	}
 	render() {
 		const {
-			className,
-			style,
+			value,
 			connectDropTarget,
 			connectDragSource,
 			connectDragPreview,
-			isDragging,
 		} = this.props;
-		const { items, name, namefieldEditable } = this.state;
-		const containerStyle = Object.assign({}, style, {
-			opacity: isDragging ? 0 : 1
-		});
+		const {
+			name,
+			style,
+			className,
+		} = value;
+		const { newText } = this.state;
 		return connectDropTarget(connectDragPreview(
 			<div className={cx(css.item, 'mdl-shadow--2dp', className)}
-				style={containerStyle}>
+				style={style}>
 				<div className={css['item-header']}>
 					{connectDragSource(
 						<div className={css.handle}>
 							<i className="material-icons">open_with</i>
 						</div>
 					)}
-					<div className={css.title} ref="name"
-						onClick={::this.onNameClick}
-						onKeyDown={::this.onNameKeyDown}
-						contentEditable={namefieldEditable}
-						dangerouslySetInnerHTML={{__html:name||' '}} />
+					<EditableDiv defaultValue={name} className={css.name}
+						onChange={this._notifyNameChange}
+						placeholder="Untitled" />
 				</div>
-				<SortableList items={items} ref="list" allowIn allowOut
-					onChange={::this.onDataChanged} />
+				<SortableList items={value.items} ref="list" allowIn allowOut
+					keyName="id"
+					onIndexChange={this._notifyIndexChange}
+					onReassign={this._notifyReassign} />
 				<div>
-					<Textfield label="Type to add new text"
+					<Textfield value={newText}
 						onKeyDown={::this.onTextfieldKeyDown}
 						onChange={::this.onTextfieldChange}
-						value={this.state.newText} />
+						label="Type to add new text" />
 				</div>
 			</div>
 		));
 	}
-	onNameClick() {
-		this.setState({
-			namefieldEditable: true,
-		});
-		setTimeout(() => {
-			findDOMNode(this.refs.name).focus();
-		}, 0);
+	updateHandlers(props) {
+		const { id } = props.value;
+		this._notifyIndexChange = (a, b) => {
+			props.onIndexChange(id, a, b);
+		};
+		this._notifyReassign = (myIdx, dest, destIdx) => {
+			props.onReassign(id, myIdx, dest, destIdx);
+		};
+		this._notifyNameChange = (name) => {
+			props.onNameChange(id, name);
+		};
+		this._notifyNewText = (text) => {
+			props.onNewText(id, text);
+		};
 	}
-	onNameKeyDown(e) {
-		if (e.keyCode === 13) {
-			e.preventDefault();
-			e.stopPropagation();
-			this.setState({
-				namefieldEditable: false,
-				name: e.target.innerHTML
-			});
-			this.onDataChanged({
-				name: {
-					$set: e.target.innerHTML
-				}
-			});
-			return;
-		}
+	notifyDataChanged(changes) {
+		this.props.onDataChanged(this.props.id, changes);
 	}
 	onTextfieldChange(e) {
 		this.setState({
@@ -133,30 +132,11 @@ export default class GridItemTemplate extends Component {
 	}
 	onTextfieldKeyDown(e) {
 		if (e.keyCode === 13) {
-			const changes = {
-				items: {
-					$push: [
-						{
-							id: 'new' + Date.now(),
-							type: 'Note',
-							detail: {
-								text: this.state.newText
-							}
-						}
-					]
-				}
-			};
-			// #2
-			this.refs.list.setState(update(this.refs.list.state, changes));
-			this.onDataChanged(changes);
-			this.setState({
-				newText: ''
-			});
+			e.preventDefault();
+			e.stopPropagation();
 			e.target.blur();
+			this._notifyNewText(e.target.value);
 		}
-	}
-	onDataChanged(changes) {
-		this.props.onDataChanged(this.props.id, changes);
 	}
 	move(props, monitor) {
 		if (!monitor.isOver({ shallow: true })) {
@@ -182,7 +162,6 @@ export default class GridItemTemplate extends Component {
 			}
 		};
 		// #2
-		dragItem.container.setState(update(dragItem.container.state, srcChanges));
 		dragItem.container.props.onChange(srcChanges);
 		const newIndex = this.refs.list.state.items.length;
 		const destChanges = {
@@ -194,7 +173,7 @@ export default class GridItemTemplate extends Component {
 		};
 		// #2
 		this.refs.list.setState(update(this.refs.list.state, destChanges));
-		this.onDataChanged(destChanges);
+		this.notifyDataChanged(destChanges);
 
 		dragItem.index = newIndex;
 		dragItem.container = this.refs.list;
@@ -238,7 +217,7 @@ export default class GridItemTemplate extends Component {
 		}
 		clearTimeout(this._swapDelay);
 		this._swapDelay = setTimeout(() => {
-			this.props.onSwapIndex(dragIndex, hoverIndex);
+			this.props.onIndexChangeIndex(dragIndex, hoverIndex);
 			dragItem.index = hoverIndex;
 		}, 50);
 	}

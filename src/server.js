@@ -6,7 +6,6 @@ import express from 'express';
 import helmet from 'helmet';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { IntlProvider } from 'react-intl';
 import { RouterContext, match } from 'react-router';
 
 import { engine } from './server/lib/simple-template';
@@ -14,19 +13,15 @@ import { engine } from './server/lib/simple-template';
 import assets from './assets';
 import config from './config';
 
-
 // Copy required assets
-const debug = require('./html/without-template.html');
-require('./html/index.html');
-require('./html/error.html');
-
+require('./views/index.html');
+require('./views/error.html');
 
 const app = express();
 
 /// @TODO FIX IT LATER for more specific rules
 app.use(helmet());
 app.engine('html', engine);
-app.set('views', path.join(__dirname, './html'));
 app.set('view engine', 'html');
 
 app.get(assets.main.js, (req, res) => {
@@ -38,7 +33,6 @@ if (0) {
 	const routes = require('./common/routes').default;
 	const { Provider } = require('react-redux');
 	const { configureStore } = require('./common/store');
-	const LocaleSelector = require('./common/components/locale-selector').default;
 
 	app.get('*', (req, res) => {
 		let locale = undefined;
@@ -57,15 +51,18 @@ if (0) {
 				// it must be called to get app state
 				const body = renderToString(
 					<Provider store={store}>
-						<LocaleSelector>
-							<RouterContext {...props} />
-						</LocaleSelector>
+						<RouterContext {...props} />
 					</Provider>
 				);
+				const state = store.getState();
 				res.status(200).render('index', {
-					title: store.getState().app.title,
+					title: state.app.title,
 					body,
-					bundle: assets.main.js
+					bundle: assets.main.js,
+					initialState: {
+						data: JSON.stringify(store),
+						time: Date.now(),
+					},
 				});
 			} else {
 				res.status(404).render('error', {
@@ -75,8 +72,9 @@ if (0) {
 		});
 	});
 } else {
+	const debugView = require('./views/without-template.html');
 	app.get('*', (req, res) => {
-		res.sendFile(path.join(__dirname, debug));
+		res.sendFile(path.join(__dirname, debugView));
 	});
 }
 
