@@ -6,18 +6,17 @@ import css from './style.css';
 
 export default class CascadeGrid extends Component {
 	static propTypes = {
-		items: PropTypes.arrayOf(PropTypes.any).isRequired,
-		columnWidth: PropTypes.number.isRequired,
-		columnKey: PropTypes.string.isRequired,
-		columnTemplate: PropTypes.func.isRequired,
-		itemKey: PropTypes.string.isRequired,
-		itemTemplate: PropTypes.func.isRequired,
+		items: PropTypes.arrayOf(PropTypes.object).isRequired,
+		keyName: PropTypes.string.isRequired,
+		columnWidth: PropTypes.number,
+		columnKey: PropTypes.string,
+		columnTemplate: PropTypes.func,
+		itemKey: PropTypes.string,
+		itemTemplate: PropTypes.func,
 	};
 	static defaultProps = {
-		items: [],
 		columnWidth: 200,
 		columnKey: 'cascade-grid-column-',
-		itemKey: 'cascade-grid-item-',
 		columnTemplate: (props) => {
 			return (
 				<div style={props.style}
@@ -26,6 +25,7 @@ export default class CascadeGrid extends Component {
 				</div>
 			);
 		},
+		itemKey: 'cascade-grid-item-',
 		itemTemplate: (props) => {
 			return (
 				<div className={props.className}>{JSON.stringify(props)}</div>
@@ -41,6 +41,7 @@ export default class CascadeGrid extends Component {
 	render() {
 		const {
 			items,
+			keyName,
 			itemKey,
 			itemTemplate,
 			columnKey,
@@ -62,7 +63,7 @@ export default class CascadeGrid extends Component {
 			columns[i % numCols].push(
 				React.createElement(itemTemplate, {
 					...item,
-					key: itemKey + (item.gridKey || i),
+					key: itemKey + (item[keyName] || i),
 					className: css.item,
 					index: i,
 				})
