@@ -1,25 +1,33 @@
-import Rx from 'rx';
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
-import update from 'react/lib/update';
-import emptyFunction from 'fbjs/lib/emptyFunction';
 import { findDOMNode } from 'react-dom';
 import { DragSource, DropTarget } from 'react-dnd';
 
 import { Textfield } from 'react-mdl';
 import SortableList from '../../components/sortable-list';
 import EditableDiv from './editable-div';
+
 import css from './grid-item-template.scss';
 
-const itemSource = {
+const BOARD_SWAP_DELAY = 50;
+
+@DragSource('BoardListItem', {
 	beginDrag(props) {
 		return {
-			id: props.id,
+			id: props.value.id,
 			index: props.index,
+			container: props.container,
 		};
 	}
-};
-const itemTarget = {
+}, (connect, monitor) => ({
+	connectDragSource: connect.dragSource(),
+	connectDragPreview: connect.dragPreview(),
+	isDragging: monitor.isDragging(),
+}))
+@DropTarget([
+	'BoardListItem',
+	'SortableListItem',
+], {
 	hover: (props, monitor, component) => {
 		switch (monitor.getItemType()) {
 			case 'BoardListItem':
@@ -30,17 +38,7 @@ const itemTarget = {
 				return;
 		}
 	}
-};
-
-@DragSource('BoardListItem', itemSource, (connect, monitor) => ({
-	connectDragSource: connect.dragSource(),
-	connectDragPreview: connect.dragPreview(),
-	isDragging: monitor.isDragging(),
-}))
-@DropTarget([
-	'BoardListItem',
-	'SortableListItem',
-], itemTarget, (connect) => ({
+}, (connect) => ({
 	connectDropTarget: connect.dropTarget(),
 }))
 export default class GridItemTemplate extends Component {
@@ -67,15 +65,13 @@ export default class GridItemTemplate extends Component {
 		this.onNameChange = ::this.onNameChange;
 	}
 	componentWillReceiveProps(nextProps) {
-		if (nextProps.id !== this.props.id) {
-			this.updateHandlers(nextProps);
+		if (nextProps.value.items.length !== this.props.value.items.length) {
+			this.state.newText = '';
 		}
-		this.state.newText = '';
 	}
 	render() {
 		const {
-			id,
-			value: { name, style, className, items },
+			value: { id, name, style, className, items },
 			connectDropTarget,
 			connectDragSource,
 			connectDragPreview,
@@ -109,17 +105,8 @@ export default class GridItemTemplate extends Component {
 			</div>
 		));
 	}
-	onListMove(srcIdx, dstIdx) {
-		this.props.onCardMove(this.props.id, srcIdx, this.props.id, dstIdx);
-	}
-	onListOut(idx) {
-		this.props.onCardDragOut(this.props.id, idx);
-	}
-	onListIn(idx) {
-		this.props.onCardDropIn(this.props.id, idx);
-	}
 	onNameChange(name) {
-		this.props.onNameChange(this.props.id, name);
+		this.props.onNameChange(this.props.value.id, name);
 	}
 	onTextfieldChange(e) {
 		this.setState({
@@ -131,10 +118,19 @@ export default class GridItemTemplate extends Component {
 			e.preventDefault();
 			e.stopPropagation();
 			e.target.blur();
-			this.props.onTextCreate(this.props.id, e.target.value);
+			this.props.onTextCreate(this.props.value.id, e.target.value);
 		}
 	}
-	// This function needs
+	onListMove(srcIdx, dstIdx) {
+		const { id } = this.props.value;
+		this.props.onCardMove(id, srcIdx, id, dstIdx);
+	}
+	onListOut(idx) {
+		this.props.onCardDragOut(this.props.value.id, idx);
+	}
+	onListIn(idx) {
+		this.props.onCardDropIn(this.props.value.id, idx);
+	}
 	onCardHover(props, monitor) {
 		if (!monitor.isOver({ shallow: true })) {
 			return;
@@ -150,7 +146,7 @@ export default class GridItemTemplate extends Component {
 		// dragItem container direct list, not this grid-item
 		const src = srcInfo.container.props.parent;
 		const dstIdx = this.props.value.items.length;
-		this.props.onCardMove(src, srcIndex, this.props.id, dstIdx);
+		this.props.onCardMove(src, srcIndex, this.props.value.id, dstIdx);
 
 		srcInfo.index = dstIdx;
 		srcInfo.container = this.refs.list;
@@ -194,8 +190,8 @@ export default class GridItemTemplate extends Component {
 		}
 		clearTimeout(this._swapDelay);
 		this._swapDelay = setTimeout(() => {
-			this.props.onIndexChangeIndex(dragIndex, hoverIndex);
+			this.props.onBoardMove(dragIndex, hoverIndex);
 			dragItem.index = hoverIndex;
-		}, 50);
+		}, BOARD_SWAP_DELAY);
 	}
 }

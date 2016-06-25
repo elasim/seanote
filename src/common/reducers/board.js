@@ -16,7 +16,7 @@ export default handleActions({
 	[Board.setNameOnState](state, action) {
 		const { id, name } = action.payload;
 		const boardIdx = state.items.findIndex(byId(id));
-		if (boardIdx === undefined) {
+		if (boardIdx === -1) {
 			return state;
 		}
 		return update(state, {
@@ -29,10 +29,25 @@ export default handleActions({
 			}
 		});
 	},
+	[Board.moveBoardOnState](state, action) {
+		const { oldIdx, newIdx } = action.payload;
+		const boardData = state.items[oldIdx];
+		if (!boardData) {
+			return;
+		}
+		return update(state, {
+			items: {
+				$splice: [
+					[oldIdx, 1],
+					[newIdx, 0, boardData]
+				]
+			}
+		});
+	},
 	[Board.createCardOnState](state, action) {
 		const { id, type, data } = action.payload;
 		const boardIdx = state.items.findIndex(byId(id));
-		if (boardIdx === undefined) {
+		if (boardIdx === -1) {
 			return state;
 		}
 		return update(state, {
@@ -55,7 +70,7 @@ export default handleActions({
 		const srcBoardIdx = items.findIndex(byId(src));
 		const dstBoardIdx = items.findIndex(byId(dst));
 		
-		if (srcBoardIdx === undefined || dstBoardIdx === undefined) {
+		if (srcBoardIdx === -1 || dstBoardIdx === -1) {
 			return state;
 		}
 		const srcBoardData = items[srcBoardIdx];

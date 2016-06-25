@@ -57,6 +57,10 @@ export const createCardOnState = createAction(
 	'BOARD_CREATE_CARD_ON_STATE',
 	(id, type, data) => ({ id, type, data })
 );
+export const moveBoardOnState = createAction(
+	'BOARD_MOVE_BOARD_ON_STATE',
+	(oldIdx, newIdx) => ({ oldIdx, newIdx })
+);
 export const setNameOnState = createAction(
 	'BOARD_SET_NAME',
 	(id, name) => ({ id, name })
@@ -72,6 +76,11 @@ export function createCard(id, type, data) {
 	return (dispatch) => {
 		dispatch(createCardOnState(id, type, data));
 		// @TODO something here to send sync request
+	};
+}
+export function moveBoard(oldIdx, newIdx) {
+	return (dispatch) => {
+		dispatch(moveBoardOnState(oldIdx, newIdx));
 	};
 }
 export function setName(id, name) {

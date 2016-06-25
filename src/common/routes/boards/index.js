@@ -40,6 +40,7 @@ import css from './style.scss';
 			getData: Board.getData,
 			createCard: Board.createCard,
 			moveCard: Board.moveCard,
+			moveBoard: Board.moveBoard,
 			setName: Board.setName,
 		}, dispatch)
 	})
@@ -77,8 +78,7 @@ export default class Boards extends Component {
 		};
 		this._gridItemTemplate = (props) => {
 			return (
-				<GridItemTemplate value={props}
-					id={props.id}
+				<GridItemTemplate value={props.value}
 					index={props.index}
 					container={this}
 					onBoardMove={moveBoard}
@@ -116,8 +116,8 @@ export default class Boards extends Component {
 			</div>
 		);
 	}
-	moveBoard() {
-
+	moveBoard(a, b) {
+		this.props.boardAction.moveBoard(a, b);
 	}
 	moveCard(src, srcIdx, dst, dstIdx) {
 		this.props.boardAction.moveCard(src, srcIdx, dst, dstIdx);
@@ -152,18 +152,6 @@ export default class Boards extends Component {
 			},
 			showAddMenu: {
 				$set: false
-			}
-		}));
-	}
-	swapIndex(a, b) {
-		const { items } = this.state;
-		const dragItem = items[a];
-		this.setState(update(this.state, {
-			items: {
-				$splice: [
-					[a, 1],
-					[b, 0, dragItem]
-				]
 			}
 		}));
 	}
