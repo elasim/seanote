@@ -18,29 +18,33 @@ import GridItemTemplate from './grid-item-template';
 import css from './style.scss';
 
 @DragDropContext(HTML5Backend)
-// @DropTarget(
-// 	[
-// 		'BoardListItem',
-// 		'SortableListItem',
-// 		'Command',
-// 	],
-// 	createDropEventHandler(),
-// 	(connect, monitor) => ({
-// 		connectDropTarget: connect.dropTarget(),
-// 		dragItemType: monitor.getItemType(),
-// 		dragItem: monitor.getItem(),
-// 	})
-// )
+@DropTarget(
+	[
+		'BoardListItem',
+		'SortableListItem',
+		'Command',
+	],
+	createDropEventHandler(),
+	(connect, monitor) => ({
+		connectDropTarget: connect.dropTarget(),
+		dragItemType: monitor.getItemType(),
+		dragItem: monitor.getItem(),
+		sourceClientOffset: monitor.getClientOffset(),
+	})
+)
 @connect(
 	state => ({
 		items: state.board.items,
+		trashItems: state.board.trashItems,
 	}),
 	dispatch => ({
 		boardAction: bindActionCreators({
 			getData: Board.getData,
 			createCard: Board.createCard,
 			moveCard: Board.moveCard,
+			moveCardToTrash: Board.moveCardToTrash,
 			moveBoard: Board.moveBoard,
+			moveBoardToTrash: Board.moveBoardToTrash,
 			setName: Board.setName,
 		}, dispatch)
 	})
@@ -109,9 +113,12 @@ export default class Boards extends Component {
 					itemTemplate={this._gridItemTemplate} />
 				<div className={css.fabs}>
 					<AddButton className={css.topmost}
-						duplicate={::this.duplicate}/>
+						onDropCard={::this.duplicateCard}
+						onDropBoard={::this.duplicateBoard} />
 					<TrashButton className={css.topmost}
-						getTrashCounts={::this.getTrashCounts} />
+						getTrashCounts={::this.getTrashCounts}
+						onDropCard={::this.moveCardToTrash}
+						onDropBoard={::this.moveBoardToTrash} />
 				</div>
 			</div>
 		);
@@ -119,8 +126,14 @@ export default class Boards extends Component {
 	moveBoard(a, b) {
 		this.props.boardAction.moveBoard(a, b);
 	}
+	moveBoardToTrash(idx) {
+		this.props.boardAction.moveBoardToTrash(idx);
+	}
 	moveCard(src, srcIdx, dst, dstIdx) {
 		this.props.boardAction.moveCard(src, srcIdx, dst, dstIdx);
+	}
+	moveCardToTrash(id, idx) {
+		this.props.boardAction.moveCardToTrash(id, idx);
 	}
 	createText(id, text) {
 		this.props.boardAction.createCard(id, 'Note', { text });
@@ -128,7 +141,10 @@ export default class Boards extends Component {
 	updateBoardName(id, name) {
 		this.props.boardAction.setName(id, name);
 	}
-	duplicate(type, item) {
+	duplicateCard(idx) {
+
+	}
+	duplicateBoard(idx) {
 
 	}
 	getTrashCounts() {
@@ -172,35 +188,36 @@ function isEqualDeep(a, b) {
 }
 
 function createDropEventHandler() {
-	return {
-		hover(props, monitor, component) {
-			if (!monitor.isOver({ shallow: true })) {
-				return;
-			}
-			// Scroll on edge
-			const dom = findDOMNode(component);
-			const bound = dom.getBoundingClientRect();
-			const cursor = monitor.getSourceClientOffset();
-			const edgeHeight = Math.floor(bound.height * 0.1);
-			const top = bound.top + edgeHeight;
-			const bottom = bound.height - edgeHeight;
-			clearInterval(component._hoverScroll);
-			if (cursor.y <= top) {
-				component._hoverScroll = setInterval(() => {
-					dom.scrollTop += cursor.y - top;
-				});
-				return;
-			}
-			if (cursor.y >= bottom) {
-				component._hoverScroll = setInterval(() => {
-					dom.scrollTop += cursor.y - bottom;
-				}, 30);
-				return;
-			}
-		},
-		drop(drop, monitor, component) {
-			clearInterval(component._hoverScroll);
-			return;
-		},
-	};
+	return {};
+	// {
+	// 	hover(props, monitor, component) {
+	// 		if (!monitor.isOver({ shallow: false })) {
+	// 			return;
+	// 		}
+	// 		// Scroll on edge
+	// 		const dom = findDOMNode(component);
+	// 		const bound = dom.getBoundingClientRect();
+	// 		const cursor = monitor.getSourceClientOffset();
+	// 		const edgeHeight = Math.floor(bound.height * 0.1);
+	// 		const top = bound.top + edgeHeight;
+	// 		const bottom = bound.height - edgeHeight;
+	// 		clearInterval(component._hoverScroll);
+	// 		if (cursor.y <= top) {
+	// 			component._hoverScroll = setInterval(() => {
+	// 				dom.scrollTop += cursor.y - top;
+	// 			});
+	// 			return;
+	// 		}
+	// 		if (cursor.y >= bottom) {
+	// 			component._hoverScroll = setInterval(() => {
+	// 				dom.scrollTop += cursor.y - bottom;
+	// 			}, 30);
+	// 			return;
+	// 		}
+	// 	},
+	// 	drop(drop, monitor, component) {
+	// 		clearInterval(component._hoverScroll);
+	// 		return;
+	// 	},
+	// };
 }

@@ -5,6 +5,7 @@ import * as Board from '../actions/board';
 
 const initialState = {
 	items: [],
+	trashItems: [],
 	lastUpdate: 0, // never updated
 	dirty: true,
 	fetch: false,
@@ -13,7 +14,7 @@ const initialState = {
 const byId = id => item => item.id === id;
 
 export default handleActions({
-	[Board.setNameOnState](state, action) {
+	[Board.$setName](state, action) {
 		const { id, name } = action.payload;
 		const boardIdx = state.items.findIndex(byId(id));
 		if (boardIdx === -1) {
@@ -29,7 +30,7 @@ export default handleActions({
 			}
 		});
 	},
-	[Board.moveBoardOnState](state, action) {
+	[Board.$moveBoard](state, action) {
 		const { oldIdx, newIdx } = action.payload;
 		const boardData = state.items[oldIdx];
 		if (!boardData) {
@@ -44,7 +45,24 @@ export default handleActions({
 			}
 		});
 	},
-	[Board.createCardOnState](state, action) {
+	[Board.$moveBoardToTrash](state, action) {
+		const idx = action.payload;
+		const boardData = state.items[idx];
+		if (!boardData) {
+			return state;
+		}
+		return update(state, {
+			items: {
+				$splice: [
+					[idx, 1]
+				]
+			},
+			trashItems: {
+				$push: [boardData]
+			}
+		});
+	},
+	[Board.$createCard](state, action) {
 		const { id, type, data } = action.payload;
 		const boardIdx = state.items.findIndex(byId(id));
 		if (boardIdx === -1) {
@@ -64,7 +82,7 @@ export default handleActions({
 			}
 		});
 	},
-	[Board.moveCardOnState](state, action) {
+	[Board.$moveCard](state, action) {
 		const { src, srcIdx, dst, dstIdx } = action.payload;
 		const { items } = state;
 		const srcBoardIdx = items.findIndex(byId(src));
@@ -101,6 +119,32 @@ export default handleActions({
 			dirty: {
 				$set: true
 			},
+		});
+	},
+	[Board.$moveCardToTrash](state, action) {
+		const { id, idx } = action.payload;
+		const boardIdx = state.items.findIndex(byId(id));
+		if (boardIdx === -1) {
+			return state;
+		}
+		const boardData = state.items[boardIdx];
+		const cardData = boardData.items[idx];
+		if (!cardData) {
+			return state;
+		}
+		return update(state, {
+			items: {
+				[boardIdx]: {
+					items: {
+						$splice: [
+							[idx, 1]
+						]
+					},
+					trashItems: {
+						$push: [cardData]
+					}
+				}
+			}
 		});
 	},
 	[Board.fetchRequest](state) {

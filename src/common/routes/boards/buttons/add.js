@@ -10,6 +10,7 @@ import {
 	DialogTitle,
 	FABButton,
 	Icon,
+	Tooltip,
 } from 'react-mdl';
 
 import ItemButton from './item';
@@ -55,30 +56,34 @@ export default class AddButton extends Component {
 		// 	? ::this.createBoard : ::this.toggleAddMenu;
 		let primaryIcon;
 		let primaryAction;
+		let label;
 		if (open) {
 			primaryIcon = 'note_add';
+			label = 'New Board';
 		} else if (canDrop) {
 			primaryIcon = 'control_point_duplicate';
+			label = 'Duplicate';
 		} else {
 			primaryIcon = 'add';
 			primaryAction = ::this.toggleAddMenu;
+			label = 'Add';
 		}
 		return connectDropTarget(
 			<div style={{display: 'inline-block'}}>
-				<FABButton
-					onClick={primaryAction}
-					onTouchTap={primaryAction}
-					accent={isOver && canDrop}
-					className={className}
-					style={style}
-				>
-					<Icon name={primaryIcon} />
-				</FABButton>
+				<Tooltip label={label} position="left">
+					<FABButton accent={isOver && canDrop}
+						className={className}
+						style={style}
+						onClick={primaryAction}
+						onTouchTap={primaryAction} >
+						<Icon name={primaryIcon} />
+					</FABButton>
+				</Tooltip>
 				<div className={menuClasses}>
-					<ItemButton icon="add_location" />
-					<ItemButton icon="add_alarm" />
-					<ItemButton icon="person_add" />
-					<ItemButton icon="add_a_photo" />
+					<ItemButton label="Location" icon="add_location" />
+					<ItemButton label="Time" icon="add_alarm" />
+					<ItemButton label="Person" icon="person_add" />
+					<ItemButton label="Image" icon="add_a_photo" />
 				</div>
 				<div onClick={() => this.setState({ open: false })}
 					className={cx(css.back, open ? css.open : null)} />

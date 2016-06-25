@@ -49,43 +49,61 @@ export function sync(opt = { force: false }) {
 }
 */
 
-export const moveCardOnState = createAction(
-	'BOARD_MOVE_CARD_ON_STATE',
+export const $moveCard = createAction(
+	'BOARD_MOVE_CARD',
 	(src, srcIdx, dst, dstIdx) => ({ src, srcIdx, dst, dstIdx })
 );
-export const createCardOnState = createAction(
-	'BOARD_CREATE_CARD_ON_STATE',
+export const $moveCardToTrash = createAction(
+	'BOARD_MOVE_CARD_TO_TRASH',
+	(id, idx) => ({ id, idx })
+);
+export const $createCard = createAction(
+	'BOARD_CREATE_CARD',
 	(id, type, data) => ({ id, type, data })
 );
-export const moveBoardOnState = createAction(
-	'BOARD_MOVE_BOARD_ON_STATE',
+export const $moveBoard = createAction(
+	'BOARD_MOVE_BOARD',
 	(oldIdx, newIdx) => ({ oldIdx, newIdx })
 );
-export const setNameOnState = createAction(
+export const $moveBoardToTrash = createAction(
+	'BOARD_MOVE_BOARD_TO_TRASH',
+	(idx) => idx
+);
+export const $setName = createAction(
 	'BOARD_SET_NAME',
 	(id, name) => ({ id, name })
 );
 
 export function moveCard(src, srcIdx, dst, dstIdx) {
 	return (dispatch) => {
-		dispatch(moveCardOnState(src, srcIdx, dst, dstIdx));
+		dispatch($moveCard(src, srcIdx, dst, dstIdx));
 		// @TODO something here to send sync request
+	};
+}
+export function moveCardToTrash(id, idx) {
+	return (dispatch) => {
+		dispatch($moveCardToTrash(id, idx));
 	};
 }
 export function createCard(id, type, data) {
 	return (dispatch) => {
-		dispatch(createCardOnState(id, type, data));
+		dispatch($createCard(id, type, data));
 		// @TODO something here to send sync request
 	};
 }
 export function moveBoard(oldIdx, newIdx) {
 	return (dispatch) => {
-		dispatch(moveBoardOnState(oldIdx, newIdx));
+		dispatch($moveBoard(oldIdx, newIdx));
+	};
+}
+export function moveBoardToTrash(idx) {
+	return (dispatch) => {
+		dispatch($moveBoardToTrash(idx));
 	};
 }
 export function setName(id, name) {
 	return (dispatch) => {
-		dispatch(setNameOnState(id, name));
+		dispatch($setName(id, name));
 	};
 }
 

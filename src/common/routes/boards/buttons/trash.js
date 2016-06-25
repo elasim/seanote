@@ -31,11 +31,13 @@ export default class TrashButton extends Component {
 	static propTypes = {
 		getTrashCounts: PropTypes.func.isRequired,
 		onEmptyTrash: PropTypes.func,
-		onDrop: PropTypes.func,
+		onDropCard: PropTypes.func,
+		onDropBoard: PropTypes.func,
 	};
 	static defaultProps = {
 		onEmptyTrash: emptyFunction,
-		onDrop: emptyFunction,
+		onDropCard: emptyFunction,
+		onDropBoard: emptyFunction,
 	};
 	constructor(props, context) {
 		super(props, context);
@@ -82,7 +84,13 @@ export default class TrashButton extends Component {
 		);
 	}
 	moveToTrash(type, item) {
-		this.props.onDrop(type, item);
+		const { onDropCard, onDropBoard } = this.props;
+		switch (type) {
+			case 'SortableListItem':
+				return onDropCard(item.container.props.parent, item.index);
+			case 'BoardListItem':
+				return onDropBoard(item.index);
+		}
 	}
 	toggleDialog() {
 		this.setState({

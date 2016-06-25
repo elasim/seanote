@@ -6,30 +6,42 @@ import css from './style.scss';
 
 export default class SortableList extends Component {
 	static propTypes = {
-		items: PropTypes.arrayOf(PropTypes.object),
+		items: PropTypes.arrayOf(PropTypes.object).isRequired,
 		keyName: PropTypes.string.isRequired,
+		style: PropTypes.object,
+		className: PropTypes.string,
 		onDragMove: PropTypes.func,
 		onDragOut: PropTypes.func,
 		onDragIn: PropTypes.func,
-		style: PropTypes.object,
-		className: PropTypes.string,
 		allowIn: PropTypes.bool,
 		allowOut: PropTypes.bool,
+		//properties defined in below will pass into items.
+		disableHandle: PropTypes.bool,
+		disablePreview: PropTypes.bool,
+		template: PropTypes.func,
 	};
 	static defaultProps = {
-		allowIn: false,
-		allowOut: false,
 		onDragMove: emptyFunction,
 		onDragOut: emptyFunction,
 		onDragIn: emptyFunction,
+		allowIn: false,
+		allowOut: false,
 	};
 	render() {
-		const { items, keyName, className, style } = this.props;
+		const {
+			items,
+			keyName,
+			className,
+			style,
+			disableHandle,
+			disablePreview,
+			template,
+		} = this.props;
 		const renderedItems = items.map((item, i) => {
 			return (
 				<SortableListItem value={item} index={i} container={this}
 					key={'sortable-list-key-' + item[keyName]}
-				/>
+					{...{disableHandle, disablePreview, template}} />
 			);
 		});
 		return (
@@ -73,9 +85,9 @@ export default class SortableList extends Component {
 class SortableListItem extends Component {
 	static propTypes = {
 		value: PropTypes.object.isRequired,
-		template: PropTypes.func,
 		disableHandle: PropTypes.bool,
 		disablePreview: PropTypes.bool,
+		template: PropTypes.func,
 	};
 	static defaultProps = {
 		template: (props) => (
@@ -83,6 +95,9 @@ class SortableListItem extends Component {
 		),
 		disableHandle: false,
 		disablePreview: false,
+	}
+	constructor(props, context) {
+		super(props, context);
 	}
 	render() {
 		const {

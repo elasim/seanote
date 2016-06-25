@@ -10,6 +10,7 @@ import {
 	DialogTitle,
 	FABButton,
 	Icon,
+	Tooltip,
 } from 'react-mdl';
 import css from './add.scss';
 
@@ -27,6 +28,7 @@ import css from './add.scss';
 export default class ItemButton extends Component {
 	static propTypes = {
 		icon: PropTypes.string.isRequired,
+		label: PropTypes.string.isRequired,
 		onClick: PropTypes.func,
 	};
 	static defaultProps = {
@@ -40,15 +42,18 @@ export default class ItemButton extends Component {
 			className,
 			style,
 			icon,
+			label,
 			onClick,
 		} = this.props;
 		return connectDragPreview(connectDragSource(
 			<div>
-				<FABButton className={className} style={style}
-					accent={isDragging}
-					onClick={onClick} onTouchTap={onClick}>
-					<Icon name={icon} />
-				</FABButton>
+				<Tooltip label={label} position="left">
+					<FABButton className={className} style={style}
+						accent={isDragging}
+						onClick={onClick} onTouchTap={onClick}>
+						<Icon name={icon} />
+					</FABButton>
+				</Tooltip>
 			</div>
 		));
 	}

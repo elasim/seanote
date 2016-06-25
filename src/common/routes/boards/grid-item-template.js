@@ -38,8 +38,10 @@ const BOARD_SWAP_DELAY = 50;
 				return;
 		}
 	}
-}, (connect) => ({
+}, (connect, monitor) => ({
 	connectDropTarget: connect.dropTarget(),
+	dragItem: monitor.getItem(),
+	dragItemType: monitor.getItemType(),
 }))
 export default class GridItemTemplate extends Component {
 	static propTypes = {
@@ -63,6 +65,11 @@ export default class GridItemTemplate extends Component {
 		this.onTextfieldKeyDown = ::this.onTextfieldKeyDown;
 		this.onTextfieldChange = ::this.onTextfieldChange;
 		this.onNameChange = ::this.onNameChange;
+		this._cardItemTemplate = (props) => {
+			return (
+				<div>{JSON.stringify(props.value)}</div>
+			);
+		};
 	}
 	componentWillReceiveProps(nextProps) {
 		if (nextProps.value.items.length !== this.props.value.items.length) {
@@ -75,10 +82,20 @@ export default class GridItemTemplate extends Component {
 			connectDropTarget,
 			connectDragSource,
 			connectDragPreview,
+			dragItem,
+			dragItemType,
+			isDragging,
 		} = this.props;
-		return connectDropTarget(connectDragPreview(
+		let outerStyle = {};
+		if (dragItemType === 'BoardListItem') {
+			if (isDragging || dragItem.id === id) {
+				outerStyle.opacity = 0;
+				outerStyle.transition = 'opacity 0.2s linear';
+			}
+		}
+		return connectDragPreview(connectDropTarget(
 			<div className={cx(css.item, 'mdl-shadow--2dp', className)}
-				style={style}>
+				style={{...style, ...outerStyle}}>
 				<div className={css['item-header']}>
 					{connectDragSource(
 						<div className={css.handle}>
@@ -91,7 +108,7 @@ export default class GridItemTemplate extends Component {
 				</div>
 				{/* parent prop isn't belong to list, it's served to move container */}
 				<SortableList items={items} ref="list" keyName="id"
-					parent={id}
+					parent={id} template={this._cardItemTemplate}
 					onDragMove={this.onListMove}
 					onDragOut={this.onListOut}
 					onDropIn={this.onListIn}
