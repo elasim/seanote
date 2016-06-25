@@ -16,7 +16,7 @@ export default handleActions({
 	[Board.setNameOnState](state, action) {
 		const { id, name } = action.payload;
 		const boardIdx = state.items.findIndex(byId(id));
-		if (!boardIdx) {
+		if (boardIdx === undefined) {
 			return state;
 		}
 		return update(state, {
@@ -32,7 +32,7 @@ export default handleActions({
 	[Board.createCardOnState](state, action) {
 		const { id, type, data } = action.payload;
 		const boardIdx = state.items.findIndex(byId(id));
-		if (!boardIdx) {
+		if (boardIdx === undefined) {
 			return state;
 		}
 		return update(state, {
@@ -55,7 +55,7 @@ export default handleActions({
 		const srcBoardIdx = items.findIndex(byId(src));
 		const dstBoardIdx = items.findIndex(byId(dst));
 		
-		if (!srcBoardIdx || !dstBoardIdx) {
+		if (srcBoardIdx === undefined || dstBoardIdx === undefined) {
 			return state;
 		}
 		const srcBoardData = items[srcBoardIdx];

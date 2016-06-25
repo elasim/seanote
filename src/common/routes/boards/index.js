@@ -1,3 +1,4 @@
+import Rx from 'rx';
 import cx from 'classnames';
 import uuid from 'uuid';
 import _ from 'lodash';
@@ -55,22 +56,37 @@ export default class Boards extends Component {
 		this.state = {
 			showAddMenu: false,
 		};
-		const onDataChange = ::this.onDataChange;
-		const onIndexChange = ::this.changeCardIndex;
-		const onReassign = ::this.reassignCard;
-		const createTextCard = ::this.createTextCard;
+		const moveBoard = ::this.moveBoard;
+		const moveCard = ::this.moveCard;
+		const createText = ::this.createText;
 		const updateName = ::this.updateBoardName;
+		this.cardOut$ = new Rx.Subject();
+		this.cardIn$ = new Rx.Subject();
+		this.cardMoving$ = Rx.Observable.zip(
+			this.cardOut$,
+			this.cardIn$,
+			(cardOut, cardIn) => ({ ...cardOut, ...cardIn }))
+			.subscribe(val => {
+				this.moveCard(val.src, val.srcIdx, val.dst, val.dstIdx);
+			});
+		const connectCardDst = (dst, dstIdx) => {
+			this.cardIn$.onNext({ dst, dstIdx });
+		};
+		const connectCardSrc = (src, srcIdx) => {
+			this.cardOut$.onNext({ src, srcIdx });
+		};
 		this._gridItemTemplate = (props) => {
 			return (
 				<GridItemTemplate value={props}
 					id={props.id}
 					index={props.index}
 					container={this}
-					onIndexChange={onIndexChange}
-					onReassign={onReassign}
+					onBoardMove={moveBoard}
+					onCardMove={moveCard}
+					onCardDragOut={connectCardSrc}
+					onCardDropIn={connectCardDst}
 					onNameChange={updateName}
-					onDataChange={onDataChange}
-					onNewText={createTextCard}
+					onTextCreate={createText}
 				/>
 			);
 		};
@@ -78,6 +94,11 @@ export default class Boards extends Component {
 	componentWillMount() {
 		this.context.setTitle('Board');
 		this.props.boardAction.getData();
+	}
+	componentWillUnmount() {
+		this.cardOut$.dispose();
+		this.cardIn$.dispose();
+		this.cardMoving$.dispose();
 	}
 	render() {
 		const { connectDropTarget } = this.props;
@@ -95,13 +116,13 @@ export default class Boards extends Component {
 			</div>
 		);
 	}
-	changeCardIndex(id, a, b) {
-		this.props.boardAction.moveCard(id, a, id, b);
+	moveBoard() {
+
 	}
-	reassignCard(src, srcIdx, dst, dstIdx) {
+	moveCard(src, srcIdx, dst, dstIdx) {
 		this.props.boardAction.moveCard(src, srcIdx, dst, dstIdx);
 	}
-	createTextCard(id, text) {
+	createText(id, text) {
 		this.props.boardAction.createCard(id, 'Note', { text });
 	}
 	updateBoardName(id, name) {
@@ -145,20 +166,6 @@ export default class Boards extends Component {
 				]
 			}
 		}));
-	}
-	onDataChange(id, changes) {
-		const idx = this.state.items.findIndex(item => item.id === id);
-		if (idx === undefined) {
-			console.warn('Unknown Data ID');
-			return;
-		}
-		console.log('data Change');
-		const newState = update(this.state, {
-			items: {
-				[idx]: changes
-			}
-		});
-		this.setState(newState);
 	}
 }
 

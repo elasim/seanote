@@ -1,3 +1,4 @@
+import Rx from 'rx';
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import update from 'react/lib/update';
@@ -15,7 +16,6 @@ const itemSource = {
 		return {
 			id: props.id,
 			index: props.index,
-			container: props.container,
 		};
 	}
 };
@@ -23,10 +23,10 @@ const itemTarget = {
 	hover: (props, monitor, component) => {
 		switch (monitor.getItemType()) {
 			case 'BoardListItem':
-				component.onHover(props, monitor);
+				component.onBoardHover(props, monitor);
 				break;
 			case 'SortableListItem':
-				component.move(props, monitor);
+				component.onCardHover(props, monitor);
 				return;
 		}
 	}
@@ -45,28 +45,32 @@ const itemTarget = {
 }))
 export default class GridItemTemplate extends Component {
 	static propTypes = {
-		onIndexChange: PropTypes.func.isRequired,
-		onReassign: PropTypes.func.isRequired,
+		onBoardMove: PropTypes.func.isRequired,
+		onCardMove: PropTypes.func.isRequired,
+		onCardDragOut: PropTypes.func.isRequired,
+		onCardDropIn: PropTypes.func.isRequired,
 		onNameChange: PropTypes.func.isRequired,
-		onNewText: PropTypes.func.isRequired,
+		onTextCreate: PropTypes.func.isRequired,
 	};
 	constructor(props, context) {
 		super(props, context);
 		this.state = {
 			newText: '',
 		};
-		this.updateHandlers(props);
+		// @note
+		// _.bindAll break refactor functionality of editor, so I don't use it
+		this.onListMove = ::this.onListMove;
+		this.onListOut = ::this.onListOut;
+		this.onListIn = ::this.onListIn;
+		this.onTextfieldKeyDown = ::this.onTextfieldKeyDown;
+		this.onTextfieldChange = ::this.onTextfieldChange;
+		this.onNameChange = ::this.onNameChange;
 	}
 	componentWillReceiveProps(nextProps) {
 		if (nextProps.value.id !== this.props.value.id) {
 			this.updateHandlers(nextProps);
 		}
 		this.state.newText = '';
-		console.log('C Receive Prop');
-	}
-	shouldComponentUpdate(nextProps, nextState) {
-		console.log('C Should UPdate?');
-		return true;
 	}
 	render() {
 		const {
@@ -91,39 +95,37 @@ export default class GridItemTemplate extends Component {
 						</div>
 					)}
 					<EditableDiv defaultValue={name} className={css.name}
-						onChange={this._notifyNameChange}
+						onChange={this.onNameChange}
 						placeholder="Untitled" />
 				</div>
-				<SortableList items={value.items} ref="list" allowIn allowOut
-					keyName="id"
-					onIndexChange={this._notifyIndexChange}
-					onReassign={this._notifyReassign} />
+				{/* parent prop isn't belong to list, it's served to move container */}
+				<SortableList items={value.items} ref="list" keyName="id"
+					onDragMove={this.onListMove}
+					onDragOut={this.onListOut}
+					onDropIn={this.onListIn}
+					allowIn allowOut />
 				<div>
 					<Textfield value={newText}
-						onKeyDown={::this.onTextfieldKeyDown}
-						onChange={::this.onTextfieldChange}
+						onKeyDown={this.onTextfieldKeyDown}
+						onChange={this.onTextfieldChange}
 						label="Type to add new text" />
 				</div>
 			</div>
 		));
 	}
-	updateHandlers(props) {
-		const { id } = props.value;
-		this._notifyIndexChange = (a, b) => {
-			props.onIndexChange(id, a, b);
-		};
-		this._notifyReassign = (myIdx, dest, destIdx) => {
-			props.onReassign(id, myIdx, dest, destIdx);
-		};
-		this._notifyNameChange = (name) => {
-			props.onNameChange(id, name);
-		};
-		this._notifyNewText = (text) => {
-			props.onNewText(id, text);
-		};
+	onListMove(srcIdx, dstIdx) {
+		const id = this.props.value.id;
+		this.props.onCardMove(id, srcIdx, id, dstIdx);
 	}
-	notifyDataChanged(changes) {
-		this.props.onDataChanged(this.props.id, changes);
+	onListOut(idx) {
+		this.props.onCardDragOut(this.props.value.id, idx);
+	}
+	onListIn(idx) {
+		this.props.onCardDropIn(this.props.value.id, idx);
+	}
+	onNameChange(name) {
+		const { value: { id }, onNameChange } = this.props;
+		onNameChange(id, name);
 	}
 	onTextfieldChange(e) {
 		this.setState({
@@ -131,14 +133,15 @@ export default class GridItemTemplate extends Component {
 		});
 	}
 	onTextfieldKeyDown(e) {
+		const { value: { id }, onTextCreate } = this.props;
 		if (e.keyCode === 13) {
 			e.preventDefault();
 			e.stopPropagation();
 			e.target.blur();
-			this._notifyNewText(e.target.value);
+			onTextCreate(id, e.target.value);
 		}
 	}
-	move(props, monitor) {
+	onCardHover(props, monitor) {
 		if (!monitor.isOver({ shallow: true })) {
 			return;
 		}
@@ -150,36 +153,16 @@ export default class GridItemTemplate extends Component {
 		if (this.refs.list === dragItem.container) {
 			return;
 		}
-		if (!this.refs.list.props.allowIn || !dragItem.container.props.allowOut) {
-			return;
-		}
-		const data = dragItem.container.state.items[dragIndex];
-		const srcChanges = {
-			items: {
-				$splice: [
-					[dragIndex, 1]
-				]
-			}
-		};
-		// #2
-		dragItem.container.props.onChange(srcChanges);
-		const newIndex = this.refs.list.state.items.length;
-		const destChanges = {
-			items: {
-				$push: [
-					data
-				]
-			}
-		};
-		// #2
-		this.refs.list.setState(update(this.refs.list.state, destChanges));
+		const data = dragItem.container.props.items[dragIndex];
+		dragItem.container.props.onListOut(dragItem.index);
+		const newIndex = this.refs.list.props.items.length;
 		this.notifyDataChanged(destChanges);
 
 		dragItem.index = newIndex;
 		dragItem.container = this.refs.list;
 		return;
 	}
-	onHover(props, monitor) {
+	onBoardHover(props, monitor) {
 		const dragItem = monitor.getItem();
 		const dragIndex = dragItem.index;
 		const hoverIndex = props.index;
