@@ -39,7 +39,7 @@ const itemTarget = {
 }))
 @DropTarget([
 	'BoardListItem',
-//	'SortableListItem',
+	'SortableListItem',
 ], itemTarget, (connect) => ({
 	connectDropTarget: connect.dropTarget(),
 }))
@@ -67,24 +67,19 @@ export default class GridItemTemplate extends Component {
 		this.onNameChange = ::this.onNameChange;
 	}
 	componentWillReceiveProps(nextProps) {
-		if (nextProps.value.id !== this.props.value.id) {
+		if (nextProps.id !== this.props.id) {
 			this.updateHandlers(nextProps);
 		}
 		this.state.newText = '';
 	}
 	render() {
 		const {
-			value,
+			id,
+			value: { name, style, className, items },
 			connectDropTarget,
 			connectDragSource,
 			connectDragPreview,
 		} = this.props;
-		const {
-			name,
-			style,
-			className,
-		} = value;
-		const { newText } = this.state;
 		return connectDropTarget(connectDragPreview(
 			<div className={cx(css.item, 'mdl-shadow--2dp', className)}
 				style={style}>
@@ -99,13 +94,14 @@ export default class GridItemTemplate extends Component {
 						placeholder="Untitled" />
 				</div>
 				{/* parent prop isn't belong to list, it's served to move container */}
-				<SortableList items={value.items} ref="list" keyName="id"
+				<SortableList items={items} ref="list" keyName="id"
+					parent={id}
 					onDragMove={this.onListMove}
 					onDragOut={this.onListOut}
 					onDropIn={this.onListIn}
 					allowIn allowOut />
 				<div>
-					<Textfield value={newText}
+					<Textfield value={this.state.newText}
 						onKeyDown={this.onTextfieldKeyDown}
 						onChange={this.onTextfieldChange}
 						label="Type to add new text" />
@@ -114,18 +110,16 @@ export default class GridItemTemplate extends Component {
 		));
 	}
 	onListMove(srcIdx, dstIdx) {
-		const id = this.props.value.id;
-		this.props.onCardMove(id, srcIdx, id, dstIdx);
+		this.props.onCardMove(this.props.id, srcIdx, this.props.id, dstIdx);
 	}
 	onListOut(idx) {
-		this.props.onCardDragOut(this.props.value.id, idx);
+		this.props.onCardDragOut(this.props.id, idx);
 	}
 	onListIn(idx) {
-		this.props.onCardDropIn(this.props.value.id, idx);
+		this.props.onCardDropIn(this.props.id, idx);
 	}
 	onNameChange(name) {
-		const { value: { id }, onNameChange } = this.props;
-		onNameChange(id, name);
+		this.props.onNameChange(this.props.id, name);
 	}
 	onTextfieldChange(e) {
 		this.setState({
@@ -133,33 +127,33 @@ export default class GridItemTemplate extends Component {
 		});
 	}
 	onTextfieldKeyDown(e) {
-		const { value: { id }, onTextCreate } = this.props;
 		if (e.keyCode === 13) {
 			e.preventDefault();
 			e.stopPropagation();
 			e.target.blur();
-			onTextCreate(id, e.target.value);
+			this.props.onTextCreate(this.props.id, e.target.value);
 		}
 	}
+	// This function needs
 	onCardHover(props, monitor) {
 		if (!monitor.isOver({ shallow: true })) {
 			return;
 		}
-		const dragItem = monitor.getItem();
-		if (!dragItem) {
+		const srcInfo = monitor.getItem();
+		if (!srcInfo) {
 			return;
 		}
-		const dragIndex = dragItem.index;
-		if (this.refs.list === dragItem.container) {
+		const srcIndex = srcInfo.index;
+		if (this.refs.list === srcInfo.container) {
 			return;
 		}
-		const data = dragItem.container.props.items[dragIndex];
-		dragItem.container.props.onListOut(dragItem.index);
-		const newIndex = this.refs.list.props.items.length;
-		this.notifyDataChanged(destChanges);
+		// dragItem container direct list, not this grid-item
+		const src = srcInfo.container.props.parent;
+		const dstIdx = this.props.value.items.length;
+		this.props.onCardMove(src, srcIndex, this.props.id, dstIdx);
 
-		dragItem.index = newIndex;
-		dragItem.container = this.refs.list;
+		srcInfo.index = dstIdx;
+		srcInfo.container = this.refs.list;
 		return;
 	}
 	onBoardHover(props, monitor) {
