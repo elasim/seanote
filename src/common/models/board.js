@@ -1,5 +1,5 @@
-if (process.env.BROWSER) {
-	module.exports = require('./fake/board').default;
-} else {
-	module.exports = require('./impl/board').default;
-}
+// if (process.env.BROWSER) {
+// } else {
+// 	module.exports = require('./impl/board').default;
+// }
+module.exports = require('./fake/board').default;
