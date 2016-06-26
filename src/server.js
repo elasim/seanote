@@ -22,6 +22,7 @@ const app = express();
 /// @TODO FIX IT LATER for more specific rules
 app.use(helmet());
 app.engine('html', engine);
+app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'html');
 
 app.get(assets.main.js, (req, res) => {
@@ -59,10 +60,10 @@ if (0) {
 					title: state.app.title,
 					body,
 					bundle: assets.main.js,
-					initialState: {
-						data: JSON.stringify(store),
+					initialState: JSON.stringify({
+						data: store.getState(),
 						time: Date.now(),
-					},
+					}),
 				});
 			} else {
 				res.status(404).render('error', {
