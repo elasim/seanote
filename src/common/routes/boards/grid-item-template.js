@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
@@ -57,8 +58,6 @@ export default class GridItemTemplate extends Component {
 		this.state = {
 			newText: '',
 		};
-		// @note
-		// _.bindAll break refactor functionality of editor, so I don't use it
 		this.onListMove = ::this.onListMove;
 		this.onListOut = ::this.onListOut;
 		this.onListIn = ::this.onListIn;
@@ -75,6 +74,14 @@ export default class GridItemTemplate extends Component {
 		if (nextProps.value.items.length !== this.props.value.items.length) {
 			this.state.newText = '';
 		}
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		if (!_.isEqual(this.state, nextState))
+			return true;
+		if (!_.isEqual(this.props, nextProps))
+			return true;
+
+		return !this.props.compare(nextProps.value, this.props.value);
 	}
 	render() {
 		const {
@@ -161,54 +168,56 @@ export default class GridItemTemplate extends Component {
 			return;
 		}
 		// dragItem container direct list, not this grid-item
-		const src = srcInfo.container.props.parent;
-		const dstIdx = this.props.value.items.length;
-		this.props.onCardMove(src, srcIndex, this.props.value.id, dstIdx);
-
-		srcInfo.index = dstIdx;
-		srcInfo.container = this.refs.list;
+		clearTimeout(this._swapDelay);
+		this._swapDelay = setTimeout(() => {
+			const src = srcInfo.container.props.parent;
+			const dstIdx = this.props.value.items.length;
+			this.props.onCardMove(src, srcIndex, this.props.value.id, dstIdx);
+			srcInfo.index = dstIdx;
+			srcInfo.container = this.refs.list;
+		}, BOARD_SWAP_DELAY);
 		return;
 	}
 	onBoardHover(props, monitor) {
-		const dragItem = monitor.getItem();
-		const dragIndex = dragItem.index;
-		const hoverIndex = props.index;
+		const srcItem = monitor.getItem();
+		const srcIdx = srcItem.index;
+		const dstIdx = props.index;
 
-		if (dragIndex === hoverIndex) {
+		if (srcIdx === dstIdx) {
 			return;
 		}
 		const clientOffset = monitor.getClientOffset();
-		const clientBoundingRect = findDOMNode(dragItem.container).getBoundingClientRect();
-		const hoverBoundingRect = findDOMNode(this).getBoundingClientRect();
-		const hoverMiddleX = hoverBoundingRect.width / 2;
-		const hoverMiddleY = hoverBoundingRect.height / 2;
-		const hoverClientX = clientOffset.x - hoverBoundingRect.left;
-		const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+		const srcBoundingRect = findDOMNode(srcItem.container).getBoundingClientRect();
+		const dstBoundingRect = findDOMNode(this).getBoundingClientRect();
+		const dstMiddleX = dstBoundingRect.width / 2;
+		const dstMiddleY = dstBoundingRect.height / 2;
+		const dstClientX = clientOffset.x - dstBoundingRect.left;
+		const dstClientY = clientOffset.y - dstBoundingRect.top;
 
-		if (clientBoundingRect.left < hoverBoundingRect.left) {
-			if (hoverClientX > hoverMiddleX) {
+		if (srcBoundingRect.left < dstBoundingRect.left) {
+			if (dstClientX > dstMiddleX) {
 				return;
 			}
 		}
-		if (clientBoundingRect.left > hoverBoundingRect.left) {
-			if (hoverClientX < hoverMiddleX) {
+		if (srcBoundingRect.left > dstBoundingRect.left) {
+			if (dstClientX < dstMiddleX) {
 				return;
 			}
 		}
-		if (clientBoundingRect.top < hoverBoundingRect.top) {
-			if (hoverClientY > hoverMiddleY) {
+		if (srcBoundingRect.top < dstBoundingRect.top) {
+			if (dstClientY > dstMiddleY) {
 				return;
 			}
 		}
-		if (clientBoundingRect.top > hoverBoundingRect.top) {
-			if (hoverClientY < hoverMiddleY) {
+		if (srcBoundingRect.top > dstBoundingRect.top) {
+			if (dstClientY < dstMiddleY) {
 				return;
 			}
 		}
 		clearTimeout(this._swapDelay);
 		this._swapDelay = setTimeout(() => {
-			this.props.onBoardMove(dragIndex, hoverIndex);
-			dragItem.index = hoverIndex;
+			this.props.onBoardMove(srcIdx, dstIdx);
+			srcItem.index = dstIdx;
 		}, BOARD_SWAP_DELAY);
 	}
 }

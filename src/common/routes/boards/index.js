@@ -1,10 +1,8 @@
 import Rx from 'rx';
 import cx from 'classnames';
-import uuid from 'uuid';
 import _ from 'lodash';
 import React, { Component, PropTypes } from 'react';
 import update from 'react/lib/update';
-import { findDOMNode } from 'react-dom';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { DragDropContext, DropTarget } from 'react-dnd';
@@ -83,6 +81,7 @@ export default class Boards extends Component {
 		this._gridItemTemplate = (props) => {
 			return (
 				<GridItemTemplate value={props.value}
+					compare={isEqualDeep}
 					index={props.index}
 					container={this}
 					onBoardMove={moveBoard}
@@ -174,15 +173,11 @@ export default class Boards extends Component {
 }
 
 function isEqualDeep(a, b) {
-	const keyA = Object.keys(a);
-	const keyB = Object.keys(b);
-	if (!_.isEqual(keyA, keyB)) {
-		return false;
-	}
-	for (let key of keyA) {
-		if (a[key] instanceof Object && !isEqualDeep(a[key], b[key])) {
-			return false;
-		}
+	if (!_.isEqual(a, b)) return false;
+	if (a.items.length !== b.items.length) return false;
+	for (let i = 0; i < a.items.length; ++i) {
+		if (!_.isEqual(a.items[i], b.items[i])) return false;
+		if (!_.isEqual(a.items[i].detail, b.items[i].detail)) return false;
 	}
 	return true;
 }
