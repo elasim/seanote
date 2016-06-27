@@ -25,34 +25,6 @@ export class Controller {
 	}
 }
 
-export function Controller2(...middlewares) {
-	return (ConcreteController) => class extends ConcreteController {
-		_router = new Router();
-		constructor(...args) {
-			super(...args);
-
-			const router = this._router;
-			router.use(bodyParser.urlencoded({ extended: true }));
-			router.use(bodyParser.json());
-
-			const actionMetadata = getActionMetadataList(ConcreteController);
-			for (let actionMeta of actionMetadata) {
-				const {
-					action,
-					generator,
-					method,
-					routePath,
-				} = actionMeta;
-				router[method](routePath, ...middlewares, generator(this::action));
-			}
-		}
-
-		get router() {
-			return this._router;
-		}
-	};
-}
-
 export const ActionResult = {
 	json: (value) => (res) => res.json(value),
 };

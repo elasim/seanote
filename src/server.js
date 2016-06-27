@@ -7,7 +7,7 @@ import helmet from 'helmet';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { RouterContext, match } from 'react-router';
-
+import AsyncProps, { loadPropsOnServer } from 'async-props';
 import { engine } from './server/lib/simple-template';
 
 import assets from './assets';
@@ -35,7 +35,7 @@ if (0) {
 	const { Provider } = require('react-redux');
 	const { configureStore } = require('./common/store');
 
-	app.get('*', (req, res) => {
+	app.get('*', (req, res, next) => {
 		let locale = undefined;
 		if (req.headers['accept-language']) {
 			locale = req.headers['accept-language'].match(/^[^,;]+/)[0];
@@ -46,24 +46,30 @@ if (0) {
 			} else if (redirect) {
 				res.redirect(302, redirect.pathname + redirect.search);
 			} else if (props) {
-				const store = configureStore({
-					locale
-				});
 				// it must be called to get app state
-				const body = renderToString(
-					<Provider store={store}>
-						<RouterContext {...props} />
-					</Provider>
-				);
-				const state = store.getState();
-				res.status(200).render('index', {
-					title: state.app.title,
-					body,
-					bundle: assets.main.js,
-					initialState: JSON.stringify({
-						data: store.getState(),
-						time: Date.now(),
-					}),
+				loadPropsOnServer(props, (e, asyncProps, scriptTag) => {
+					if (e) {
+						next(new Error('AsyncPropFail'));
+					}
+					const store = configureStore({
+						locale
+					});
+					const state = store.getState();
+					const body = renderToString(
+						<Provider store={store}>
+							<AsyncProps {...props} {...asyncProps} />
+						</Provider>
+					);
+					res.status(200).render('index', {
+						title: state.app.title,
+						body,
+						bundle: assets.main.js,
+						asyncPropScript: scriptTag,
+						initialState: JSON.stringify({
+							data: store.getState(),
+							time: Date.now(),
+						}),
+					});
 				});
 			} else {
 				res.status(404).render('error', {

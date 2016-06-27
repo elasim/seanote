@@ -9,6 +9,7 @@ import ko from 'react-intl/locale-data/ko';
 import { configureStore } from './common/store';
 import { Provider } from 'react-redux';
 import { Router, browserHistory } from 'react-router';
+import AsyncProps from 'async-props';
 import routes from './common/routes';
 
 addLocaleData([
@@ -33,7 +34,8 @@ if (window.__APP) {
 const store = configureStore(initialState);
 render(
 	<Provider store={store}>
-		<Router history={browserHistory}>
+		<Router render={props => <AsyncProps {...props}/>}
+			history={browserHistory} >
 			{routes}
 		</Router>
 	</Provider>
