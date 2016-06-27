@@ -27,6 +27,7 @@ import css from './add.scss';
 }))
 export default class ItemButton extends Component {
 	static propTypes = {
+		id: PropTypes.string.isRequired,
 		icon: PropTypes.string.isRequired,
 		label: PropTypes.string.isRequired,
 		onClick: PropTypes.func,
@@ -42,12 +43,13 @@ export default class ItemButton extends Component {
 			className,
 			style,
 			icon,
+			id,
 			label,
 			onClick,
 		} = this.props;
 		return connectDragPreview(connectDragSource(
 			<div>
-				<Tooltip label={label} position="left">
+				<Tooltip label={label} position="left" id={id}>
 					<FABButton className={className} style={style}
 						accent={isDragging}
 						onClick={onClick} onTouchTap={onClick}>
