@@ -70,7 +70,7 @@ export default class AddButton extends Component {
 		}
 		return connectDropTarget(
 			<div style={{display: 'inline-block'}}>
-				<Tooltip label={label} position="left">
+				<Tooltip label={label} position="left" id="fab-menu-add">
 					<FABButton accent={isOver && canDrop}
 						className={className}
 						style={style}
@@ -80,10 +80,10 @@ export default class AddButton extends Component {
 					</FABButton>
 				</Tooltip>
 				<div className={menuClasses}>
-					<ItemButton label="Location" icon="add_location" />
-					<ItemButton label="Time" icon="add_alarm" />
-					<ItemButton label="Person" icon="person_add" />
-					<ItemButton label="Image" icon="add_a_photo" />
+					<ItemButton label="Location" icon="add_location" id="fab-menu-add-location" />
+					<ItemButton label="Time" icon="add_alarm" id="fab-menu-add-time" />
+					<ItemButton label="Person" icon="person_add" id="fab-menu-add-person" />
+					<ItemButton label="Image" icon="add_a_photo" id="fab-menu-add-image" />
 				</div>
 				<div onClick={() => this.setState({ open: false })}
 					className={cx(css.back, open ? css.open : null)} />
