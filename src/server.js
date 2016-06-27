@@ -30,7 +30,7 @@ app.get(assets.main.js, (req, res) => {
 });
 app.use('/api', require('./server/routes/api').default);
 
-if (0) {
+if (1) {
 	const routes = require('./common/routes').default;
 	const { Provider } = require('react-redux');
 	const { configureStore } = require('./common/store');
@@ -47,9 +47,10 @@ if (0) {
 				res.redirect(302, redirect.pathname + redirect.search);
 			} else if (props) {
 				// it must be called to get app state
-				loadPropsOnServer(props, (e, asyncProps, scriptTag) => {
+				loadPropsOnServer(props, {}, (e, asyncProps, scriptTag) => {
 					if (e) {
 						next(new Error('AsyncPropFail'));
+						return;
 					}
 					const store = configureStore({
 						locale
