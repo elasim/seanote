@@ -1,3 +1,4 @@
+/*
 import React, { Component } from 'react';
 const SFX_TRASH = require('../../../assets/sfx/trash.wav');
 
@@ -35,3 +36,4 @@ class Test extends Component {
 		return <button type='type' onClick={::this.play} >Hi</button>;
 	}
 }
+*/

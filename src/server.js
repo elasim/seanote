@@ -53,14 +53,14 @@ if (1) {
 						return;
 					}
 					const store = configureStore({
-						locale
+						app: { locale }
 					});
-					const state = store.getState();
 					const body = renderToString(
 						<Provider store={store}>
 							<AsyncProps {...props} {...asyncProps} />
 						</Provider>
 					);
+					const state = store.getState();
 					res.status(200).render('index', {
 						title: state.app.title,
 						body,

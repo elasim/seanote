@@ -20,7 +20,7 @@ addLocaleData([
 
 const initialState = {
 	app: {
-		locale: navigator.language || 'en'
+		locale: navigator.languages ? navigator.languages[0] : 'en'
 	}
 };
 if (window.__APP) {
@@ -29,6 +29,8 @@ if (window.__APP) {
 	// data is usable. it's not too old.
 	if (time < Date.now() - (60 * 5)) {
 		Object.assign(initialState, data);
+	} else {
+		console.log('Obsolte');
 	}
 }
 const store = configureStore(initialState);
