@@ -49,7 +49,7 @@ class TestController extends Controller {
 	}
 }
 
-describe('Test Controller Decorator', () => {
+describe('Test Controller', () => {
 	let server;
 	let port;
 	function URL(path) {
