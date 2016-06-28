@@ -24,6 +24,7 @@ app.use(helmet());
 app.engine('html', engine);
 app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'html');
+app.get('/favicon.ico', (req, res) => res.status(404).end());
 
 app.get(assets.main.js, (req, res) => {
 	res.sendFile(path.join(__dirname, assets.main.js));
@@ -47,30 +48,23 @@ if (1) {
 				res.redirect(302, redirect.pathname + redirect.search);
 			} else if (props) {
 				// it must be called to get app state
-				loadPropsOnServer(props, {}, (e, asyncProps, scriptTag) => {
-					if (e) {
-						next(new Error('AsyncPropFail'));
-						return;
-					}
-					const store = configureStore({
-						app: { locale }
-					});
-					const body = renderToString(
-						<Provider store={store}>
-							<AsyncProps {...props} {...asyncProps} />
-						</Provider>
-					);
-					const state = store.getState();
-					res.status(200).render('index', {
-						title: state.app.title,
-						body,
-						bundle: assets.main.js,
-						asyncPropScript: scriptTag,
-						initialState: JSON.stringify({
-							data: store.getState(),
-							time: Date.now(),
-						}),
-					});
+				const store = configureStore({
+					app: { locale }
+				});
+				const body = renderToString(
+					<Provider store={store}>
+						<RouterContext {...props} />
+					</Provider>
+				);
+				const state = store.getState();
+				res.status(200).render('index', {
+					title: state.app.title,
+					body,
+					bundle: assets.main.js,
+					initialState: JSON.stringify({
+						data: store.getState(),
+						time: Date.now(),
+					}),
 				});
 			} else {
 				res.status(404).render('error', {

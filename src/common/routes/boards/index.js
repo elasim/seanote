@@ -48,11 +48,6 @@ import css from './style.scss';
 	})
 )
 export default class Boards extends Component {
-	static loadProps(params, cb) {
-		console.log(params, cb);
-		cb(null, {
-		});
-	}
 	static defaultProps = {
 		connectDropTarget: (x)=>x
 	};
@@ -101,7 +96,7 @@ export default class Boards extends Component {
 	}
 	componentWillMount() {
 		this.context.setTitle('Board');
-		// this.props.boardAction.getData();
+		this.props.boardAction.getData();
 	}
 	componentWillUnmount() {
 		this.cardOut$.dispose();

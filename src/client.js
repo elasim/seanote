@@ -8,7 +8,7 @@ import en from 'react-intl/locale-data/en';
 import ko from 'react-intl/locale-data/ko';
 import { configureStore } from './common/store';
 import { Provider } from 'react-redux';
-import { Router, browserHistory } from 'react-router';
+import { match, Router, browserHistory as history } from 'react-router';
 import AsyncProps from 'async-props';
 import routes from './common/routes';
 
@@ -34,15 +34,16 @@ if (window.__APP) {
 	}
 }
 const store = configureStore(initialState);
-render(
-	<Provider store={store}>
-		<Router render={props => <AsyncProps {...props}/>}
-			history={browserHistory} >
-			{routes}
-		</Router>
-	</Provider>
-	, document.getElementById('app')
-);
-
+match({ history, routes }, (error, redirect, renderProps) => {
+	const container = (
+		<Provider store={store}>
+			<Router {...renderProps} />
+		</Provider>
+	);
+	render(
+		container,
+		document.getElementById('app')
+	);
+});
 /// @TODO FIX, HIDE ADDRESS-BAR ON MOBILE BROWSER
 
