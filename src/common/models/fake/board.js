@@ -21,7 +21,7 @@ export default new class Board {
 		this._details = _.cloneDeep(testItems);
 	}
 	all() {
-		const which = !(Math.round(Math.random() * 10) % 2);
+		const which = 1;
 		const self = this;
 		return new Promise((resolve, reject) => {
 			if (which) {
