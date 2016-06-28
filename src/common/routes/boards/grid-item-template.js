@@ -17,7 +17,6 @@ const BOARD_SWAP_DELAY = 50;
 		return {
 			id: props.value.id,
 			index: props.index,
-			container: props.container,
 		};
 	}
 }, (connect, monitor) => ({
@@ -138,6 +137,7 @@ export default class GridItemTemplate extends Component {
 		});
 	}
 	onTextfieldKeyDown(e) {
+		const { value: { id }, onTextCreate } = this.props;
 		if (e.keyCode === 13) {
 			e.preventDefault();
 			e.stopPropagation();
