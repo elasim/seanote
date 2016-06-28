@@ -7,7 +7,7 @@ import About from './about';
 import SignIn from './signin';
 
 import Board from './board';
-import Boards from './boards';
+import BoardList from './board-list';
 
 import NotFound from './not-found';
 
@@ -16,7 +16,7 @@ export default (
 		<IndexRoute component={Home} />
 		<Route path="about" component={About} />
 		<Route path="signin" component={SignIn} />
-		<Route path="board" component={Boards} />
+		<Route path="board" component={BoardList} />
 		<Route path="board/:id" component={Board} />
 		<Route path="*" component={NotFound} />
 	</Route>
