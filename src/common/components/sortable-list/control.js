@@ -1,3 +1,4 @@
+import Rx from 'rx';
 import React, { Component, PropTypes } from 'react';
 import emptyFunction from 'fbjs/lib/emptyFunction';
 import { findDOMNode } from 'react-dom';
@@ -73,7 +74,7 @@ export default class SortableList extends Component {
 	{
 		hover(props, monitor, component) {
 			if (component && component.onHover) {
-				component.onHover(props, monitor);
+				component.hoverEvent$.onNext({ props, item: monitor.getItem() });
 			}
 		}
 	},
@@ -98,6 +99,16 @@ class SortableListItem extends Component {
 	}
 	constructor(props, context) {
 		super(props, context);
+	}
+	componentDidMount() {
+		this.hoverEvent$ = new Rx.Subject();
+		this.hoverEventSubscription = this.hoverEvent$
+			.throttle(1000)
+			.subscribe((param) => this.onHover(param.props, param.item));
+	}
+	componentWillUnmount() {
+		this.hoverEvent$.dispose();
+		this.hoverEventSubscription.dispose();
 	}
 	render() {
 		const {
@@ -145,8 +156,8 @@ class SortableListItem extends Component {
 		}
 		return rendered;
 	}
-	onHover(props, monitor) {
-		const dragSrc = monitor.getItem();
+	onHover(props, item) {
+		const dragSrc = item;
 		const srcIdx = dragSrc.index;
 		const dstIdx = props.index;
 		let moveContainer = false;
@@ -176,17 +187,6 @@ class SortableListItem extends Component {
 			dragSrc.index = dstIdx;
 			dragSrc.container = props.container;
 		} else {
-			const clientOffset = monitor.getClientOffset();
-			const hoverBoundingRect = findDOMNode(props.container)
-				.getBoundingClientRect();
-			const hoverMiddleY = hoverBoundingRect.height / 2;
-			const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-			if (srcIdx < dstIdx && hoverClientY < hoverMiddleY) {
-				return;
-			}
-			if (srcIdx > dstIdx && hoverClientY > hoverMiddleY) {
-				return;
-			}
 			dragSrc.container.props.onDragMove(srcIdx, dstIdx);
 			dragSrc.index = dstIdx;
 		}
