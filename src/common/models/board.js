@@ -1,5 +1,5 @@
-if (process.env.BROWSER) {
-	module.exports = require('./fake/board').default;
-} else {
-	module.exports = require('./impl/board').default;
-}
+import ddp from './ddp';
+
+const Board = ddp.link('boards');
+
+export default Board;
