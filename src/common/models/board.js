@@ -1,5 +1,44 @@
-import ddp from './ddp';
+import _ from 'lodash';
+import uuid from 'uuid';
+import Faker from 'faker';
 
-const Board = ddp.link('boards');
+// MOCK
+const testItems = require('./data').default;
 
-export default Board;
+const DetailItemTypes = [
+	('Note'),
+	('Link'),
+	('People'),
+	('Schedule'),
+	('Video'),
+	('Audio'),
+	('Map')
+];
+
+// MOCK
+export default new class Board {
+	constructor() {
+		this._details = _.cloneDeep(testItems);
+	}
+	all() {
+		const which = 1;
+		const self = this;
+		return new Promise((resolve, reject) => {
+			if (which) {
+				resolve(self._details);
+			} else {
+				reject(new Error('Fail Reason'));
+			}
+		});
+	}
+	getDetails(id) {
+		return this._details.find(item => item.id);
+	}
+	update(id, newData) {
+		const data = this._details.find(item => item.id === id);
+		
+	}
+	enumerateTypes() {
+		return _.clone(DetailItemTypes);
+	}
+};

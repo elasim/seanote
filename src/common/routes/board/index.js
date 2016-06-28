@@ -7,7 +7,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { DragDropContext, DropTarget } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-import * as Board from '../../actions/board';
+import * as BoardAction from '../../actions/board';
 
 import CascadeGrid from '../../components/cascade-grid';
 import AddButton from './buttons/add';
@@ -37,17 +37,17 @@ import css from './style.scss';
 	}),
 	dispatch => ({
 		boardAction: bindActionCreators({
-			getData: Board.getData,
-			createCard: Board.createCard,
-			moveCard: Board.moveCard,
-			moveCardToTrash: Board.moveCardToTrash,
-			moveBoard: Board.moveBoard,
-			moveBoardToTrash: Board.moveBoardToTrash,
-			setName: Board.setName,
+			getData: BoardAction.getData,
+			createCard: BoardAction.createCard,
+			moveCard: BoardAction.moveCard,
+			moveCardToTrash: BoardAction.moveCardToTrash,
+			moveBoard: BoardAction.moveBoard,
+			moveBoardToTrash: BoardAction.moveBoardToTrash,
+			setName: BoardAction.setName,
 		}, dispatch)
 	})
 )
-export default class Boards extends Component {
+export default class Board extends Component {
 	static defaultProps = {
 		connectDropTarget: (x)=>x
 	};

@@ -27,9 +27,6 @@ export default class SortableList extends Component {
 		onDragIn: emptyFunction,
 		allowIn: false,
 		allowOut: false,
-		onDragMove: emptyFunction,
-		onDragOut: emptyFunction,
-		onDragIn: emptyFunction,
 	};
 	render() {
 		const {
