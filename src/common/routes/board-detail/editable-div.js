@@ -15,7 +15,6 @@ export default class EditableDiv extends Component {
 		super(props, context);
 		this.state = {
 			editable: false,
-			value: { __html: props.defaultValue }
 		};
 		_.bindAll(this, [
 			'onClick',
@@ -28,7 +27,7 @@ export default class EditableDiv extends Component {
 			onClick,
 			onBlur,
 			onKeyDown,
-			state: { editable, value },
+			state: { editable },
 			props: { className, style, },
 		} = this;
 		return (
@@ -51,25 +50,29 @@ export default class EditableDiv extends Component {
 		}
 	}
 	onBlur(e) {
-		const { onChange } = this.props;
 		this.setState({
 			editable: false
 		});
-		onChange(e.target.innerHTML);
+		this.onChange(e.target.innerHTML);
 		if (this.props.onBlur) {
 			this.props.onBlur(e);
 		}
 	}
 	onKeyDown(e) {
-		const { onChange, onKeyDown } = this.props;
+		const { onKeyDown } = this.props;
 		if (e.keyCode === 13) {
 			e.preventDefault();
-			onChange(e.target.innerHTML);
+			this.onChange(e.target.innerHTML);
 			e.target.blur();
 			return;
 		}
 		if (onKeyDown) {
 			onKeyDown(e);
+		}
+	}
+	onChange(text) {
+		if (this.props.defaultValue !== text) {
+			this.props.onChange(text);
 		}
 	}
 }
