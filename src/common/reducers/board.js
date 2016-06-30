@@ -30,6 +30,31 @@ export default handleActions({
 			}
 		});
 	},
+	[Board.$updateCard](state, action) {
+		const { id, cardId, detail } = action.payload;
+		const boardIdx = state.items.findIndex(byId(id));
+		if (boardIdx === -1) {
+			return state;
+		}
+		const board = state.items[boardIdx];
+		const cardIdx = board.items.findIndex(byId(cardId));
+		if (cardIdx === -1) {
+			return state;
+		}
+		return update(state, {
+			items: {
+				[boardIdx]: {
+					items: {
+						[cardIdx]: {
+							detail: {
+								$set: detail
+							}
+						}
+					}
+				}
+			}
+		});
+	},
 	[Board.$moveBoard](state, action) {
 		const { oldIdx, newIdx } = action.payload;
 		const boardData = state.items[oldIdx];

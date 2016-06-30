@@ -1,17 +1,71 @@
-@import './variables.scss';
-@import './buttons/variables.scss';
-
+$wide-width: 720px;
 .root {
-	background-color: #eee;
+	height: 100%;
 }
-
-.fabs {
+.container {
+	width: 100%;
+	height: 100%;
+}
+.col {
+	height: 100%;
+	overflow: auto;
+}
+.list {
+	@extend .col;
+	background-color: #fff;
+	overflow: auto;
+	padding-top: 30px;
+}
+.item {
+	width: inherit;
+	margin: 10px 0;
+	border: 1px solid #ccc;
+	a {
+		color: #000;
+		text-decoration: none;
+	}
+	.header {
+		display: table;
+		width: 100%;
+		font-size: 1.5rem;
+		padding: 5px;
+		.handle {
+			display: table-cell;
+			vertical-align: middle;
+			padding-right: 5px;
+			width: 24px;
+		}
+		.title {
+			display: table-cell;
+			line-height: 2rem;
+			word-break: break-all;
+		}
+		.more {
+			display: table-cell;
+			width: 32px;
+			padding-right: 8px;
+			vertical-align: middle;
+		}
+	}
+	.content {
+		background-color: #333;
+		padding: 5px;
+		text-align: right;
+		button {
+			color: #fff;
+		}
+	}
+}
+.fold {
 	position: fixed;
-	right: 30px;
-	bottom: 30px;
-}
+	width: inherit;
+	z-index: 10;
+	margin-left: -50px;
+	margin-top: 5px;
 
-.topmost {
-	z-index: $back-index + 2;
-	position: relative;
+	@media(min-width: 480px) {
+		&.full-width {
+			margin-left: 5px;
+		}
+	}
 }

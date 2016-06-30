@@ -14,7 +14,7 @@ export default handleActions({
 	}),
 	[App.setContextMenu]: (state, action) => ({
 		...state,
-		context: action.payload,
+		contextMenu: action.payload,
 	}),
 	[App.setLocale]: (state, action) => ({
 		...state,

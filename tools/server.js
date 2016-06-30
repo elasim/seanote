@@ -75,6 +75,7 @@ async function startServer(stat) {
 			bs = await initBrowserSync({
 				proxy: {
 					target: 'https://' + config.user.host + ':8443',
+					ws: true,
 					middleware: [
 						webpackDev(clientCompiler, {
 							noInfo: !global.VERBOSE,
@@ -109,7 +110,7 @@ async function startServer(stat) {
 		console.log(config.setup.runtime.assetsPath, 'prepared');
 		await server.start();
 		if (bs) {
-			open('http://localhost:3000');
+			open('https://localhost:3000');
 		}
 	} catch (e) {
 		return exit(e);

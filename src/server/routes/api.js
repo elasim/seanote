@@ -1,20 +1,20 @@
 import { Router } from 'express';
+import bodyParser from 'body-parser';
+
+import BoardController from './controllers/board';
+import ListController from './controllers/list';
+import UserController from './controllers/user';
 
 const router = new Router();
+const boardCtrl = new BoardController();
+const listCtrl = new ListController();
+const userCtrl = new UserController();
 
-router.post('/auth', (req, res) => {
+router.use(bodyParser.urlencoded({ extended: true }));
+router.use(bodyParser.json());
 
-});
-
-router.post('/user', (req, res) => {
-
-});
-router.delete('/user/:id', (req, res) => {
-
-});
-// update
-router.post('/user/:id', (req, res) => {
-
-});
+router.use('/board/list', listCtrl.router);
+router.use('/board', boardCtrl.router);
+router.use('/user', userCtrl.router);
 
 export default router;

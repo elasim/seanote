@@ -1,5 +1,5 @@
 import { createAction } from 'redux-actions';
-import Board from '../models/board';
+import Board from '../data/board';
 
 // Notify fetch request Sent
 export const fetchRequest = createAction(
@@ -73,6 +73,10 @@ export const $setName = createAction(
 	'BOARD_SET_NAME',
 	(id, name) => ({ id, name })
 );
+export const $updateCard = createAction(
+	'BOARD_UPDATE_CARD',
+	(id, cardId, detail ) => ({ id, cardId, detail })
+);
 
 export function moveCard(src, srcIdx, dst, dstIdx) {
 	return (dispatch) => {
@@ -104,6 +108,11 @@ export function moveBoardToTrash(idx) {
 export function setName(id, name) {
 	return (dispatch) => {
 		dispatch($setName(id, name));
+	};
+}
+export function updateCard(id, cardId, detail) {
+	return (dispatch) => {
+		dispatch($updateCard(id, cardId, detail));
 	};
 }
 

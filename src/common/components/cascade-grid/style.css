@@ -1,6 +1,7 @@
 .col {
 	float: left;
 	word-break: break-all;
+	width: 100%;
 }
 
 .align {

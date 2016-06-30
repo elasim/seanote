@@ -35,3 +35,6 @@ jspm_packages
 
 # VSCODE
 .vscode/launch.json
+
+# DB
+*.sqlite3

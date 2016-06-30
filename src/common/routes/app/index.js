@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { Link } from 'react-router';
+import { withRouter, Link } from 'react-router';
 import { IntlProvider } from 'react-intl';
 import { connect } from 'react-redux';
 import {
@@ -12,7 +12,7 @@ import {
 	Icon
 } from 'react-mdl';
 
-import { setTitle } from '../../actions/app';
+import * as AppAction from '../../actions/app';
 import Header from './header';
 import css from './style.scss';
 import './global.css';
@@ -22,11 +22,13 @@ if (process.env.BROWSER) {
 	require('../../thirds/material.custom.js');
 }
 
-@connect(state => state.app, { setTitle })
+@connect(state => state.app, { ...AppAction })
 class App extends React.Component {
 	static childContextTypes = {
 		getTitle: PropTypes.func,
 		setTitle: PropTypes.func,
+		setLocale: PropTypes.func,
+		setContextMenu: PropTypes.func,
 	};
 	constructor(props, context) {
 		super(props, context);
@@ -36,7 +38,13 @@ class App extends React.Component {
 			},
 			setTitle(title) {
 				props.setTitle(title);
-			}
+			},
+			setContextMenu(contextMenu) {
+				props.setContextMenu(contextMenu);
+			},
+			setLocale(locale) {
+				props.setLocale(locale);
+			},
 		};
 	}
 	getChildContext() {

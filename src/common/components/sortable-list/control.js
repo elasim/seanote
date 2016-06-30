@@ -147,9 +147,9 @@ class SortableListItem extends Component {
 				</div>
 			);
 		} else {
-			rendered = connectDropTarget(
-				React.createElement(template, this.props)
-			);
+			rendered = connectDropTarget(<div style={{width:'100%'}}>
+				{React.createElement(template, this.props)}
+			</div>);
 		}
 		if (!disablePreview) {
 			rendered = connectDragPreview(rendered);
