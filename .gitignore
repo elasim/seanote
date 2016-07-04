@@ -38,3 +38,7 @@ jspm_packages
 
 # DB
 *.sqlite3
+
+# Secrets
+gitignores/
+src/config.json
