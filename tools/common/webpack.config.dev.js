@@ -32,7 +32,7 @@ const common = {
 		loaders: [
 			{
 				test: /\.jsx?$/,
-				exclude: /(node_modules|bower_components|thirds)/,
+				exclude: /(node_modules|bower_components|thirds|react-router)/,
 				loader: 'babel'
 			},
 			{

@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import uuid from 'uuid';
-import Faker from 'faker';
 
 // MOCK
 const testItems = require('./data').default;

@@ -3,15 +3,14 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import express from './server/express';
-import io from './server/socket.io';
 import config from './config';
 
 const httpsServer = https.createServer({
-	key: fs.readFileSync(path.join(process.cwd(), './test.key')),
-	cert: fs.readFileSync(path.join(process.cwd(), './test.crt')),
+	key: fs.readFileSync(path.join(process.cwd(), config.https.key)),
+	cert: fs.readFileSync(path.join(process.cwd(), config.https.cert)),
 }, express);
 httpsServer.listen(
-	8443,
+	config.https.port,
 	config.host,
 	httpsServer::onListen);
 
@@ -20,16 +19,6 @@ httpServer.listen(
 	config.port,
 	config.host,
 	httpServer::onListen);
-
-io.attach(httpServer);
-io.attach(httpsServer);
-io.on('connection', socket => {
-	console.log('New Client', `#${socket.id}`);
-
-	socket.on('disconnect', () => {
-		console.log('Client Out');
-	});
-});
 
 function onListen(e) {
 	if (e) {

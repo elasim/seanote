@@ -1,13 +1,23 @@
-import { createAction } from 'redux-actions';
+export default {
+	setTitle,
+	setContextMenu,
+	setLocale,
+};
 
-export const setTitle = createAction(
-	'APP_SET_TITLE',
-	title => title);
+export const ActionTypes = {
+	setTitle: 'APP_SET_TITLE',
+	setContextMenu: 'APP_SET_CONTEXT_MENU',
+	setLocale: 'APP_SET_LOCALE',
+};
 
-export const setContextMenu = createAction(
-	'APP_SET_CONTEXT_MENU',
-	context => context);
+function setTitle(title) {
+	return { type: ActionTypes.setTitle, payload: title };
+}
 
-export const setLocale = createAction(
-	'APP_SET_LOCALE',
-	locale => locale);
+function setContextMenu(contextMenu) {
+	return { type: ActionTypes.setContextMenu, payload: contextMenu };
+}
+
+function setLocale(locale) {
+	return { type: ActionTypes.setLocale, payload: locale };
+}

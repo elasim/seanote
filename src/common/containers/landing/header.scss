@@ -1,0 +1,58 @@
+@import "../variables.scss";
+@import "./variables.scss";
+
+.root {
+	color: $font-color-alt;
+	text-align: center;
+	background-color: $back-color-alt;
+
+	position: fixed;
+	z-index: 100;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: $header-expand-height;
+	padding-top: $header-expand-padding-top;
+
+	transition:
+		height $header-animation-props,
+		padding-top $header-animation-props;
+
+	h1 {
+		margin-top: 0;
+	}
+	a {
+		color: inherit;
+		text-decoration: inherit;
+	}
+	a:hover {
+		color: #e0e0e0;
+	}
+
+}
+.text {
+	transition: opacity $header-animation-props;
+	opacity: 1;
+}
+.quote {
+	font-size: 1.4em;
+	font-style: italic;
+
+	margin-bottom: 40px;
+}
+.row-double {
+	margin: 15px;
+}
+.row {
+	margin: 5px;
+}
+
+.root.shrink {
+	height: $header-height;
+	padding-top: $header-padding-top;
+	overflow: hidden;
+
+	.text {
+		opacity: 0;
+	}
+}

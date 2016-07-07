@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import React, { Component, PropTypes } from 'react';
+
 import { findDOMNode } from 'react-dom';
 import {
 	Textfield,
@@ -7,7 +8,7 @@ import {
 	Icon
 } from 'react-mdl';
 import css from './style.css';
-import User from '../user-mock.js';
+import User from '../../data/user.js';
 
 const FIELD_EMAIL = 'email';
 const FIELD_USERNAME = 'username';
@@ -22,12 +23,8 @@ const ErrorString = {
 
 export default class SignupForm extends Component {
 	static propTypes = {
-		api: PropTypes.string.isRequired,
 		onSuccess: PropTypes.func.isRequired,
-		onFailure: PropTypes.func
-	};
-	static defaultProps = {
-		onFailure: () => {}
+		onFailure: PropTypes.func.isRequired,
 	};
 	constructor(props, context) {
 		super(props, context);
@@ -64,7 +61,6 @@ export default class SignupForm extends Component {
 				});
 				onFailure(e);
 			});
-		return false;
 	}
 	async onChangeValue(e) {
 		this.setState({

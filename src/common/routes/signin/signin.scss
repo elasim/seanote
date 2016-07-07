@@ -1,0 +1,33 @@
+.root {
+	margin: 0 auto;
+	text-align: center;
+	background-color: #fff;
+	border-radius: 10px;
+
+	@media(min-width: 480px) {
+		width: 320px;
+	}
+	h2 {
+		margin-top: 0;
+	}
+}
+
+.button {
+	margin: 5px 0;
+	width: 80%;
+	@media(min-width: 320px) {
+		width: 240px;
+	}
+}
+
+.row {
+	margin-bottom: 15px;
+}
+
+.section {
+	padding: 20px 10px;
+}
+
+.section + .section {
+	border-top: 5px solid #f0f0f0;
+}

@@ -1,0 +1,42 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,700,700italic|Noto+Sans:400,400italic,700,700italic);
+@import "../variables.scss";
+@import "./variables.scss";
+
+:global {
+	body {
+		color: $font-color;
+		background: $back-color;
+	}
+}
+
+.root {
+	padding-top: $header-expand-height + $header-expand-padding-top;
+}
+.container {
+	position: relative;
+	top: 0;
+	padding: 40px 20px;
+	margin: 0 auto;
+
+	transition: top $header-animation-props;
+
+	@media(min-width: 840px) {
+		width: 80%;
+	}
+	@media(max-width: 840px) {
+		width: auto;
+	}
+	a {
+		color: $link-color;
+		text-decoration: inherit;
+	}
+	a:hover {
+		color: $link-color-hover;
+	}
+}
+.shrink {
+	.container {
+		top: 40px + ($header-height + $header-padding-top) - ($header-expand-height + $header-expand-padding-top);
+//		top: -220px;
+	}
+}

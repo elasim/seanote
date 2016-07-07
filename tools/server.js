@@ -120,7 +120,7 @@ async function startServer(stat) {
 		await server.stop();
 		await server.start();
 		if (bs) {
-			bs.reload();
+			// bs.reload();
 		}
 	});
 }

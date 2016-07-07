@@ -1,132 +1,106 @@
 import { createAction } from 'redux-actions';
+import emptyFunction from 'fbjs/lib/emptyFunction';
 import Board from '../data/board';
 
-// Notify fetch request Sent
-export const fetchRequest = createAction(
-	'BOARD_FETCH_REQUEST'
-);
-// Notify fetch request Succeed
-export const fetchSucceed = createAction(
-	'BOARD_FETCH_SUCCEED',
-	data => data
-);
-// Notify fetch request Failure
-export const fetchFailure = createAction(
-	'BOARD_FETCH_FAILURE',
-	error => error
-);
+export default {
+	setName,
+	moveBoard,
+	moveBoardToTrash,
+	createCard,
+	updateCard,
+	moveCard,
+	moveCardToTrash,
+	fetchData,
+};
 
-// Sync data with server if it available or necessary
-/*
-export function sync(opt = { force: false }) {
-	return async (dispatch, getState) => {
-		const currentState = getState();
-		if (!opt.force) {
-			const { board: { lastSync, dirty } } = currentState;
-			// don't allow to send sync request too often
-			if (lastSync > Date.now() - 10 * 1000) {
-				return;
-			}
-			// data not changed, don't need to sync
-			if (!dirty) {
-				return;
-			}
-		}
-		console.log('Sync Sent');
-		try {
-			await Board.sync();
-			Board.all();
-			dispatch(fetchSucceed());
-		} catch (e) {
-			dispatch(fetchFailure(e));
-		}
-		return;
+export const ActionTypes = {
+	setName: 'BOARD_SET_NAME',
+	moveBoard: 'BOARD_MOVE_BOARD',
+	updateCard: 'BOARD_UPDATE_CARD',
+	moveBoardToTrash: 'BOARD_MOVE_BOARD_TO_TRASH',
+	createCard: 'BOARD_CREATE_CARD',
+	moveCard: 'BOARD_MOVE_CARD',
+	moveCardToTrash: 'BOARD_MOVE_CARD_TO_TRASH',
+	fetchDataReceived: 'BOARD_DATA_RECEIVED',
+};
 
-		const { lastUpdated } = currentState;
-		dispatch()
-		const serverData = Board.fetch();
-	};
-}
-*/
-
-export const $moveCard = createAction(
-	'BOARD_MOVE_CARD',
+const $moveCard = createAction(
+	ActionTypes.moveCard,
 	(src, srcIdx, dst, dstIdx) => ({ src, srcIdx, dst, dstIdx })
 );
-export const $moveCardToTrash = createAction(
-	'BOARD_MOVE_CARD_TO_TRASH',
+const $moveCardToTrash = createAction(
+	ActionTypes.moveCardToTrash,
 	(id, idx) => ({ id, idx })
 );
-export const $createCard = createAction(
-	'BOARD_CREATE_CARD',
+const $createCard = createAction(
+	ActionTypes.createCard,
 	(id, type, data) => ({ id, type, data })
 );
-export const $moveBoard = createAction(
-	'BOARD_MOVE_BOARD',
+const $moveBoard = createAction(
+	ActionTypes.moveBoard,
 	(oldIdx, newIdx) => ({ oldIdx, newIdx })
 );
-export const $moveBoardToTrash = createAction(
-	'BOARD_MOVE_BOARD_TO_TRASH',
+const $moveBoardToTrash = createAction(
+	ActionTypes.moveBoardToTrash,
 	(idx) => idx
 );
-export const $setName = createAction(
-	'BOARD_SET_NAME',
+const $setName = createAction(
+	ActionTypes.setName,
 	(id, name) => ({ id, name })
 );
-export const $updateCard = createAction(
-	'BOARD_UPDATE_CARD',
+const $updateCard = createAction(
+	ActionTypes.updateCard,
 	(id, cardId, detail ) => ({ id, cardId, detail })
 );
 
-export function moveCard(src, srcIdx, dst, dstIdx) {
+function moveCard(src, srcIdx, dst, dstIdx) {
 	return (dispatch) => {
 		dispatch($moveCard(src, srcIdx, dst, dstIdx));
 		// @TODO something here to send sync request
 	};
 }
-export function moveCardToTrash(id, idx) {
+function moveCardToTrash(id, idx) {
 	return (dispatch) => {
 		dispatch($moveCardToTrash(id, idx));
 	};
 }
-export function createCard(id, type, data) {
+function createCard(id, type, data) {
 	return (dispatch) => {
 		dispatch($createCard(id, type, data));
 		// @TODO something here to send sync request
 	};
 }
-export function moveBoard(oldIdx, newIdx) {
+function moveBoard(oldIdx, newIdx) {
 	return (dispatch) => {
 		dispatch($moveBoard(oldIdx, newIdx));
 	};
 }
-export function moveBoardToTrash(idx) {
+function moveBoardToTrash(idx) {
 	return (dispatch) => {
 		dispatch($moveBoardToTrash(idx));
 	};
 }
-export function setName(id, name) {
+function setName(id, name) {
 	return (dispatch) => {
 		dispatch($setName(id, name));
 	};
 }
-export function updateCard(id, cardId, detail) {
+function updateCard(id, cardId, detail) {
 	return (dispatch) => {
 		dispatch($updateCard(id, cardId, detail));
 	};
 }
 
-// Action: Request /board/get/?all
-export function getData(){
-	return async (dispatch, getState) => {
-		if (getState().board.lastUpdate > Date.now() - 60 * 1000) {
-			return;
-		}
-		dispatch(fetchRequest());
-		try {
-			dispatch(fetchSucceed(await Board.all()));
-		} catch (e) {
-			dispatch(fetchFailure(e));
-		}
+function fetchData(callback = emptyFunction){
+	return dispatch => {
+		Board.all()
+			.then(data => {
+				dispatch({
+					type: ActionTypes.fetchDataReceived,
+					payload: data
+				});
+				callback();
+			})
+			.catch(e => callback(e));
 	};
 }

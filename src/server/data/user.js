@@ -1,28 +1,48 @@
+import uuid from 'uuid';
 import Sequelize from 'sequelize';
 import sequelize from './sequelize';
 
-const User = sequelize.define('users', {
-	id: { type: Sequelize.UUID, primaryKey: true },
-	email: { type: Sequelize.STRING },
+const User = sequelize.define('User', {
+	id: {
+		type: Sequelize.UUID,
+		primaryKey: true,
+		defaultValue: Sequelize.UUIDV4,
+	},
+	role: {
+		type: Sequelize.TEXT,
+		defaultValue: JSON.stringify('user'),
+		get: function () {
+			return JSON.parse(this.getDataValue('role'));
+		},
+		set: function (val) {
+			this.setDataValue('role', JSON.stringify(val)); 
+		},
+	},
 });
 
-const UserClaim = sequelize.define('user_claim', {
-	type: Sequelize.STRING,
-	value: Sequelize.TEXT,
+const UserClaim = sequelize.define('UserClaim', {
+	provider: { type: Sequelize.STRING, primaryKey: true },
+	id: { type: Sequelize.STRING, primaryKey: true },
+}, {
+	timestamps: false,
 });
 
-const UserLogin = sequelize.define('user_login', {
-	name: { type: Sequelize.STRING, primaryKey: true },
-	key: { type: Sequelize.STRING, primaryKey: true },
+const UserLogin = sequelize.define('UserLogin', {
+	username: { type: Sequelize.STRING, primaryKey: true },
+	password: { type: Sequelize.STRING, primaryKey: true },
+}, {
+	timestamps: false,
 });
 
-const UserProfile = sequelize.define('user_profile', {
+const UserProfile = sequelize.define('UserProfile', {
+	UserId: { type: Sequelize.UUID, primaryKey: true },
 	displayName: Sequelize.STRING,
 	picture: Sequelize.STRING,
+	email: Sequelize.STRING,
 	company: Sequelize.STRING,
 	website: Sequelize.STRING,
 	location: Sequelize.STRING,
-	gender: Sequelize.ENUM('Male', 'Female'),
+	gender: { type: Sequelize.ENUM('Male', 'Female') },
 });
 
 export {

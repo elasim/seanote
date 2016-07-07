@@ -1,3 +1,4 @@
+import sequelize from './sequelize';
 import { User, UserClaim, UserLogin, UserProfile } from './user';
 import { Organization, OrganizationProfile } from './organization';
 import { Author, Board, List } from './board';
@@ -7,9 +8,10 @@ Board.hasMany(List);
 Board.belongsTo(Author, { as: 'Owner' });
 
 // Author is a User or Group
-User.hasOne(UserLogin);
-User.hasOne(UserProfile);
-User.hasMany(UserClaim);
+UserLogin.belongsTo(User);
+UserClaim.belongsTo(User);
+UserProfile.belongsTo(User);
+
 User.hasMany(Organization, { as: 'Owner' });
 User.belongsTo(Author);
 User.belongsToMany(Organization, OrganizationUsersRelationship);
@@ -32,6 +34,70 @@ export {
 	Organization,
 	OrganizationProfile,
 };
+
+
+User.createWithClaim = (provider, id, profiles) => {
+	return sequelize.transaction().then(async transaction => {
+		const t = { transaction };
+		try {
+			const user = await createUser(t, profiles);
+			await UserClaim.create({
+				UserId: user.id,
+				provider,
+				id,
+			}, t);
+			await transaction.commit();
+			return Promise.resolve(user);
+		} catch (e) {
+			await transaction.rollback();
+			return Promise.reject(e);
+		}
+	});
+};
+
+User.createWithLogin = (username, password) => {
+	return sequelize.transaction().then(async transaction => {
+		const t = { transaction };
+		try {
+			const user = await createUser(t);
+			await UserLogin.create({
+				UserId: user.id,
+				username,
+				password,
+			}, t);
+			await transaction.commit();
+			return Promise.resolve(user);
+		} catch (e) {
+			await transaction.rollback();
+			return Promise.reject(e);
+		}
+	});
+};
+
+async function createUser(t, profiles) {
+	const author = await Author.create({}, t);
+	console.log(author.id);
+	const user = await User.create({
+		AuthorId: author.id
+	}, t);
+	await UserProfile.create({
+		UserId: user.id,
+		...profiles,
+	}, t);
+	return user;
+}
+
+[
+	Author,
+	Board,
+	List,
+	User,
+	UserClaim,
+	UserLogin,
+	UserProfile,
+	Organization,
+	OrganizationProfile,
+].forEach(t => t.sync({ force: !0 }));
 
 /**
  * Sequelize Associations

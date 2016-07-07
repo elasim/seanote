@@ -1,6 +1,5 @@
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
-import { findDOMNode } from 'react-dom';
 import {
 	Textfield,
 	Button,
@@ -8,7 +7,7 @@ import {
 } from 'react-mdl';
 
 import css from './style.css';
-import User from '../user-mock.js';
+import User from '../../data/user';
 
 const FIELD_EMAIL = 'email';
 const FIELD_PASSWORD = 'password';
@@ -22,6 +21,7 @@ export default class SigninForm extends Component {
 	static propTypes = {
 		onSuccess: PropTypes.func.isRequired,
 		onFailure: PropTypes.func,
+		redirect: PropTypes.string,
 	};
 	static defaultProps = {
 		onFailure: () => {}
@@ -62,10 +62,7 @@ export default class SigninForm extends Component {
 			error: undefined,
 			sent: true
 		});
-		User.signIn({
-			email: inputEmail.value,
-			password: inputPassword.value,
-		})
+		User.signIn(inputEmail.value, inputPassword.value)
 			.then(onSuccess)
 			.catch(e => {
 				console.error(e);

@@ -1,11 +1,15 @@
 import Sequelize from 'sequelize';
 import sequelize from './sequelize';
 
-const Organization = sequelize.define('organizations', {
-	id: { type: Sequelize.UUID, primaryKey: true },
+const Organization = sequelize.define('Organization', {
+	id: {
+		type: Sequelize.UUID,
+		defaultValue: Sequelize.UUIDV4,
+		primaryKey: true,
+	},
 });
 
-const OrganizationProfile = sequelize.define('organization_profile', {
+const OrganizationProfile = sequelize.define('OrganizationProfile', {
 	displayName: Sequelize.STRING,
 	description: Sequelize.STRING,
 	website: Sequelize.STRING,

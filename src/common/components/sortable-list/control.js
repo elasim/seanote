@@ -1,7 +1,6 @@
 import Rx from 'rx';
 import React, { Component, PropTypes } from 'react';
 import emptyFunction from 'fbjs/lib/emptyFunction';
-import { findDOMNode } from 'react-dom';
 import { DragSource, DropTarget } from 'react-dnd';
 import css from './style.scss';
 
@@ -156,6 +155,7 @@ class SortableListItem extends Component {
 		}
 		return rendered;
 	}
+	onDrop() {}
 	onHover(props, item) {
 		const dragSrc = item;
 		const srcIdx = dragSrc.index;
@@ -177,15 +177,8 @@ class SortableListItem extends Component {
 		// Updating property is not responsible of this component.
 		// Only notify them to update data
 		if (moveContainer) {
-			const srcItem = dragSrc.container.props.items[srcIdx];
-			dragSrc.container.props.onDragOut(srcIdx, srcItem);
-
 			const dstItem = props.container.props.items[dstIdx];
-			props.container.props.onDropIn(dstIdx, dstItem);
-
-			dragSrc.key = srcItem[props.container.props.keyName];
-			dragSrc.index = dstIdx;
-			dragSrc.container = props.container;
+			props.container.props.onDropOver(dstIdx, dstItem);
 		} else {
 			dragSrc.container.props.onDragMove(srcIdx, dstIdx);
 			dragSrc.index = dstIdx;

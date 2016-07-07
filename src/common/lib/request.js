@@ -1,24 +1,22 @@
-import 'isomorphic-fetch';
+import fetchPolyfill from 'fetch-ponyfill';
 
-function request(method, url, data) {
-	const param = { method };
+const fetch = fetch || fetchPolyfill();
+
+function request(method, url, data, headers) {
+	const param = {
+		method,
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+			...headers,
+		},
+		rejectUnauthorized: false,
+		credentials: 'same-origin'
+	};
 	if (data !== undefined) {
-		param.headers = { 'Content-Type': 'application/json' };
-		param.data = JSON.stringify(data);
+		param.body = JSON.stringify(data);
 	}
-	return fetch(url, param)
-		.then(res => {
-			try {
-				const data = res.json();
-				return data;
-			} catch (e) {
-				if (res.status === 200) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-		});
+	return fetch(url, param);
 }
 
 export default {

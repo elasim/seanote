@@ -1,51 +1,61 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { addLocaleData } from 'react-intl';
 import { Provider } from 'react-redux';
-import { match, Router, browserHistory as history } from 'react-router';
+import { Router, browserHistory } from 'react-router';
+import injectTapEventPlugin from 'react-tap-event-plugin';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import { configureStore } from '../common/store';
-import configureRoutes from '../common/routes';
+import { configureRoutes } from '../common/routes';
+import { configureLocale } from './intl';
 
-addLocaleData([
-	...require('react-intl/locale-data/en'),
-	...require('react-intl/locale-data/ko'),
-]);
-const store = configureStore(getInitialState());
-const routes = configureRoutes({
-	fetchBoardData,
-	fetchBoardList,
-});
+const defaultState = {
+	app: {
+		locale: navigator.languages ? navigator.languages[0] : 'en'
+	},
+	auth: {
+		token: null,
+	},
+};
 
-match({ history, routes }, (error, redirect, renderProps) => {
-	const container = (
-		<Provider store={store}>
-			<Router {...renderProps} />
-		</Provider>
-	);
-	render(container, document.getElementById('app'));
-});
-/// @TODO FIX, HIDE ADDRESS-BAR ON MOBILE BROWSER
+function configure(state) {
+	injectTapEventPlugin();
+	configureLocale();
+	const store = configureStore(state);
+	const routes = configureRoutes(store);
 
-function fetchBoardList(nextState, replace, next) {
-	next();
+	return { store, routes };
 }
 
-function fetchBoardData(nextState, replace, next) {
-	next();
-}
+window.bootstrap = (serverSentState = {}) => {
+	const initialState = getInitialState(serverSentState);
 
-function getInitialState() {
-	const initialState = {
-		app: { locale: navigator.languages ? navigator.languages[0] : 'en' }
-	};
-	if (window.__APP) {
-		const { data, time } = window.__APP;
-		delete window.__APP;
-		// data is usable. it's not too old.
-		if (time < Date.now() - (60 * 5)) {
-			Object.assign(initialState, data);
-		}
+	// DEBUG ONLY
+	const User = require('../common/data/user').default;
+	User.whoami()
+		.then((user) => {
+			initialState.auth.token = user.token;
+		}, (/* ignore error */) => {})
+		.then(() => {
+			const { store, routes } = configure(initialState);
+			render(
+				<Provider store={store}>
+					<MuiThemeProvider>
+						<Router routes={routes} history={browserHistory} />
+					</MuiThemeProvider>
+				</Provider>,
+				document.getElementById('app')
+			);
+		});
+
+	delete window.bootstrap;
+};
+
+function getInitialState(serverSentState = {}) {
+	const { data, time } = serverSentState;
+	if (data && time && time + (60 * 1000) >= Date.now()) {
+		return { ...defaultState, ...data };
+	} else {
+		return { ...defaultState };
 	}
-	return initialState;
 }

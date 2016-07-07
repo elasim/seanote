@@ -1,23 +1,35 @@
 import { handleActions } from 'redux-actions';
-import * as App from '../actions/app';
+import { ActionTypes } from '../actions/app';
 
-const initialState = {
+const DEFAULT_STATE = {
 	title: undefined,
 	contextMenu: undefined,
 	locale: 'en',
 };
 
 export default handleActions({
-	[App.setTitle]: (state, action) => ({
+	[ActionTypes.setTitle]: setTitle,
+	[ActionTypes.setContextMenu]: setContextMenu,
+	[ActionTypes.setLocale]: setLocale,
+}, DEFAULT_STATE);
+
+function setTitle(state, action) {
+	return {
 		...state,
-		title: action.payload
-	}),
-	[App.setContextMenu]: (state, action) => ({
+		title: action.payload,
+	};
+}
+
+function setContextMenu(state, action) {
+	return {
 		...state,
 		contextMenu: action.payload,
-	}),
-	[App.setLocale]: (state, action) => ({
+	};
+}
+
+function setLocale(state, action) {
+	return {
 		...state,
-		locale: action.payload
-	}),
-}, initialState);
+		locale: action.payload,
+	};
+}
