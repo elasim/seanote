@@ -3,7 +3,7 @@ import express from 'express';
 import cookieSession from 'cookie-session';
 import helmet from 'helmet';
 import passport from 'passport';
-import { extendSession } from './lib/auth';
+import { refreshToken } from './lib/auth';
 import { engine } from './lib/simple-template';
 import routes from './routes';
 
@@ -26,10 +26,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use((req, res, next) => {
 	if (req.user) {
-		if (extendSession(req.user)) {
-			console.log(req.user.ssid, ': Token expirey extended');
+		const newToken = refreshToken(req.user);
+		if (newToken) {
+			console.log(req.user.ssid, ': new token issued');
+			req.session.passport.user.token = newToken;
 		} else {
-			console.log(req.user.ssid, ': Token expired');
+			console.log(req.user.ssid, ': token expired');
 			req.session = null;
 		}
 	}

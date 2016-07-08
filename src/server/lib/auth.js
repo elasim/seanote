@@ -37,13 +37,12 @@ export function veifySession(session) {
 	}
 }
 
-export function extendSession(sessionInfo) {
+export function refreshToken(sessionInfo) {
 	try {
-		sessions[sessionInfo.ssid] = createToken({
+		return sessions[sessionInfo.ssid] = createToken({
 			role: sessionInfo.claim.role,
 			id: sessionInfo.claim.aud,
 		});
-		return true;
 	} catch (e) {
 		return false;
 	}
