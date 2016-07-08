@@ -7,6 +7,9 @@ const Author = sequelize.define('Author', {
 		defaultValue: Sequelize.UUIDV4,
 		primaryKey: true,
 	},
+	type: {
+		type: Sequelize.STRING,
+	}
 }, {
 	timestamps: false,
 });
