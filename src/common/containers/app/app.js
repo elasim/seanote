@@ -4,6 +4,7 @@ import React, { Component, PropTypes } from 'react';
 import { defineMessages } from 'react-intl';
 import Header from './header';
 import Nav from './nav';
+import FlatButton from 'material-ui/FlatButton';
 import FontIcon from 'material-ui/FontIcon';
 import {
 	createScrollSpy,
@@ -104,7 +105,7 @@ export default class View extends Component {
 					onClickMenu={this::showDrawer}
 				/>
 				<div className={cx(css.drawer)}>
-					DRAWER BOX
+					<FlatButton onClick={send} label="Send"/>
 				</div>
 				<div className={css.dim} onClick={this::hideDrawer}></div>
 				<Nav className={css.nav} items={MENU_ITEMS} />
@@ -152,16 +153,21 @@ function createDataUpdater() {
 		.timeInterval()
 		.subscribe(async () => {
 			try {
-				const res = await request.post('/api/_bulk', {
-					boardList: ['/board/list', { sort: 'updatedAt' }],
-					groupList: ['/group/list', { filter: 'favorite', sort: 'accessAt'}],
-					chat: ['/chat', { filter: 'unread', sort: 'updatedAt' }],
-					notification: ['/notification', { filter: 'unread', sort: 'updatedAt' }],
-				});
+				const res = await send();
 				const data = await res.json();
 				console.log(data);
 			} catch (e) {
 				console.error('data fetch failure', e);
 			}
 		});
+}
+
+function send() {
+	return request.post('/api/_bulk', {
+		boardList: ['/board/list', { sort: 'updatedAt' }],
+		groupList: ['/group/list', { filter: 'favorite', sort: 'accessAt'}],
+		chat: ['/chat', { filter: 'unread', sort: 'updatedAt' }],
+		notification: ['/notification', { filter: 'unread', sort: 'updatedAt' }],
+		token: '/user',
+	});
 }
