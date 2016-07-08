@@ -1,62 +1,43 @@
 import { Router } from 'express';
 import bodyParser from 'body-parser';
 
+import APIDescriptors from './api-descriptors';
 import Stream from './stream';
-import User from './user';
-import Board from './board';
-import BoardList from './board-list';
-
-const APIDescriptors = {
-	'/stream': Stream,
-	'/user': User,
-	'/board': Board,
-	'/board/list': BoardList,
-};
+import Bulk from './bulk';
 
 const router = new Router();
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
 for (let keyPath in APIDescriptors) {
-	const actionMethods = APIDescriptors[keyPath];
-	for (let method in actionMethods) {
-		const actionDescriptor = actionMethods[method];
-		let handler;
-		let middlewares = [];
+	const methods = APIDescriptors[keyPath];
+	for (let method in methods) {
+		let action;
+		let middlewares;
 
-		if (actionDescriptor instanceof Array) {
-			handler = actionDescriptor[actionDescriptor.length - 1];
-			middlewares = actionDescriptor.slice(0, actionDescriptor.length - 1);
+		const actionInfo = methods[method];
+		if (actionInfo instanceof Array) {
+			action = actionInfo[actionInfo.length - 1];
+			middlewares = actionInfo.slice(0, actionInfo.length - 1);
 		} else {
-			handler = actionDescriptor;
+			action = actionInfo;
+			middlewares = [];
 		}
-		router[method](
-			keyPath,
-			...middlewares,
-			(req, res) => {
-				console.log(req.originalUrl);
-				return handler(req, res);
+
+		router[method](keyPath, ...middlewares, async (req, res) => {
+			try {
+				const result = await action(req);
+				return result ? res.json(result) : res.end();
+			} catch (e) {
+				console.error(e);
+				return res.status(500).end();
 			}
-		);
+		});
 	}
 }
 
-router.post('_bulk', (req, res) => {
-	// Rx.Observable.from(Object.keys(req.body))
-	// 	.map((v, i) => {
-
-	// 	})
-	// Rx.Observable.flatMap(Rx.Observable.req.body)
-	// .map(key => {
-	// 	const [api, param] = req.body[key];
-	// 	return { name: key, api, param };
-	// });
-	// Rx.Observable.from(requests)
-	// 	.
-	res.json({
-		error: 'Not Implemented'
-	});
-});
+router.get('/stream', Stream);
+router.post('/_bulk', Bulk);
 
 router.use((error, req, res, next) => {
 	res.status(500).json({ error: error.message });
