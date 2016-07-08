@@ -20,13 +20,13 @@
 }
 .root.shrink-search {
 	@media (max-width: 600px) {
-		left: -$list-side-container-width;
+		left: -$nav-side-width;
 	}
 }
 .searchbar {
 	position: absolute;
 	top: 12px;
-	left: $list-side-container-width + 10;
+	left: $nav-side-width + 10;
 	right: 50px;
 
 	.icon {

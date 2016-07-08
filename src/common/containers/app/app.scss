@@ -4,13 +4,12 @@
 
 .root {
 	padding-top: $header-height + $header-padding-top
-		+ $list-shrink-height
-		+ $list-padding-height * 2;
+		+ $nav-narrow-height;
 
 	transition: padding-top $header-animation-props;
 
 	@media(min-width: 600px + 1) {
-		padding-left: $list-side-container-width;
+		padding-left: $nav-side-width;
 		padding-top: $header-container-height;
 	}
 
@@ -78,17 +77,11 @@
 }
 
 .nav {
-	color: #fff;
-	background-color: #455A64;
-
 	position: fixed;
 	top: $header-container-height;
 	left: 0;
 	bottom: 0;
-	width: $list-side-width;
-	padding: $list-padding-height $list-padding-width;
-
-	transition: top $header-animation-props;
+	width: $nav-side-width;
 	overflow: auto;
 
 	@media (max-width: 600px) {
@@ -96,31 +89,7 @@
 		right: 0;
 		bottom: auto;
 		width: auto;
-		height: $list-shrink-height;
-		overflow: hidden;
-	}
-
-	.category {
-
-		@media (max-width: 600px) {
-			display: inline-block;
-			text-align: center;
-		}
-
-		.title {
-			i, span {
-				color: #fff;
-			}
-
-			@media (min-width: 600px + 1) {
-				text-align: left;
-			}
-			@media (max-width: 600px) {
-				& span {
-					display: none;
-				}
-			}
-		}
+		height: $nav-narrow-height;
 	}
 }
 .hide-top .nav {

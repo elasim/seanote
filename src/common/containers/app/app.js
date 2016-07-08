@@ -3,13 +3,12 @@ import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import { defineMessages } from 'react-intl';
 import Header from './header';
-import FlatButton from 'material-ui/FlatButton';
+import Nav from './nav';
 import FontIcon from 'material-ui/FontIcon';
 import request from '../../lib/request';
 import {
 	createScrollSpy,
 	createResizeSpy,
-	getViewportWidth,
 	getViewportHeight,
 } from '../helpers';
 import css from './app.scss';
@@ -37,34 +36,22 @@ const messages = defineMessages({
 	},
 });
 
-const categoryDescriptors = [
+const MENU_ITEMS = [
 	{
 		label: 'List',
-		icon: {
-			className: 'material-icons',
-			content: 'list',
-		},
+		icon: <FontIcon className="material-icons" color="#fff">list</FontIcon>,
 	},
 	{
 		label: 'Groups',
-		icon: {
-			className: 'material-icons',
-			content: 'group_work',
-		},
+		icon: <FontIcon className="material-icons" color="#fff">group_work</FontIcon>,
 	},
 	{
 		label: 'Chat',
-		icon: {
-			className: 'material-icons',
-			content: 'chat',
-		},
+		icon: <FontIcon className="material-icons" color="#fff">chat</FontIcon>,
 	},
 	{
 		label: 'Notifications',
-		icon: {
-			className: 'material-icons',
-			content: 'notifications',
-		},
+		icon: <FontIcon className="material-icons" color="#fff">notifications</FontIcon>,
 	}
 ];
 
@@ -81,7 +68,6 @@ export default class View extends Component {
 		this.state = {
 			showHeader: true,
 			showDrawer: false,
-			shrinkNav: false,
 		};
 	}
 	componentDidMount() {
@@ -91,10 +77,8 @@ export default class View extends Component {
 		const _adjustLayout = this::adjustLayout;
 		this.scrollSpy = createScrollSpy(_adjustLayout);
 		this.heightResizeSpy = createResizeSpy(_adjustLayout, getViewportHeight);
-		this.widthResizeSpy = createResizeSpy(this::adjustNavLayout, getViewportWidth);
 
 		_adjustLayout();
-		this::adjustNavLayout();
 	}
 	componentWillUnmount() {
 		if (this.tokenRefresher) {
@@ -111,46 +95,6 @@ export default class View extends Component {
 		}
 	}
 	render() {
-		const categories = categoryDescriptors.map((category, i) => {
-			let props = {
-				className: css.category,
-				key: i,
-			};
-			if (this.state.shrinkNav) {
-				props.style = {
-					width: `${Math.floor(1 / categoryDescriptors.length * 100)}%`,
-				};
-			} else {
-				props.style = {
-					width: '100%'
-				};
-			}
-			return (
-				<div {...props}>
-					<FlatButton
-						icon={<FontIcon color="#fff" className={category.icon.className} >{category.icon.content}</FontIcon>}
-						label={!this.state.shrinkNav ? category.label : null}
-						labelStyle={{color: '#fff'}}
-						style={{
-							width: '100%',
-							height: 50,
-							textAlign: !this.state.shrinkNav ? 'left' : 'center',
-						}} />
-				{/*
-					<FlatButton
-						className={css.title}
-						style={{
-							width: '100%',
-							textAlign: !this.state.shrinkNav ? 'left' : 'center',
-						}}
-					>
-						<i className={category.icon.className} >{category.icon.content}</i>
-						<span>{category.label}</span>
-					</FlatButton>
-				*/}
-				</div>
-			);
-		});
 		return (
 			<div className={cx(css.root, {
 				[css['hide-top']]: !this.state.showHeader,
@@ -163,9 +107,7 @@ export default class View extends Component {
 					DRAWER BOX
 				</div>
 				<div className={css.dim} onClick={this::hideDrawer}></div>
-				<div className={css.nav}>
-					{categories}
-				</div>
+				<Nav className={css.nav} items={MENU_ITEMS} />
 				{this.props.children}
 				<div style={{height:4000}}>padding</div>
 			</div>
@@ -192,13 +134,6 @@ function adjustLayout() {
 		}
 	} else if (!this.state.showHeader) {
 		this.setState({ showHeader: true });
-	}
-}
-
-function adjustNavLayout() {
-	const shrinkNav = document.body.clientWidth <= 600;
-	if (this.state.shrinkNav !== shrinkNav) {
-		this.setState({ shrinkNav });
 	}
 }
 

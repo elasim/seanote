@@ -1,0 +1,16 @@
+@import "../variables.scss";
+@import "./variables.scss";
+
+.root {
+	color: #fff;
+	background-color: #455A64;
+
+	transition: top $header-animation-props;
+
+	@media (max-width: 600px) {
+		.menu {
+			display: inline-block;
+			text-align: center;
+		}
+	}
+}
