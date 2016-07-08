@@ -1,6 +1,6 @@
 import fetchPolyfill from 'fetch-ponyfill';
 
-const fetch = fetch || fetchPolyfill();
+const $fetch = fetch || fetchPolyfill();
 
 function request(method, url, data, headers) {
 	const param = {
@@ -16,7 +16,7 @@ function request(method, url, data, headers) {
 	if (data !== undefined) {
 		param.body = JSON.stringify(data);
 	}
-	return fetch(url, param);
+	return $fetch(url, param);
 }
 
 export default {
