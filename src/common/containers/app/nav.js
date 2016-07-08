@@ -22,7 +22,10 @@ export default class Nav extends Component {
 		};
 	}
 	componentDidMount() {
-		this.resizeSpy = createResizeSpy(this::adjustLayout, getViewportWidth);
+		const _adjustLayout = this::adjustLayout;
+		this.resizeSpy = createResizeSpy(_adjustLayout, getViewportWidth);
+
+		_adjustLayout();
 	}
 	componentWillUnmount() {
 		if (this.resizeSpy) {

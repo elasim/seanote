@@ -76,7 +76,7 @@ export default class View extends Component {
 
 		const _adjustLayout = this::adjustLayout;
 		this.scrollSpy = createScrollSpy(_adjustLayout);
-		this.heightResizeSpy = createResizeSpy(_adjustLayout, getViewportHeight);
+		this.resizeSpy = createResizeSpy(_adjustLayout, getViewportHeight);
 
 		_adjustLayout();
 	}
@@ -87,11 +87,8 @@ export default class View extends Component {
 		if (this.scrollSpy) {
 			this.scrollSpy.dispose();
 		}
-		if (this.widthResizeSpy) {
-			this.widthResizeSpy.dispose();
-		}
-		if (this.heightResizeSpy) {
-			this.heightResizeSpy.dispose();
+		if (this.resizeSpy) {
+			this.resizeSpy.dispose();
 		}
 	}
 	render() {
