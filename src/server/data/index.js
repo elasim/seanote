@@ -1,38 +1,41 @@
 import sequelize from './sequelize';
 import { User, UserClaim, UserLogin, UserProfile } from './user';
-import { Organization, OrganizationProfile } from './organization';
+import { Group, GroupProfile } from './group';
 import { Author, Board, List } from './board';
 
-const OrganizationUsersRelationship = { through: 'OrganizationUsers' };
-Board.hasMany(List);
-Board.belongsTo(Author, { as: 'Owner' });
+import userTemplate from './user.template';
 
 // Author is a User or Group
+
+const GroupUsersRelations = { through: 'GroupUsers' };
+Group.hasOne(GroupProfile);
+Group.belongsTo(Author);
+Group.belongsToMany(User, GroupUsersRelations);
+
+User.hasMany(Group, { as: 'Owner' });
+User.belongsTo(Author);
+User.belongsToMany(Group, GroupUsersRelations);
+
 UserLogin.belongsTo(User);
 UserClaim.belongsTo(User);
 UserProfile.belongsTo(User);
 
-User.hasMany(Organization, { as: 'Owner' });
-User.belongsTo(Author);
-User.belongsToMany(Organization, OrganizationUsersRelationship);
-
-Organization.hasOne(OrganizationProfile);
-Organization.belongsTo(Author);
-Organization.belongsToMany(User, OrganizationUsersRelationship);
+Board.hasMany(List);
+Board.belongsTo(Author, { as: 'Owner' });
 
 export {
-	// Board
+	// Boards
 	Author,
 	Board,
 	List,
-	// User
+	// Users
 	User,
 	UserClaim,
 	UserLogin,
 	UserProfile,
-	// Organization
-	Organization,
-	OrganizationProfile,
+	// Groups
+	Group,
+	GroupProfile,
 };
 
 
@@ -75,8 +78,9 @@ User.createWithLogin = (username, password) => {
 };
 
 async function createUser(t, profiles) {
-	const author = await Author.create({}, t);
-	console.log(author.id);
+	const author = await Author.create({
+		type: 'user'
+	}, t);
 	const user = await User.create({
 		AuthorId: author.id
 	}, t);
@@ -84,6 +88,16 @@ async function createUser(t, profiles) {
 		UserId: user.id,
 		...profiles,
 	}, t);
+	const board = await Board.create({
+		...userTemplate.board,
+		OwnerId: author.id,
+	}, t);
+	userTemplate.list.forEach(async listItem => {
+		await List.create({
+			...listItem,
+			BoardId: board.id
+		}, t);
+	});
 	return user;
 }
 
@@ -95,8 +109,8 @@ async function createUser(t, profiles) {
 	UserClaim,
 	UserLogin,
 	UserProfile,
-	Organization,
-	OrganizationProfile,
+	Group,
+	GroupProfile,
 ].forEach(t => t.sync({ force: !0 }));
 
 /**

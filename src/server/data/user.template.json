@@ -1,0 +1,64 @@
+{
+	"board": {
+		"name": "Learn Seanote"
+	},
+	"list": [
+		{
+			"position": 0,
+			"name": "Getting Started",
+			"items": [
+				{
+					"type": "note",
+					"detail": "This is a basic card"
+				},
+				{
+					"type": "note",
+					"detail": "You can set label on any card",
+					"label": {
+						"tag": "basic-label",
+						"color": "#F44336"
+					}
+				},
+				{
+					"type": "note",
+					"detail": "There are other cards"
+				},
+				{
+					"type": "people",
+					"detail": {
+						"name": "@elasim"
+					}
+				},
+				{
+					"type": "photo",
+					"detail": "seanote-storage://public/getting-started.png"
+				},
+				{
+					"type": "location",
+					"detail": {
+						"latitude": "37.5760076",
+						"longitude": "126.974728,17z"
+					}
+				},
+				{
+					"type": "time",
+					"detail": 1467945815206
+				}
+			]
+		},
+		{
+			"position": 1,
+			"name": "Share your board",
+			"items": [
+				{
+					"type": "note",
+					"detail": "You can share your board with friend"
+				},
+				{
+					"type": "note",
+					"detail": "Or You can create group and invite your friends"
+				}
+			]
+		}
+	]
+}
