@@ -1,4 +1,5 @@
 import { createAction } from 'redux-actions';
+import { browserHistory } from 'react-router';
 import emptyFunction from 'fbjs/lib/emptyFunction';
 import User from '../data/user';
 
@@ -30,11 +31,19 @@ function acquireToken(callback = emptyFunction) {
 		const user = await User.whoami();
 		if (user) {
 			dispatch(responseToken(user.token));
+			if (!user.token) {
+				redirectToHome();
+			}
 			callback();
 		} else {
 			const e = new Error('not logged');
 			dispatch(notifyFailure(e));
 			callback(e);
+			redirectToHome();
 		}
 	};
+}
+
+function redirectToHome() {
+	browserHistory.push('/');
 }

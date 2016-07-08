@@ -37,6 +37,7 @@ export async function veifySession(session) {
 		const user = await User.findById(claim.aud);
 		if (!user) {
 			console.log('Token verified, but User not exists');
+			delete sessions[id];
 			return false;
 		}
 		return claim;
@@ -83,15 +84,10 @@ function createToken(user) {
 }
 
 function verifyToken(token) {
-	if (!token) return;
-	try {
-		return jwt.verify(token, keyPair.pub, {
-			algorithms: [config.jwt.algorithm],
-			issuer: config.jwt.iss,
-		});
-	} catch (e) {
-		return false;
-	}
+	return jwt.verify(token, keyPair.pub, {
+		algorithms: [config.jwt.algorithm],
+		issuer: config.jwt.iss,
+	});
 }
 
 function getKeyPair() {
