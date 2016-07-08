@@ -41,7 +41,7 @@ for (let keyPath in APIDescriptors) {
 	}
 }
 
-router.get('_bulk', (req, res) => {
+router.post('_bulk', (req, res) => {
 	// Rx.Observable.from(Object.keys(req.body))
 	// 	.map((v, i) => {
 

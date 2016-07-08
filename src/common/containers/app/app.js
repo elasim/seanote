@@ -152,7 +152,7 @@ function createDataUpdater() {
 		.timeInterval()
 		.subscribe(async () => {
 			try {
-				const res = await request.get('/api/_bulk', {
+				const res = await request.post('/api/_bulk', {
 					boardList: ['/board/list', { sort: 'updatedAt' }],
 					groupList: ['/group/list', { filter: 'favorite', sort: 'accessAt'}],
 					chat: ['/chat', { filter: 'unread', sort: 'updatedAt' }],
