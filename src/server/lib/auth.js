@@ -66,7 +66,6 @@ function verifyToken(token) {
 			issuer: config.jwt.iss,
 		});
 	} catch (e) {
-		console.error('verifyToken', e);
 		return false;
 	}
 }
