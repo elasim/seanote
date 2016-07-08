@@ -10,15 +10,15 @@ import userTemplate from './user.template';
 const GroupUsersRelations = { through: 'GroupUsers' };
 Group.hasOne(GroupProfile);
 Group.belongsTo(Author);
+Group.belongsTo(User, { as: 'Owner '});
 Group.belongsToMany(User, GroupUsersRelations);
 
-User.hasMany(Group, { as: 'Owner' });
+User.hasOne(UserProfile);
 User.belongsTo(Author);
 User.belongsToMany(Group, GroupUsersRelations);
 
 UserLogin.belongsTo(User);
 UserClaim.belongsTo(User);
-UserProfile.belongsTo(User);
 
 Board.hasMany(List);
 Board.belongsTo(Author, { as: 'Owner' });
