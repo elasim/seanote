@@ -1,7 +1,7 @@
 import url from 'url';
 import querystring from 'querystring';
 import passport from 'passport';
-import { createSession, veifySession } from '../../lib/auth';
+import { createSession, veifySession } from '../../lib/session';
 
 // This function used to handle login return like OAuth
 export function loginWithPassport(vender, req, res, next) {
@@ -22,8 +22,13 @@ passport.serializeUser((user, done) => {
 
 // session : { id, token }
 passport.deserializeUser((session, done) => {
-	const claim = veifySession(session);
-	done(null, claim ? { ssid: session.id, claim } : null);
+	veifySession(session)
+		.then(claim => {
+			done(null, claim ? { ssid: session.id, claim } : null);
+		}, e => {
+			console.log('session verification failed with Error', e);
+			done(null, null);
+		});
 });
 
 function success(req, res) {

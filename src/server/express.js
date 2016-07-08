@@ -3,8 +3,8 @@ import express from 'express';
 import cookieSession from 'cookie-session';
 import helmet from 'helmet';
 import passport from 'passport';
-import { refreshToken } from './lib/auth';
 import { engine } from './lib/simple-template';
+import { connectJwtSession } from './lib/session';
 import routes from './routes';
 
 const assets = require('./assets');
@@ -24,19 +24,7 @@ app.use(helmet());
 app.use(cookieSession({	name: 'sid', keys: ['key'] }));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use((req, res, next) => {
-	if (req.user) {
-		const newToken = refreshToken(req.user);
-		if (newToken) {
-			console.log(req.user.ssid, ': new token issued');
-			req.session.passport.user.token = newToken;
-		} else {
-			console.log(req.user.ssid, ': token expired');
-			req.session = null;
-		}
-	}
-	return next();
-});
+app.use(connectJwtSession);
 app.use(routes);
 
 app.get('/favicon.ico', (req, res) => res.status(404).end());

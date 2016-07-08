@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import uuid from 'uuid';
 import jwt from 'jsonwebtoken';
-
+import { User } from '../data';
 import { auth as config } from '../../config.json';
 
 // @Note: Scalability
@@ -26,10 +26,20 @@ export function createSession(user) {
 	}
 }
 
-export function veifySession(session) {
+export async function veifySession(session) {
 	const { id, token } = session;
 	try {
-		return verifyToken(token) || verifyToken(sessions[id]);
+		const claim = verifyToken(token) || verifyToken(sessions[id]);
+		// Token verification can used to check session expiry, user role and user id.
+		// but, It doesn't means about that the user is actually exist.
+		// User data could be deleted during session is still active.
+		// In this case, verification must be failed.
+		const user = await User.findById(claim.aud);
+		if (!user) {
+			console.log('Token verified, but User not exists');
+			return false;
+		}
+		return claim;
 	} catch (e) {
 		console.error(e);
 		delete sessions[id];
@@ -37,7 +47,7 @@ export function veifySession(session) {
 	}
 }
 
-export function refreshToken(sessionInfo) {
+export function extendSessionLife(sessionInfo) {
 	try {
 		return sessions[sessionInfo.ssid] = createToken({
 			role: sessionInfo.claim.role,
@@ -46,6 +56,21 @@ export function refreshToken(sessionInfo) {
 	} catch (e) {
 		return false;
 	}
+}
+
+// EXPRESS-MIDDLEWARE
+export function connectJwtSession(req, res, next) {
+	if (req.user) {
+		const newToken = extendSessionLife(req.user);
+		if (newToken) {
+			console.log(req.user.ssid, ': new token issued');
+			req.session.passport.user.token = newToken;
+		} else {
+			console.log(req.user.ssid, ': token expired');
+			req.session = null;
+		}
+	}
+	return next();
 }
 
 function createToken(user) {
