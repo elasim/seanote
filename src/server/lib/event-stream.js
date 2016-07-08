@@ -1,7 +1,8 @@
-import Rx from 'rx';
 import { EventEmitter } from 'events';
 
 const PADDING_2K = Buffer(2049).fill(0);
+const streams = {};
+
 class EventStream extends EventEmitter {
 	constructor() {
 		super();
@@ -17,7 +18,7 @@ class EventStream extends EventEmitter {
 		this.lastExpired = 0;
 		this.expires = 120;
 		this.retryTime = 10000;
-	}	
+	}
 	bind(req, res) {
 		if (!this.closed) {
 			this::setDisconnect();
@@ -59,12 +60,29 @@ class EventStream extends EventEmitter {
 			data,
 			tag,
 		};
-		// save event until token expires.
+		// save event until expires to use when it requred with last-event-id
 		this.events.push(event);
 		this::send(event);
 
-		// remove from buffer after expires time
+		// remove from buffer after expiry time
 		setTimeout(this::shfitBuffer, this.expires);
+	}
+
+	static findOrCreate(uid) {
+		if (!streams[uid]) {
+			streams[uid] = new EventStream();
+			streams[uid].on('end', () => {
+				streams[uid].reset();
+				delete streams[uid];
+			});
+		}
+		return streams[uid];
+	}
+	static sendEvent(uid, data, event) {
+		const stream = streams[uid];
+		if (stream) {
+			stream.send(data, event);
+		}
 	}
 }
 
