@@ -4,19 +4,17 @@ import api from './api';
 
 const router = new Router();
 
-router.use('/auth', auth);
-router.all('/logout', (req, res) => {
-	if (req.session) {
-		req.session = null;
-	}
-	res.redirect('/');
-});
 router.use('/api', api);
+router.use('/auth', auth);
 
 router.get('/signin', redirectToDashboard);
 router.get('/setting', redirectToSignIn);
 router.get('/pages', redirectToSignIn);
 router.get('/pages/:id', redirectToSignIn);
+router.all('/logout', redirectToSignIn, (req, res) => {
+	req.session = null;
+	res.redirect('/');
+});
 
 function redirectToDashboard(req, res, next) {
 	if (req.user) return res.redirect('/');
@@ -24,7 +22,7 @@ function redirectToDashboard(req, res, next) {
 }
 
 function redirectToSignIn(req, res, next) {
-	if (!req.user) {
+	if (!req.session || !req.user) {
 		const redirect = encodeURIComponent(req.originalUrl);
 		return res.redirect(`/signin?redirect=${redirect}`);
 	}

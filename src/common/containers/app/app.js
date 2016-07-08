@@ -5,7 +5,6 @@ import { defineMessages } from 'react-intl';
 import Header from './header';
 import Nav from './nav';
 import FontIcon from 'material-ui/FontIcon';
-import request from '../../lib/request';
 import {
 	createScrollSpy,
 	createResizeSpy,
@@ -72,7 +71,8 @@ export default class View extends Component {
 	}
 	componentDidMount() {
 		// refresh token in a minute
-		this.tokenRefresher = createTokenRefresher();
+		this.tokenRefresher = this::createTokenRefresher();
+		this.dataUpdater = this::createDataUpdater();
 
 		const _adjustLayout = this::adjustLayout;
 		this.scrollSpy = createScrollSpy(_adjustLayout);
@@ -83,6 +83,9 @@ export default class View extends Component {
 	componentWillUnmount() {
 		if (this.tokenRefresher) {
 			this.tokenRefresher.dispose();
+		}
+		if (this.dataUpdater) {
+			this.dataUpdater.dispose();
 		}
 		if (this.scrollSpy) {
 			this.scrollSpy.dispose();
@@ -134,32 +137,31 @@ function adjustLayout() {
 	}
 }
 
+// calling whoami api every minutes
+// to maintain current user session without request
 function createTokenRefresher() {
-	return Rx.Observable.interval(1000* 60)
+	return Rx.Observable.interval(1000 * 60)
+		.subscribe(() => this.props.acquireToken());
+}
+
+import request from '../../lib/request';
+
+// keep up to date
+function createDataUpdater() {
+	return Rx.Observable.timer(1, 5 * 60 * 1000)
+		.timeInterval()
 		.subscribe(async () => {
 			try {
-				const res = await request.get('/api/user');
-				const user = await res.json();
-				console.log('New token:', user.token);
+				const res = await request.get('/api/_bulk', {
+					boardList: ['/board/list', { sort: 'updatedAt' }],
+					groupList: ['/group/list', { filter: 'favorite', sort: 'accessAt'}],
+					chat: ['/chat', { filter: 'unread', sort: 'updatedAt' }],
+					notification: ['/notification', { filter: 'unread', sort: 'updatedAt' }],
+				});
+				const data = await res.json();
+				console.log(data);
 			} catch (e) {
-				console.log('Refreshing token failure');
+				console.error('data fetch failure', e);
 			}
 		});
 }
-
-/*
-				<Grid className={css.container} noSpacing>
-					<Cell col={3} tablet={4} phone={8} hidePhone={!view}
-						hideTablet={hide} hideDesktop={hide}
-						className={css.list}>
-						<BoardList />
-					</Cell>
-					<Cell col={viewCol.col} tablet={viewCol.tablet} phone={8}
-						hidePhone={view} className={css.col}>
-						<div className={cx(css.fold, hide ? css['full-width'] : null) }>
-							<IconButton name="view_list" onClick={this.onToggleList} />
-						</div>
-						{this.props.children}
-					</Cell>
-				</Grid>
-*/

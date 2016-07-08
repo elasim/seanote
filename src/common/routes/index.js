@@ -7,7 +7,7 @@ import Home from './home';
 import About from './about';
 import SignIn from './signin';
 import Dashboard from './dashboard';
-import Board from './board';
+// import Board from './board';
 import Setting from './setting';
 import NotFound from './not-found';
 
@@ -26,10 +26,10 @@ export function configureRoutes(store, initalState) {
 			<Route path="/signin" component={SignIn} onEnter={redirectToDashboard} />
 			<Route path="/setting" component={Setting} onEnter={redirectToSignIn} />
 			<Route path="/pages" component={Dashboard} onEnter={redirectToSignIn} />
-			<Route path="/pages/:id" component={Board} onEnter={redirectToSignIn} />
 			<Route path="*" component={NotFound} />
 		</Route>
 	);
+//		<Route path="/pages/:id" component={Board} onEnter={redirectToSignIn} />
 	function redirectToDashboard(params, replace) {
 		const state = initalState || store.getState();
 		if (state.auth.token) {

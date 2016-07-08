@@ -1,6 +1,6 @@
 import { createAction } from 'redux-actions';
 import emptyFunction from 'fbjs/lib/emptyFunction';
-import request from '../lib/request';
+import User from '../data/user';
 
 export default {
 	acquireToken,
@@ -26,13 +26,13 @@ const notifyFailure = createAction(
 
 function acquireToken(callback = emptyFunction) {
 	return async dispatch => {
-		try {
-			dispatch(requestToken());
-			const res = await request.get('/api/user/');
-			const data = await res.json();
-			dispatch(responseToken(data.token));
+		dispatch(requestToken());
+		const user = await User.whoami();
+		if (user) {
+			dispatch(responseToken(user.token));
 			callback();
-		} catch (e) {
+		} else {
+			const e = new Error('not logged');
 			dispatch(notifyFailure(e));
 			callback(e);
 		}

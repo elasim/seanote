@@ -2,20 +2,17 @@ import { Router } from 'express';
 import bodyParser from 'body-parser';
 // import { User, UserLogin, UserProfile, } from '../../data';
 
-const $r = new Router();
+const router = new Router();
 
-$r.use((req, res, next) => {
-	console.log(req.headers.accept);
+router.use((req, res, next) => {
 	if (req.headers['accept'] === 'application/json') {
 		req.callingAPI = true;
 	}
 	next();
 });
-$r.use(bodyParser.json());
-$r.put('/', (req, res) => {
-	console.log(req.body);
-
+router.use(bodyParser.json());
+router.put('/', (req, res) => {
 	res.status(403).end();
 });
 
-export default $r;
+export default router;
