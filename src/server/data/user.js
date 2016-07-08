@@ -1,4 +1,3 @@
-import uuid from 'uuid';
 import Sequelize from 'sequelize';
 import sequelize from './sequelize';
 
@@ -10,13 +9,7 @@ const User = sequelize.define('User', {
 	},
 	role: {
 		type: Sequelize.TEXT,
-		defaultValue: JSON.stringify('user'),
-		get: function () {
-			return JSON.parse(this.getDataValue('role'));
-		},
-		set: function (val) {
-			this.setDataValue('role', JSON.stringify(val)); 
-		},
+		defaultValue: 'user',
 	},
 });
 
