@@ -9,8 +9,8 @@ router.use('/auth', auth);
 
 router.get('/signin', redirectToDashboard);
 router.get('/setting', redirectToSignIn);
-router.get('/pages', redirectToSignIn);
-router.get('/pages/:id', redirectToSignIn);
+router.get('/boards', redirectToSignIn);
+router.get('/boards/:id', redirectToSignIn);
 router.all('/logout', redirectToSignIn, (req, res) => {
 	req.session = null;
 	res.redirect('/');

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import BoardAction from '../../actions/board';
+import ListAction from '../../actions/list';
 import BoardView from './board';
 
 export default _.flow(
@@ -13,14 +13,14 @@ export default _.flow(
 		}),
 		dispatch => ({
 			action: bindActionCreators({
-				fetchData: BoardAction.fetchData,
-				createCard: BoardAction.createCard,
-				moveCard: BoardAction.moveCard,
-				moveCardToTrash: BoardAction.moveCardToTrash,
-				moveBoard: BoardAction.moveBoard,
-				moveBoardToTrash: BoardAction.moveBoardToTrash,
-				setName: BoardAction.setName,
-				updateCard: BoardAction.updateCard,
+				fetchData: ListAction.fetchData,
+				createCard: ListAction.createCard,
+				moveCard: ListAction.moveCard,
+				moveCardToTrash: ListAction.moveCardToTrash,
+				moveBoard: ListAction.moveBoard,
+				moveBoardToTrash: ListAction.moveBoardToTrash,
+				setName: ListAction.setName,
+				updateCard: ListAction.updateCard,
 			}, dispatch)
 		})
 	),

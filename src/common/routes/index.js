@@ -7,6 +7,7 @@ import Home from './home';
 import About from './about';
 import SignIn from './signin';
 import Dashboard from './dashboard';
+import Boards from './boards';
 // import Board from './board';
 import Setting from './setting';
 import NotFound from './not-found';
@@ -25,7 +26,7 @@ export function configureRoutes(store, initalState) {
 			<Route path="/about" component={About} />
 			<Route path="/signin" component={SignIn} onEnter={redirectToDashboard} />
 			<Route path="/setting" component={Setting} onEnter={redirectToSignIn} />
-			<Route path="/pages" component={Dashboard} onEnter={redirectToSignIn} />
+			<Route path="/boards" component={Boards} onEnter={redirectToSignIn} />
 			<Route path="*" component={NotFound} />
 		</Route>
 	);
