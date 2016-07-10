@@ -3,7 +3,7 @@ import { OAuth2Strategy as Strategy } from 'passport-google-oauth';
 import { User, UserClaim } from '../../data';
 import router from './router';
 import { loginWithPassport } from './auth-passport';
-import { auth as AuthCfg } from '../../../config';
+import config from '../../lib/config';
 
 const googleOAuth = passport.authenticate('google', {
 	scope: ['profile']
@@ -26,7 +26,7 @@ router.get('/google-revoke', (req, res) => {
 });
 
 passport.use(new Strategy(
-	AuthCfg.google,
+	config.auth.google,
 	async (accessToken, refreshToken, profile, done) => {
 		try {
 			const claim = await UserClaim.findOne({

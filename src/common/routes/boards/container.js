@@ -4,7 +4,7 @@ import { create, rename, moveTrash } from '../../actions/board';
 
 export default connect(
 	state => ({
-		items: state.data.boards.list
+		board: state.board,
 	}),
 	{
 		create,

@@ -10,7 +10,7 @@ import {
 	createScrollSpy,
 	createResizeSpy,
 	getViewportHeight,
-} from '../helpers';
+} from '../../lib/dom-helpers';
 import css from './app.scss';
 
 const messages = defineMessages({
@@ -109,7 +109,7 @@ export default class View extends Component {
 					onClickMenu={this::showDrawer}
 				/>
 				<div className={cx(css.drawer)}>
-					<FlatButton onClick={send} label="Send"/>
+					<FlatButton onClick={() => this.props.prefetch()} label="Send"/>
 				</div>
 				<div className={css.dim} onClick={this::hideDrawer}></div>
 				<Nav className={css.nav} items={MENU_ITEMS} />
@@ -149,29 +149,9 @@ function createTokenRefresher() {
 		.subscribe(() => this.props.acquireToken());
 }
 
-import request from '../../lib/request';
-
 // keep up to date
 function createDataUpdater() {
 	return Rx.Observable.timer(1, 5 * 60 * 1000)
 		.timeInterval()
-		.subscribe(async () => {
-			try {
-				const res = await send();
-				const data = await res.json();
-				console.log(data);
-			} catch (e) {
-				console.error('data fetch failure', e);
-			}
-		});
-}
-
-function send() {
-	return request.post('/api/_bulk', {
-		boardList: ['/board/list', { sort: 'updatedAt' }],
-		groupList: ['/group/list', { filter: 'favorite', sort: 'accessAt'}],
-		chat: ['/chat', { filter: 'unread', sort: 'updatedAt' }],
-		notification: ['/notification', { filter: 'unread', sort: 'updatedAt' }],
-		token: '/user',
-	});
+		.subscribe(() => this.props.prefetch());
 }

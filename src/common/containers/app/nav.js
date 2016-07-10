@@ -1,13 +1,15 @@
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
+import Link from 'react-router/lib/Link';
 import FlatButton from 'material-ui/FlatButton';
+import pure from 'recompose/pure';
 import {
 	createResizeSpy,
 	getViewportWidth,
-} from '../helpers';
+} from '../../lib/dom-helpers';
 import css from './nav.scss';
 
-export default class Nav extends Component {
+class Nav extends Component {
 	static propTypes = {
 		items: PropTypes.array,
 		className: PropTypes.string,
@@ -69,23 +71,28 @@ class NavMenu extends Component {
 		narrow: PropTypes.bool,
 		icon: PropTypes.element,
 		label: PropTypes.string,
+		link: PropTypes.string,
 		items: PropTypes.array,
 	};
 	render() {
-		const { label, icon, narrow, className, style } = this.props;
+		const { label, icon, narrow, className, style, link } = this.props;
 		return (
 			<div className={cx(css.menu, className)} style={style}>
-				<FlatButton
-					icon={icon}
-					label={!narrow ? label : null}
-					labelStyle={{color: '#fff'}}
-					style={{
-						width: '100%',
-						height: 50,
-						textAlign: !narrow ? 'left' : 'center',
-					}} />
+				<Link to={link}>
+					<FlatButton
+						icon={icon}
+						label={!narrow ? label : null}
+						labelStyle={{color: '#fff'}}
+						style={{
+							width: '100%',
+							height: 50,
+							textAlign: !narrow ? 'left' : 'center',
+						}} />
+				</Link>
 				{/* items here */}
 			</div>
 		);
 	}
 }
+
+export default pure(Nav);

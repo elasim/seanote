@@ -3,7 +3,7 @@ import path from 'path';
 import uuid from 'uuid';
 import jwt from 'jsonwebtoken';
 import { User } from '../data';
-import { auth as config } from '../../config.json';
+import config from './config';
 
 // @Note: Scalability
 // Move this into external database to make server cluster
@@ -76,23 +76,23 @@ export function connectJwtSession(req, res, next) {
 
 function createToken(user) {
 	return jwt.sign({ role: user.role }, keyPair.key, {
-		algorithm: config.jwt.algorithm,
-		expiresIn: config.jwt.exp,
-		issuer: config.jwt.iss,
+		algorithm: config.auth.jwt.algorithm,
+		expiresIn: config.auth.jwt.exp,
+		issuer: config.auth.jwt.iss,
 		audience: user.id
 	});
 }
 
 function verifyToken(token) {
 	return jwt.verify(token, keyPair.pub, {
-		algorithms: [config.jwt.algorithm],
-		issuer: config.jwt.iss,
+		algorithms: [config.auth.jwt.algorithm],
+		issuer: config.auth.jwt.iss,
 	});
 }
 
 function getKeyPair() {
-	const pathKey = path.join(process.cwd(), config.jwt.privateKey);
-	const pathPub = path.join(process.cwd(), config.jwt.publicKey);
+	const pathKey = path.join(__dirname, config.auth.jwt.privateKey);
+	const pathPub = path.join(__dirname, config.auth.jwt.publicKey);
 	return {
 		key: fs.readFileSync(pathKey),
 		pub: fs.readFileSync(pathPub),

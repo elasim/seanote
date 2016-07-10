@@ -7,12 +7,10 @@ import { engine } from './lib/simple-template';
 import { connectJwtSession } from './lib/session';
 import routes from './routes';
 
-const assets = require('./assets');
 const assetDebugView = require('../views/without-template.html');
 
 const debugViewPath = path.join(__dirname, assetDebugView);
 const viewsDir = path.join(__dirname, './views');
-const bundlePath = path.join(__dirname, assets.main.js);
 
 const app = express();
 
@@ -28,8 +26,9 @@ app.use(connectJwtSession);
 app.use(routes);
 
 app.get('/favicon.ico', (req, res) => res.status(404).end());
-app.get(assets.main.js, (req, res) => res.sendFile(bundlePath));
-if (0) {
+app.use('/assets', express.static(path.join(__dirname, './assets')));
+//app.get('/assets/bundle.js', (req, res) => res.sendFile(path.join(__dirname, './client.js')));
+if (1) {
 	app.get('*', require('./react-ssr').default);
 } else {
 	app.get('*', (req, res) => res.sendFile(debugViewPath));

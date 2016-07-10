@@ -1,21 +1,20 @@
 import React, { Component, PropTypes } from 'react';
-import pure from 'recompose/pure';
 
-class AboutView extends Component {
+export default class BoardView extends Component {
 	static contextTypes = {
 		setTitle: PropTypes.func.isRequired,
 	}
 	componentWillMount() {
-		this.context.setTitle('About');
+		this.context.setTitle('Board Item View');
 	}
 	componentDidMount() {
 		window.scrollTo(0, 1);
 	}
 	render() {
 		return (
-			<div className="mdl-layout__content">ABOUT</div>
+			<div>
+				It is Board Item!
+			</div>
 		);
 	}
 }
-
-export default pure(AboutView);

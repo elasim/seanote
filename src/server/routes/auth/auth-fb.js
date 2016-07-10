@@ -3,7 +3,7 @@ import { Strategy } from 'passport-facebook';
 import { User, UserClaim } from '../../data';
 import router from './router';
 import { loginWithPassport } from './auth-passport';
-import { auth as AuthCfg } from '../../../config';
+import config from '../../lib/config';
 
 router.get('/fb', passport.authenticate('facebook', {
 	scope: ['public_profile', 'email'],
@@ -17,7 +17,7 @@ router.get('/fb-revoke', (req, res) => {
 });
 
 passport.use(new Strategy(
-	AuthCfg.facebook,
+	config.auth.facebook,
 	async (accessToken, refreshToken, profile, done) => {
 		try {
 			const claim = await UserClaim.findOne({

@@ -2,9 +2,10 @@ import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import Link from 'react-router/lib/Link';
 import IconButton from 'material-ui/IconButton';
+import pure from 'recompose/pure';
 import css from './header.scss';
 
-export default class Header extends Component {
+class Header extends Component {
 	static propTypes = {
 		onClickMenu: PropTypes.func.isRequired,
 		className: PropTypes.string,
@@ -61,3 +62,5 @@ function expandSearchbar() {
 function shrinkSearchbar() {
 	this.setState({ shrinkSearchbar: true });
 }
+
+export default pure(Header);

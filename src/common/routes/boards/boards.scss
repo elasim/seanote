@@ -1,0 +1,47 @@
+@import "../../containers/variables.scss";
+@import "../../containers/app/variables.scss";
+
+$three-column-width: 960px;
+$list-width: 340px;
+
+.root.hide-top {
+	@media(min-width: $three-column-width + 1) {
+		.list {
+			top: 0;
+		}
+	}
+}
+.root {
+	overflow: auto;
+	.list {
+		transition: top $header-animation-props;
+	}
+
+	@media(max-width: $three-column-width) {
+		.content {
+			display: none;
+		}
+		&.viewer {
+			.list {
+				display: none;
+			}
+			.content {
+				background-color: red;
+				display: initial;
+			}
+		}
+	}
+
+	@media(min-width: $three-column-width + 1) {
+		padding-left: $list-width;
+		.list {
+			background-color: #fff;
+			position: fixed;
+			top: $header-height + $header-padding-top;
+			left: $nav-side-width;
+			bottom: 0;
+			width: $list-width;
+			overflow: auto;
+		}
+	}
+}

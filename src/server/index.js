@@ -2,12 +2,12 @@ import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
-import express from './server/express';
-import config from './config';
+import express from './express';
+import config from './lib/config';
 
 const httpsServer = https.createServer({
-	key: fs.readFileSync(path.join(process.cwd(), config.https.key)),
-	cert: fs.readFileSync(path.join(process.cwd(), config.https.cert)),
+	key: fs.readFileSync(path.join(__dirname, config.https.key)),
+	cert: fs.readFileSync(path.join(__dirname, config.https.cert)),
 }, express);
 httpsServer.listen(
 	config.https.port,
@@ -26,5 +26,5 @@ function onListen(e) {
 		return;
 	}
 	const addr = this.address();
-	console.log(`Listening on ${addr.address}:${addr.port}`);
+	console.log(`Listen on! ${addr.address}:${addr.port}`);
 }

@@ -1,6 +1,14 @@
 @import "../variables.scss";
 @import "./variables.scss";
 
+:global {
+	span[type=button] {
+		appearance: none;
+	}
+	a[type=button] {
+		appearance: none;
+	}
+}
 
 .root {
 	padding-top: $header-height + $header-padding-top

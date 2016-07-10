@@ -4,6 +4,8 @@ import { Provider } from 'react-redux';
 import { Router, browserHistory } from 'react-router';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import appMuiTheme from '../common/themes/mui';
 
 import { configureStore } from '../common/store';
 import { configureRoutes } from '../common/routes';
@@ -23,7 +25,6 @@ function configure(state) {
 	configureLocale();
 	const store = configureStore(state);
 	const routes = configureRoutes(store);
-
 	return { store, routes };
 }
 
@@ -35,12 +36,13 @@ window.bootstrap = (serverSentState = {}) => {
 	User.whoami()
 		.then((user) => {
 			initialState.auth.token = user.token;
-		}, (/* ignore error */) => {})
+		}, (/* ignore error */) => { })
 		.then(() => {
 			const { store, routes } = configure(initialState);
+			const muiTheme = getMuiTheme(appMuiTheme);			
 			render(
 				<Provider store={store}>
-					<MuiThemeProvider>
+					<MuiThemeProvider muiTheme={muiTheme}>
 						<Router routes={routes} history={browserHistory} />
 					</MuiThemeProvider>
 				</Provider>,

@@ -6,7 +6,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import { configureStore } from '../common/store';
 import { configureRoutes } from '../common/routes';
-import assets from './assets';
+import muiTheme from '../common/themes/mui';
 
 // imports required assets to render
 require('../views/index.html');
@@ -56,6 +56,7 @@ function render(req, res, renderProps) {
 
 	function finishRender() {
 		const MUI_THEME = getMuiTheme({
+			...muiTheme,
 			userAgent: req.headers['user-agent'],
 		});
 		const body = renderToString(
@@ -69,7 +70,7 @@ function render(req, res, renderProps) {
 		res.status(200).render('index', {
 			title: state.app.title,
 			body,
-			bundle: assets.main.js,
+			bundle: '/assets/client.js',
 			initialState: JSON.stringify({
 				data: state,
 				time: Date.now(),

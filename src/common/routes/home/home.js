@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react';
-
+import pure from 'recompose/pure';
 import css from './home.scss';
 
-export default class HomeView extends Component {
+class HomeView extends Component {
 	static contextTypes = {
 		setTitle: PropTypes.func.isRequired,
 	};
@@ -31,3 +31,5 @@ export default class HomeView extends Component {
 		);
 	}
 }
+
+export default pure(HomeView);

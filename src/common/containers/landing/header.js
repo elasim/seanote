@@ -3,6 +3,7 @@ import { injectIntl, defineMessages } from 'react-intl';
 import { Link } from 'react-router';
 import cx from 'classnames';
 import FlatButton from 'material-ui/FlatButton';
+import pure from 'recompose/pure';
 import css from './header.scss';
 
 const messages = defineMessages({
@@ -24,7 +25,7 @@ const messages = defineMessages({
 });
 
 @injectIntl
-export default class Header extends Component {
+class Header extends Component {
 	static propTypes = {
 		shrink: PropTypes.bool,
 	};
@@ -65,3 +66,5 @@ export default class Header extends Component {
 		);
 	}
 }
+
+export default pure(Header);

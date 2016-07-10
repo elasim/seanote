@@ -6,4 +6,4 @@ import 'core-js/fn/array/find-index';
 import 'core-js/fn/array/fill';
 import 'core-js/fn/promise';
 
-import 'client/bootstrap';
+import './bootstrap';

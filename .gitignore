@@ -8,9 +8,6 @@ pids
 *.pid
 *.seed
 
-# build
-build
-
 # Coverage directory used by tools like istanbul
 coverage
 
@@ -39,6 +36,6 @@ jspm_packages
 # DB
 *.sqlite3
 
-# Secrets
-gitignores/
-src/config.json
+lib/
+src/config/keystore/
+src/config/server.config.json

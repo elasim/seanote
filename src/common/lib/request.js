@@ -1,6 +1,6 @@
 import fetchPolyfill from 'fetch-ponyfill';
 
-const $fetch = fetch || fetchPolyfill();
+const $fetch = typeof fetch !== 'undefined' ? fetch : fetchPolyfill();
 
 function request(method, url, data, headers) {
 	const param = {

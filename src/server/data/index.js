@@ -77,6 +77,8 @@ User.createWithLogin = (username, password) => {
 	});
 };
 
+// Because sequelize don't support stored procedure for some rdbms
+// create user template manually on single transaction
 async function createUser(t, profiles) {
 	const author = await Author.create({
 		type: 'user'
@@ -112,14 +114,3 @@ async function createUser(t, profiles) {
 	Group,
 	GroupProfile,
 ].forEach(t => t.sync({ force: !0 }));
-
-/**
- * Sequelize Associations
- * A hasOne B [as NAME, foreignKey FK]
- * A hasMany B [as NAME, foreginKey FK]
- * -> getter/setter in A (getB, setB or getNAME)
- * -> B schema {..., BId, B_id, FK }
- * 
- * A belongsTo B [as NAME, foreignKey FK, targetKey B_KEY_COLUMN]
- * A belongsToMany B [as NAME, foreginKey FK, targetKey B_KEY_COLUMN]
- */
