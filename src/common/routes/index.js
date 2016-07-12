@@ -8,7 +8,6 @@ import About from './about';
 import SignIn from './signin';
 import Dashboard from './dashboard';
 import Boards from './boards';
-import BoardView from './board-view';
 import Setting from './setting';
 import NotFound from './not-found';
 
@@ -27,7 +26,7 @@ export function configureRoutes(store, initalState) {
 			<Route path="signin" component={SignIn} onEnter={redirectToDashboard} />
 			<Route path="setting" component={Setting} onEnter={redirectToSignIn} />
 			<Route path="boards" component={Boards} onEnter={redirectToSignIn} >
-				<Route path=":id" component={BoardView} onEnter={redirectToSignIn} />
+				<Route path=":id" onEnter={redirectToSignIn} />
 			</Route>
 			<Route path="*" component={NotFound} />
 		</Route>
