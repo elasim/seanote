@@ -4,7 +4,7 @@ import Subheader from 'material-ui/Subheader';
 import { List } from 'material-ui/List';
 import DragDropContainer from '../../lib/dnd/container';
 import DragPreview from '../../lib/dnd/preview';
-import ListView from './components/list';
+import BoardList from './components/board-list';
 import View from './components/view';
 import FAB from './components/fab';
 import cx from 'classnames';
@@ -34,7 +34,7 @@ class Boards extends Component {
 					<div className={css.list}>
 						<List>
 							<Subheader>Board</Subheader>
-							<ListView list={this.props.board.list} />
+							<BoardList list={this.props.board.list} />
 						</List>
 					</div>
 					<div className={css.content}>

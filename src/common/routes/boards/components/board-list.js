@@ -31,7 +31,7 @@ const dragHandle = (
 
 @pure
 @injectIntl
-export default class extends Component {
+export default class BoardList extends Component {
 	static propTypes = {
 		list: PropTypes.array.isRequired,
 	};
