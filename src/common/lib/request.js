@@ -1,7 +1,3 @@
-import fetchPolyfill from 'fetch-ponyfill';
-
-const $fetch = typeof fetch !== 'undefined' ? fetch : fetchPolyfill();
-
 function request(method, url, data, headers) {
 	const param = {
 		method,
@@ -10,13 +6,12 @@ function request(method, url, data, headers) {
 			'Content-Type': 'application/json',
 			...headers,
 		},
-		rejectUnauthorized: false,
-		credentials: 'same-origin'
+		credentials: 'same-origin',
 	};
 	if (data !== undefined) {
 		param.body = JSON.stringify(data);
 	}
-	return $fetch(url, param);
+	return fetch(url, param);
 }
 
 export default {

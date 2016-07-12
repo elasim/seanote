@@ -39,22 +39,22 @@ const messages = defineMessages({
 const MENU_ITEMS = [
 	{
 		label: 'Board',
-		icon: <FontIcon className="material-icons" color="#fff">list</FontIcon>,
+		icon: <FontIcon className="material-icons" color="#fff">&#xE8EF;</FontIcon>,
 		link: '/boards',
 	},
 	{
 		label: 'Groups',
-		icon: <FontIcon className="material-icons" color="#fff">group_work</FontIcon>,
+		icon: <FontIcon className="material-icons" color="#fff">&#xE886;</FontIcon>,
 		link: '/groups',
 	},
 	{
 		label: 'Messages',
-		icon: <FontIcon className="material-icons" color="#fff">chat</FontIcon>,
+		icon: <FontIcon className="material-icons" color="#fff">&#xE0B7;</FontIcon>,
 		link: '/messages',
 	},
 	{
 		label: 'Notifications',
-		icon: <FontIcon className="material-icons" color="#fff">notifications</FontIcon>,
+		icon: <FontIcon className="material-icons" color="#fff">&#xE7F4;</FontIcon>,
 		link: '/notifications',
 	}
 ];

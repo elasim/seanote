@@ -2,6 +2,10 @@
 @import "./variables.scss";
 
 :global {
+	html {
+	  -ms-content-zooming: none;
+	  -ms-touch-action: pan-x pan-y;
+	}
 	span[type=button] {
 		appearance: none;
 	}

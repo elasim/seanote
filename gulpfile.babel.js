@@ -104,6 +104,7 @@ gulp.task('dev-server', ['clean:dev'], () => {
 			...server.webpack,
 			watch: true,
 			noInfo: true,
+			cache: true,
 		}, webpackModule, runBrowserSync))
 		.pipe(gulp.dest(server.output));
 
@@ -120,7 +121,8 @@ gulp.task('dev-server', ['clean:dev'], () => {
 			...client.webpack,
 			cache: true,
 			entry: [
-				'webpack-hot-middleware/client?path=__webpack-hmr&timeout=10000&overlay=true&reload=true',
+				'event-source-polyfill',
+				'webpack-hot-middleware/client?path=/__webpack-hmr&timeout=10000&overlay=true&reload=true',
 				'./client/index.js'
 			]
 		};
@@ -132,7 +134,7 @@ gulp.task('dev-server', ['clean:dev'], () => {
 		browserSync = require('browser-sync').create();
 		browserSync.init({
 			proxy: {
-				target: 'https://localhost:8443',
+				target: 'http://localhost:8000',
 				ws: true,
 				middleware: [
 					require('webpack-dev-middleware')(compiler, {

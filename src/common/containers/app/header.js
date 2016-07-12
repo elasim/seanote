@@ -21,7 +21,6 @@ class Header extends Component {
 	}
 	render() {
 		const { className, onClickMenu } = this.props;
-		const searchIcon = 'search';
 
 		return (
 			<header className={cx(css.root, className, {
@@ -32,12 +31,12 @@ class Header extends Component {
 					style={{ left: 5, top: -5 }}
 					iconStyle={{ color: '#fff' }}
 					onClick={onClickMenu}>
-					dehaze
+					&#xE3C7;
 				</IconButton>
 				<h1><Link to="/">Seanote</Link></h1>
 				<form className={css.searchbar}>
 					<i className={cx('material-icons', css.icon)}
-						style={{left: 8}}>{searchIcon}</i>
+						style={{left: 8}}>&#xE8B6;</i>
 					<input type="text" ref="query"
 						placeholder="Search"
 						className={css.query}
