@@ -40,31 +40,9 @@ export default class BoardList extends Component {
 		const items = list
 			// Debug only to make long list
 			.reduce((aggregate, now) => {
-				return aggregate.concat(
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					now,
-					);
+				const filler = new Array(20);
+				filler.fill(now);
+				return aggregate.concat(filler);
 			}, [])
 			.map((item,i) => {
 				const commonProps = {
@@ -76,7 +54,7 @@ export default class BoardList extends Component {
 					/>
 				);
 				const draggableHandle = (
-					<Draggable preview={preview}>{dragHandle}</Draggable>
+					<Draggable data={item} preview={preview}>{dragHandle}</Draggable>
 				);
 				const props = {
 					...commonProps,

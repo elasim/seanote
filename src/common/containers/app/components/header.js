@@ -3,7 +3,7 @@ import React, { Component, PropTypes } from 'react';
 import Link from 'react-router/lib/Link';
 import IconButton from 'material-ui/IconButton';
 import pure from 'recompose/pure';
-import css from './header.scss';
+import css from '../styles/header.scss';
 
 class Header extends Component {
 	static propTypes = {

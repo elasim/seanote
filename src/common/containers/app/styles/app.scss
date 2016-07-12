@@ -1,4 +1,4 @@
-@import "../variables.scss";
+@import "../../variables.scss";
 @import "./variables.scss";
 
 :global {
@@ -36,24 +36,9 @@
 	padding-bottom: $header-container-height;
 }
 
-.dim {
-	opacity: 0.5;
-	background-color: $back-color-alt;
-
-	position: fixed;
-	z-index: 101;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
-}
-.hide-drawer .dim {
-	@extend .hide;
-}
-
 .header {
 	position: fixed;
-	z-index: 100;
+	z-index: $dim-index - 1;
 	left: 0;
 	top: 0;
 	right: 0;
@@ -70,7 +55,7 @@
 	background-color: #fff;
 
 	position: fixed;
-	z-index: 102;
+	z-index: $dim-index + 1;
 	left: 0;
 	top: 0;
 	width: $drawer-width;
@@ -106,8 +91,4 @@
 }
 .hide-top .nav {
 	top: 0;
-}
-
-.hide {
-	display: none;
 }

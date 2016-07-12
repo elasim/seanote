@@ -4,14 +4,14 @@ import { ActionTypes } from '../actions/app';
 const DEFAULT_STATE = {
 	title: undefined,
 	headerVisibility: true,
-	contextMenu: undefined,
+	dim: null,
 	locale: 'en',
 };
 
 export default handleActions({
 	[ActionTypes.setTitle]: setTitle,
 	[ActionTypes.setHeaderVisibility]: setHeaderVisibility,
-	[ActionTypes.setContextMenu]: setContextMenu,
+	[ActionTypes.setDim]: setDim,
 	[ActionTypes.setLocale]: setLocale,
 }, DEFAULT_STATE);
 
@@ -29,10 +29,10 @@ function setHeaderVisibility(state, action) {
 	};
 }
 
-function setContextMenu(state, action) {
+function setDim(state, action) {
 	return {
 		...state,
-		contextMenu: action.payload,
+		dim: action.payload,
 	};
 }
 

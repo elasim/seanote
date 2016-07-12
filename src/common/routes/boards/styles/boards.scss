@@ -1,5 +1,3 @@
-@import "../../../containers/variables.scss";
-@import "../../../containers/app/variables.scss";
 @import "./variables.scss";
 
 .root {
@@ -12,6 +10,9 @@
 		position: fixed;
 		right: 20px;
 		bottom: 20px;
+	}
+	.fab.front {
+		z-index: $dim-index + 1;
 	}
 
 	@media(max-width: $three-column-width) {

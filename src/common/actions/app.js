@@ -1,29 +1,29 @@
 export default {
 	setTitle,
 	setHeaderVisibility,
-	setContextMenu,
+	setDim,
 	setLocale,
 };
 
 export const ActionTypes = {
 	setTitle: 'APP_SET_TITLE',
 	setHeaderVisibility: 'APP_SET_HEADER_VISIBILITY',
-	setContextMenu: 'APP_SET_CONTEXT_MENU',
+	setDim: 'APP_SET_DIM',
 	setLocale: 'APP_SET_LOCALE',
 };
 
-function setTitle(title) {
+export function setTitle(title) {
 	return { type: ActionTypes.setTitle, payload: title };
 }
 
-function setHeaderVisibility(visibility) {
+export function setHeaderVisibility(visibility) {
 	return { type: ActionTypes.setHeaderVisibility, payload: visibility };
 }
 
-function setContextMenu(contextMenu) {
-	return { type: ActionTypes.setContextMenu, payload: contextMenu };
+export function setDim(obj) {
+	return { type: ActionTypes.setDim, payload: obj };
 }
 
-function setLocale(locale) {
+export function setLocale(locale) {
 	return { type: ActionTypes.setLocale, payload: locale };
 }

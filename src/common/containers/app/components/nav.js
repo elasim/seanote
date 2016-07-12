@@ -3,11 +3,11 @@ import React, { Component, PropTypes } from 'react';
 import Link from 'react-router/lib/Link';
 import FlatButton from 'material-ui/FlatButton';
 import pure from 'recompose/pure';
+import css from '../styles/nav.scss';
 import {
 	createResizeSpy,
 	getViewportWidth,
-} from '../../lib/dom-helpers';
-import css from './nav.scss';
+} from '../../../lib/dom-helpers';
 
 class Nav extends Component {
 	static propTypes = {

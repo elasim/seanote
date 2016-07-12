@@ -2,16 +2,17 @@ import Rx from 'rx';
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import { defineMessages } from 'react-intl';
-import Header from './header';
-import Nav from './nav';
+import Header from './components/header';
+import Nav from './components/nav';
+import Dim from './components/dim';
 import FlatButton from 'material-ui/FlatButton';
 import FontIcon from 'material-ui/FontIcon';
+import css from './styles/app.scss';
 import {
 	createScrollSpy,
 	createResizeSpy,
 	getViewportHeight,
 } from '../../lib/dom-helpers';
-import css from './app.scss';
 
 const messages = defineMessages({
 	list: {
@@ -99,6 +100,7 @@ export default class View extends Component {
 		}
 	}
 	render() {
+		const { dim } = this.props;
 		return (
 			<div className={cx(css.root, {
 				[css['hide-top']]: !this.props.headerVisibility,
@@ -110,7 +112,7 @@ export default class View extends Component {
 				<div className={cx(css.drawer)}>
 					<FlatButton onClick={() => this.props.prefetch()} label="Send"/>
 				</div>
-				<div className={css.dim} onClick={this::hideDrawer}></div>
+				<Dim active={!!dim} {...dim} />
 				<Nav className={css.nav} items={MENU_ITEMS} />
 				{this.props.children}
 			</div>
@@ -119,10 +121,14 @@ export default class View extends Component {
 }
 
 function showDrawer() {
+	this.props.setDim({
+		onClick: this::hideDrawer
+	});
 	this.setState({ showDrawer: true });
 }
 
 function hideDrawer() {
+	this.props.setDim(null);
 	this.setState({ showDrawer: false });
 }
 

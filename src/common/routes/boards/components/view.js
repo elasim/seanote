@@ -8,27 +8,35 @@ import css from '../styles/view.scss';
 export default class View extends Component {
 	static contextTypes = {
 		setTitle: PropTypes.func.isRequired,
+		hammer: PropTypes.object,
 	}
 	componentWillMount() {
 		this.context.setTitle('Board Item View');
 		this.state = {
-			activeOverlay: false
+			activeOverlay: false,
+			frontOverlay: false,
 		};
 	}
 	componentDidMount() {
 		window.scrollTo(0, 1);
-		this.resizeSpy = createResizeSpy(this::adjustLayout, getViewportWidth);
+		this.resizeSpy = createResizeSpy(::this.adjustLayout, getViewportWidth);
+		this.disposeDragHook = this.context.hammer.createHook(
+			::this.prepareOverlay,
+			null,
+			::this.moveBackOverlay
+		);
 	}
 	componentWillUnmount() {
 		this.resizeSpy.dispose();
+		this.disposeDragHook();
 	}
 	render() {
-		const { activeOverlay } = this.state;
+		const { activeOverlay, frontOverlay } = this.state;
 		return (
 			<Droppable
-				onDragOver={this::toogleOverlay}
-				onDragOut={this::toogleOverlay}
-				onDrop={this::toogleOverlay}
+				onDragOver={::this.toogleOverlay}
+				onDragOut={::this.toogleOverlay}
+				onDrop={::this.toogleOverlay}
 			>
 				<div className={cx(css.root, {
 					[css.full]: this.props.full
@@ -37,18 +45,32 @@ export default class View extends Component {
 					Content
 					<input />
 					<div className={cx(css.overlay, {
+						[css.front]: frontOverlay,
 						[css.active]: activeOverlay
 					})} />
 				</div>
 			</Droppable>
 		);
 	}
-}
 
-function toogleOverlay() {
-	this.setState({ activeOverlay: !this.state.activeOverlay });
-}
+	prepareOverlay() {
+		this.setState({
+			frontOverlay: true,
+		});
+	}
+	moveBackOverlay() {
+		this.setState({
+			frontOverlay: false
+		});
+	}
+	toogleOverlay(e, descriptor) {
+		const { data } = descriptor;
+		if (data.id === this.props.params.id) {
+			return;
+		}
+		this.setState({ activeOverlay: !this.state.activeOverlay });
+	}
+	adjustLayout() {
 
-function adjustLayout() {
-
+	}
 }

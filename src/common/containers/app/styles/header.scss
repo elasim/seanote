@@ -1,4 +1,4 @@
-@import "../variables.scss";
+@import "../../variables.scss";
 @import "./variables.scss";
 
 .root {
@@ -31,7 +31,6 @@
 
 	.icon {
 		position: absolute;
-		z-index: 101;
 		top: 5px;
 		padding: 2px;
 		color: #CFD8DC;

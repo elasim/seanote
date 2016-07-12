@@ -1,18 +1,20 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import withContext from '../with-context';
-import App from './app';
 import AppAction from '../../actions/app';
 import AuthAction from '../../actions/auth';
 import DataAction from '../../actions/data';
+import withContext from '../with-context';
+import App from './app';
 
 export default _.flow(
 	connect(
 		state => ({
 			headerVisibility: state.app.headerVisibility,
+			dim: state.app.dim,
 		}),
 		{
 			setHeaderVisibility: AppAction.setHeaderVisibility,
+			setDim: AppAction.setDim,
 			acquireToken: AuthAction.acquireToken,
 			prefetch: DataAction.prefetch,
 		}
