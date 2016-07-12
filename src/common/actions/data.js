@@ -1,9 +1,8 @@
 import { createAction } from 'redux-actions';
 import request from '../lib/request';
+import BoardAction from './board';
 
-export default {
-	prefetch,
-};
+export default { prefetch };
 
 export const ActionTypes = {
 	prefetchStart: 'DATA_PREFETCH_START',
@@ -12,24 +11,26 @@ export const ActionTypes = {
 };
 
 const prefetchStart = createAction(ActionTypes.prefetchStart);
-const prefetchSuccess = createAction(ActionTypes.prefetchSuccess);
+// const prefetchSuccess = createAction(ActionTypes.prefetchSuccess);
 const prefetchFailure = createAction(ActionTypes.prefetchFailure);
 
 function prefetch() {
-	return async (dispatch, getState) => {
+	return async dispatch => {
 		dispatch(prefetchStart());
 		try {
 			const res = await request.post('/api/_bulk', {
 				// change these tag to action type
-				// so, we can use them later
+				// so, that can use them later
 				boardList: ['/board/list', { sort: 'updatedAt' }],
 				groupList: ['/group/list', { filter: 'favorite', sort: 'accessAt'}],
 				messages: ['/message', { filter: 'unread', sort: 'updatedAt' }],
 				notification: ['/notification', { filter: 'unread', sort: 'updatedAt' }],
-				token: '/user',
 			});
 			const data = await res.json();
-			console.log('Prefetch', data);
+			dispatch(BoardAction.update({
+				items: data.boardList.items,
+				counts: data.boardList.counts
+			}));
 		} catch (e) {
 			dispatch(prefetchFailure(e));
 		}
