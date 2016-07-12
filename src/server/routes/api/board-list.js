@@ -19,7 +19,11 @@ export default {
 		});
 		const counts = await Board.count({ where });
 		return {
-			items: items.map(board => board.toJSON()),
+			items: items.map(board => {
+				const data = board.toJSON();
+				data.updatedAt = Date.parse(board.updatedAt);
+				return data;
+			}),
 			counts,
 			...paging,
 		};
