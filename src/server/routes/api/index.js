@@ -8,6 +8,10 @@ import Bulk from './bulk';
 const router = new Router();
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
+router.use((req, res, next) => {
+	res.set('Cache-Control', 'no-cache');
+	next();
+});
 
 for (let keyPath in APIDescriptors) {
 	const methods = APIDescriptors[keyPath];
