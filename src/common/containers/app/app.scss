@@ -4,7 +4,6 @@
 :global {
 	html {
 	  -ms-content-zooming: none;
-	  -ms-touch-action: pan-x pan-y;
 	}
 	span[type=button] {
 		appearance: none;
@@ -15,8 +14,7 @@
 }
 
 .root {
-	padding-top: $header-height + $header-padding-top
-		+ $nav-narrow-height;
+	padding-top: $header-container-height + $nav-narrow-height;
 
 	transition: padding-top $header-animation-props;
 
@@ -35,6 +33,7 @@
 }
 .root.hide-top {
 	padding-top: 10px;
+	padding-bottom: $header-container-height;
 }
 
 .dim {
@@ -102,6 +101,7 @@
 		bottom: auto;
 		width: auto;
 		height: $nav-narrow-height;
+		overflow: hiddden;
 	}
 }
 .hide-top .nav {
