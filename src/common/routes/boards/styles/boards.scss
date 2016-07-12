@@ -1,0 +1,51 @@
+@import "../../../containers/variables.scss";
+@import "../../../containers/app/variables.scss";
+@import "./variables.scss";
+
+.root {
+	overflow: auto;
+	
+	.list {
+		transition: top $header-animation-props;
+	}
+	.fab {
+		position: fixed;
+		right: 20px;
+		bottom: 20px;
+	}
+
+	@media(max-width: $three-column-width) {
+		.content {
+			display: none;
+		}
+		.list {
+			//prevent overlap last item by FAButton
+			padding-bottom: 54px + 20px;
+		}
+		&.viewer .list {
+			display: none;
+		}
+		&.viewer .content {
+			background-color: red;
+			display: initial;
+		}
+	}
+
+	@media(min-width: $three-column-width + 1) {
+		padding-left: $list-width;
+
+		.list {
+			background-color: #fff;
+
+			position: fixed;
+			top: $header-height + $header-padding-top;
+			left: $nav-side-width;
+			bottom: 0;
+			width: $list-width;
+			overflow: auto;
+		}
+		&.hide-top .list {
+			top: 0;
+		}
+	}
+}

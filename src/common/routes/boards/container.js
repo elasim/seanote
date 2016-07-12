@@ -4,6 +4,7 @@ import { create, rename, moveTrash } from '../../actions/board';
 
 export default connect(
 	state => ({
+		headerVisibility: state.app.headerVisibility,
 		board: state.board,
 	}),
 	{

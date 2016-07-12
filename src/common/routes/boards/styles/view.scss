@@ -1,0 +1,32 @@
+@import "../../../containers/variables.scss";
+@import "../../../containers/app/variables.scss";
+@import "./variables.scss";
+
+$overlay-animation: 0.1s linear;
+
+.root {
+	padding: 5px;
+	.overlay {
+		position: fixed;
+		left: $list-width + $nav-side-width;
+		top: $header-height + $header-padding-top;
+
+		border: #333 solid;
+		border-width: 0;
+		opacity: 0;
+	}
+	.overlay.active {
+		opacity: 0.5;
+		transition:
+			border-width $overlay-animation,
+			opacity $overlay-animation;
+		border-width: 10px;
+		bottom: 0;
+		right: 0;
+	}
+}
+.root.full {
+	.overlay {
+		top: 0;
+	}
+}

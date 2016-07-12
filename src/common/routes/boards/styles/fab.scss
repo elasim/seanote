@@ -1,0 +1,15 @@
+
+.root {
+	.icon {
+		transition: transform 0.2s linear;
+	}
+}
+.root.active {
+	.icon {
+		transform: rotate(-135deg);
+	}
+	.floating {
+		position: relative;
+		z-index: 102;
+	}
+}
