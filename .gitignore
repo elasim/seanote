@@ -36,6 +36,6 @@ jspm_packages
 # DB
 *.sqlite3
 
-lib/
+/lib/
 src/config/keystore/
 src/config/server.config.json
