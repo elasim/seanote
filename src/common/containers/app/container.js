@@ -8,7 +8,9 @@ import DataAction from '../../actions/data';
 
 export default _.flow(
 	connect(
-		null,
+		state => ({
+			headerVisibility: state.app.headerVisibility,
+		}),
 		{
 			setHeaderVisibility: AppAction.setHeaderVisibility,
 			acquireToken: AuthAction.acquireToken,

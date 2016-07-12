@@ -38,7 +38,7 @@ const messages = defineMessages({
 
 const MENU_ITEMS = [
 	{
-		label: 'Board',
+		label: 'My Boards',
 		icon: <FontIcon className="material-icons" color="#fff">&#xE8EF;</FontIcon>,
 		link: '/boards',
 	},
@@ -70,7 +70,6 @@ export default class View extends Component {
 	componentWillMount() {
 		this.context.setTitle('Seanote');
 		this.state = {
-			showHeader: true,
 			showDrawer: false,
 		};
 	}
@@ -102,7 +101,7 @@ export default class View extends Component {
 	render() {
 		return (
 			<div className={cx(css.root, {
-				[css['hide-top']]: !this.state.showHeader,
+				[css['hide-top']]: !this.props.headerVisibility,
 				[css['hide-drawer']]: !this.state.showDrawer,
 			})}>
 				<Header className={css.header}
@@ -114,7 +113,6 @@ export default class View extends Component {
 				<div className={css.dim} onClick={this::hideDrawer}></div>
 				<Nav className={css.nav} items={MENU_ITEMS} />
 				{this.props.children}
-				<div style={{height:4000}}>padding</div>
 			</div>
 		);
 	}
@@ -133,12 +131,12 @@ function adjustLayout() {
 
 	// portrait or too small to show header
 	if (getViewportHeight() <= 400) {
-		const showHeader = top === 0;
-		if (this.state.showHeader !== showHeader) {
-			this.setState({ showHeader });
+		const headerVisibility = top === 0;
+		if (this.props.headerVisibility !== headerVisibility) {
+			this.props.setHeaderVisibility(headerVisibility);
 		}
-	} else if (!this.state.showHeader) {
-		this.setState({ showHeader: true });
+	} else if (!this.props.headerVisibility) {
+		this.props.setHeaderVisibility(true);
 	}
 }
 
