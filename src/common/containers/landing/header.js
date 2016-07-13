@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { injectIntl, defineMessages } from 'react-intl';
+import { defineMessages } from 'react-intl';
 import { Link } from 'react-router';
 import cx from 'classnames';
 import FlatButton from 'material-ui/FlatButton';
@@ -24,13 +24,15 @@ const messages = defineMessages({
 	},
 });
 
-@injectIntl
 class Header extends Component {
 	static propTypes = {
 		shrink: PropTypes.bool,
 	};
+	static contextTypes = {
+		intl: PropTypes.object,
+	};
 	render() {
-		const { intl } = this.props;
+		const { intl } = this.context;
 		const buttonProps = {
 			backgroundColor: '#37474f',
 			labelStyle: {color: '#fff'},

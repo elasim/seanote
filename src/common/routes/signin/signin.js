@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router';
-import { defineMessages, injectIntl } from 'react-intl';
+import { defineMessages } from 'react-intl';
 import TextField from 'material-ui/TextField';
 import FontIcon from 'material-ui/FontIcon';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -75,13 +75,13 @@ const oauths = [
 	},
 ];
 
-@injectIntl
 export default class SignInView extends Component {
 	static contextTypes = {
 		setTitle: PropTypes.func.isRequired,
+		intl: PropTypes.object,
 	};
 	render() {
-		const { intl } = this.props;
+		const { intl } = this.context;
 		const textfieldProps = {
 			fullWidth: true,
 			underlineFocusStyle: {
@@ -91,13 +91,15 @@ export default class SignInView extends Component {
 		const buttonProps = {
 			className: css.button,
 		};
-		const oauthButtons = oauths.map(oauth => (
+		const oauthButtons = oauths.map((oauth, index) => (
 			<RaisedButton label={intl.formatMessage(oauth.label)}
 				backgroundColor={oauth.backgroundColor}
-				labelColor={oauth.color}
+				labelStyle={{
+					color: oauth.color
+				}}
 				icon={<FontIcon className={`fa ${oauth.icon}`}/>}
-				linkButton={true}
 				href={oauth.link}
+				key={index}
 				{...buttonProps} />
 		));
 		return (
