@@ -32,15 +32,6 @@ const List = sequelize.define('List', {
 	},
 	name: Sequelize.STRING,
 	isClosed: { type: Sequelize.BOOLEAN, defaultValue: true },
-	// items: {
-	// 	type: Sequelize.TEXT,
-	// 	get: function () {
-	// 		return JSON.parse(this.items);
-	// 	},
-	// 	set: function (value) {
-	// 		this.setDataValue('items', JSON.stringify(value));
-	// 	},
-	// },
 });
 
 const Card = sequelize.define('Card', {
