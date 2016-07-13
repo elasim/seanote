@@ -1,11 +1,8 @@
-import { User } from '../../data';
+import { requireAuth } from './middlewares';
 
 export default {
 	// whoami
-	get: [(req, res, next) => {
-		if (!req.user) return next(new Error('authorized only'));
-		next();
-	}, (req) => {
+	get: [requireAuth, (req) => {
 		return Promise.resolve({ token: req.session.passport.user.token });
 	}],
 	/*
