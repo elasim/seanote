@@ -39,3 +39,4 @@ jspm_packages
 /lib/
 /src/config/keystore/
 /src/config/server.config.js
+.obsolete/
