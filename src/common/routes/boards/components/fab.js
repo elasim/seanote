@@ -6,11 +6,11 @@ import Droppable from '../../../lib/dnd/droppable';
 import css from '../styles/fab.scss';
 
 const EventTypes = {
-	DRAG_OVER: Symbol('FAB.Event.DragOver'),
-	DRAG_OUT: Symbol('FAB.Event.DragOut'),
-	DROP: Symbol('FAB.Event.Drop'),
-	OPEN: Symbol('FAB.Event.Open'),
-	CLOSE: Symbol('FAB.Event.Close'),
+	DragOver: Symbol('FAB.Event.DragOver'),
+	DragOut: Symbol('FAB.Event.DragOut'),
+	Drop: Symbol('FAB.Event.Drop'),
+	Open: Symbol('FAB.Event.Open'),
+	Close: Symbol('FAB.Event.Close'),
 };
 
 class FAB extends Component {
@@ -55,35 +55,35 @@ class FAB extends Component {
 		this.setState({ isDragOver: true });
 		const { onMessage } = this.props;
 		if (onMessage) {
-			onMessage(EventTypes.DRAG_OVER, args);
+			onMessage(EventTypes.DragOver, args);
 		}
 	}
 	onOut(...args) {
 		this.setState({ isDragOver: false });
 		const { onMessage } = this.props;
 		if (onMessage) {
-			onMessage(EventTypes.DRAG_OUT, args);
+			onMessage(EventTypes.DragOut, args);
 		}
 	}
 	onDrop(...args) {
 		this.setState({ isDragOver: false });
 		const { onMessage } = this.props;
 		if (onMessage) {
-			onMessage(EventTypes.DROP, args);
+			onMessage(EventTypes.Drop, args);
 		}
 	}
 	open() {
 		this.setState({ isActive: true });
 		const { onMessage } = this.props;
 		if (onMessage) {
-			onMessage(EventTypes.OPEN, { dimClick: this.close });
+			onMessage(EventTypes.Open, { dimClick: this.close });
 		}
 	}
 	close() {
 		this.setState({ isActive: false });
 		const { onMessage } = this.props;
 		if (onMessage) {
-			onMessage(EventTypes.CLOSE);
+			onMessage(EventTypes.Close);
 		}
 	}
 }

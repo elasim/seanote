@@ -22,6 +22,8 @@ class Boards extends Component {
 			fabIcon: null,
 			fabFront: false,
 		};
+		this.handleBoardListEvent = ::this.handleBoardListEvent;
+		this.handleFabEvent = ::this.handleFabEvent;
 	}
 	componentDidMount() {
 		this.disposeDragHook = this.context.hammer.createHook(
@@ -34,11 +36,14 @@ class Boards extends Component {
 		this.disposeDragHook();
 	}
 	render() {
-		const { id } = this.props.params;
+		const {
+			params: { id },
+			headerVisibility,
+		} = this.props;
 		const { fabIcon, fabFront } = this.state;
 		let view;
 		if (id) {
-			view = <View full={!this.props.headerVisibility} params={{id}}/>;
+			view = <View full={!headerVisibility} id={id}/>;
 		} else {
 			view = <div>Select item</div>;
 		}
@@ -50,7 +55,7 @@ class Boards extends Component {
 				<div className={css.list}>
 					<List>
 						<Subheader>Board</Subheader>
-						<BoardList list={this.props.board.list} />
+						<BoardList list={this.props.board.list} onMessage={this.handleBoardListEvent} />
 					</List>
 				</div>
 				<div className={css.content}>
@@ -58,29 +63,40 @@ class Boards extends Component {
 				</div>
 				<FAB className={cx(css.fab, {
 					[css.front]: fabFront,
-				})} icon={fabIcon} onMessage={::this.handleFabEvent}/>
+				})} icon={fabIcon} onMessage={this.handleFabEvent}/>
 				<DragPreview/>
 			</div>
 		);
 	}
-
+	handleBoardListEvent(type, args) {
+		switch (type) {
+			case BoardList.EventTypes.DragOver: {
+				const [descriptor, drop] = args;
+				if (descriptor.data.id === drop.id) return;
+				this.props.sort(descriptor.data.id, drop.id);
+				return;
+			}
+			default:
+				return;
+		}
+	}
 	handleFabEvent(type, args) {
 		switch (type) {
-			case FAB.EventTypes.DRAG_OVER: {
+			case FAB.EventTypes.DragOver: {
 				return this.props.setDim({
 					icon: null,
 					text: 'Copying a this item',
 				});
 			}
-			case FAB.EventTypes.DROP: {
+			case FAB.EventTypes.Drop: {
 				const [, descriptor] = args;
 				console.log('Drop', descriptor);
 				return this.props.setDim(null);
 			}
-			case FAB.EventTypes.DRAG_OUT: {
+			case FAB.EventTypes.DragOut: {
 				return this.props.setDim(null);
 			}
-			case FAB.EventTypes.OPEN: {
+			case FAB.EventTypes.Open: {
 				this.props.setDim({
 					onClick: args.dimClick,
 				});
@@ -89,7 +105,7 @@ class Boards extends Component {
 				});
 				return;
 			}
-			case FAB.EventTypes.CLOSE: {
+			case FAB.EventTypes.Close: {
 				this.props.setDim(null);
 				this.setState({
 					fabFront: false,

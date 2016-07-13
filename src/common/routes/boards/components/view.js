@@ -41,7 +41,7 @@ export default class View extends Component {
 				<div className={cx(css.root, {
 					[css.full]: this.props.full
 				})}>
-					Board {this.props.params.id}
+					Board {this.props.id}
 					Content
 					<input />
 					<div className={cx(css.overlay, {
@@ -65,7 +65,7 @@ export default class View extends Component {
 	}
 	toogleOverlay(e, descriptor) {
 		const { data } = descriptor;
-		if (data.id === this.props.params.id) {
+		if (data.id === this.props.id) {
 			return;
 		}
 		this.setState({ activeOverlay: !this.state.activeOverlay });

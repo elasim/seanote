@@ -7,14 +7,16 @@ import Divider from 'material-ui/Divider';
 import IconMenu from 'material-ui/IconMenu';
 import IconButton from 'material-ui/IconButton';
 import MenuItem from 'material-ui/MenuItem';
-import FontIcon from 'material-ui/FontIcon';
+import DragHandleIcon from 'material-ui/svg-icons/editor/drag-handle';
+import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import Droppable from '../../../lib/dnd/droppable';
 import Draggable from '../../../lib/dnd/draggable';
 
 import pure from 'recompose/pure';
+
 const iconButtonElement = (
-	<IconButton iconClassName="material-icons">
-		&#xE5D4;
+	<IconButton>
+		<MoreVertIcon />
 	</IconButton>
 );
 const iconMenu = (
@@ -26,35 +28,36 @@ const iconMenu = (
 	</IconMenu>
 );
 const dragHandle = (
-	<FontIcon className="material-icons">&#xE25D;</FontIcon>
+	<DragHandleIcon />
 );
+
+const EventTypes = {
+	DragOver: Symbol('BoardList.DragOver'),
+	Drop: Symbol('BoardList.Drop'),
+};
 
 @pure
 @injectIntl
-export default class BoardList extends Component {
+class BoardList extends Component {
 	static propTypes = {
 		list: PropTypes.array.isRequired,
+		onMessage: PropTypes.func,
 	};
 	render() {
 		const { list, intl } = this.props;
 		const items = list
-			// Debug only to make long list
-			.reduce((aggregate, now) => {
-				const filler = new Array(20);
-				filler.fill(now);
-				return aggregate.concat(filler);
-			}, [])
-			.map((item,i) => {
+			.map((item, i) => {
 				const commonProps = {
 					primaryText: item.name,
-					secondaryText: intl.formatRelative(item.updatedAt),				};
+					secondaryText: intl.formatRelative(item.updatedAt),
+				};
 				const preview = (
-					<ListItem {...commonProps}
-						leftIcon={dragHandle}
-					/>
+					<ListItem {...commonProps} leftIcon={dragHandle} />
 				);
 				const draggableHandle = (
-					<Draggable data={item} preview={preview}>{dragHandle}</Draggable>
+					<Draggable data={item} preview={preview}>
+						{dragHandle}
+					</Draggable>
 				);
 				const props = {
 					...commonProps,
@@ -64,10 +67,11 @@ export default class BoardList extends Component {
 						this::open(item.id);
 					},
 				};
+				const dragEvents = {
+					onDragOver: (e, desc) => this.onDragOver(e, desc, item),
+				};
 				return (
-					<Droppable key={i}
-						onDragOver={({ descriptor }) => {}}
-						onDrop={() => { console.log(item.id); }} >
+					<Droppable key={i} {...dragEvents}>
 						<div>
 							<ListItem {...props} />
 							<Divider />
@@ -77,8 +81,18 @@ export default class BoardList extends Component {
 			});
 		return <div>{items}</div>;
 	}
+	onDragOver(event, ...args) {
+		const { onMessage } = this.props;
+		if (onMessage) {
+			onMessage(EventTypes.DragOver, args);
+		}
+	}
 }
 
 function open(val) {
 	browserHistory.push(`/boards/${val}`);
 }
+
+BoardList.EventTypes = EventTypes;
+
+export default BoardList;
