@@ -5,8 +5,10 @@ import jwt from 'jsonwebtoken';
 import { User } from '../data';
 import config from './config';
 
-// @Note: Scalability
+// @Refactors: Scalability, Security
 // Move this into external database to make server cluster
+// Also, It should be placed in reliable memcached database
+// to identify already used or not
 const sessions = {};
 const keyPair = getKeyPair();
 
@@ -40,7 +42,7 @@ export async function veifySession(session) {
 			delete sessions[id];
 			return false;
 		}
-		return claim;
+		return { claim, user };
 	} catch (e) {
 		console.error(e);
 		delete sessions[id];
@@ -74,7 +76,7 @@ export function connectJwtSession(req, res, next) {
 	return next();
 }
 
-function createToken(user) {
+export function createToken(user) {
 	return jwt.sign({ role: user.role }, keyPair.key, {
 		algorithm: config.auth.jwt.algorithm,
 		expiresIn: config.auth.jwt.exp,
@@ -83,7 +85,7 @@ function createToken(user) {
 	});
 }
 
-function verifyToken(token) {
+export function verifyToken(token) {
 	return jwt.verify(token, keyPair.pub, {
 		algorithms: [config.auth.jwt.algorithm],
 		issuer: config.auth.jwt.iss,

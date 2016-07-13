@@ -23,8 +23,8 @@ passport.serializeUser((user, done) => {
 // session : { id, token }
 passport.deserializeUser((session, done) => {
 	veifySession(session)
-		.then(claim => {
-			done(null, claim ? { ssid: session.id, claim } : null);
+		.then(({claim, user}) => {
+			done(null, claim ? { ssid: session.id, claim, db: user } : null);
 		}, e => {
 			console.log('session verification failed with Error', e);
 			done(null, null);
