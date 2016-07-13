@@ -17,6 +17,11 @@ export default class Draggable extends Component {
 		};
 		this.context.hammer.registerDraggable(this.dragDescriptor);
 	}
+	componentWillReceiveProps(nextProps) {
+		if (this.dragDescriptor.data !== nextProps.data) {
+			this.dragDescriptor.data = nextProps.data;
+		}
+	}
 	componentWillUnmount() {
 		this.context.hammer.unregisterDraggable(this.dragDescriptor);
 		this.dragDescriptor = null;

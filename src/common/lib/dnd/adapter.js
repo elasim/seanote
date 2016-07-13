@@ -1,5 +1,6 @@
 import Rx from 'rx';
 import Hammer from 'hammerjs';
+import { isEqual, getElementParentNodes } from './utils';
 
 export default class HammerAdapter {
 	context = null;
@@ -64,18 +65,19 @@ export default class HammerAdapter {
 	}
 }
 
-function isEqual(value) {
-	return (item) => item === value;
-}
-
 function onPanStart(e) {
+	const targets = getElementParentNodes(e.target);
 	const idx = this.draggable.findIndex(descriptor => {
-		return descriptor.element === e.target;
+		return targets.indexOf(descriptor.element) !== -1;
 	});
 	if (idx === -1) return;
 
-	this.dragInfo = this.draggable[idx];
-	this.dragStart$.onNext({ descriptor: this.dragInfo, event: e });
+	this.dragInfo = { ...this.draggable[idx] };
+	this.dragStart$.onNext({
+		descriptor: this.dragInfo,
+		event: e,
+		target: targets[idx],
+	});
 	e.preventDefault();
 }
 
@@ -84,10 +86,15 @@ function onPanMove(e) {
 	e.preventDefault();
 
 	const target = document.elementFromPoint(e.pointers[0].clientX, e.pointers[0].clientY);
+	const targets = getElementParentNodes(target);
+	const idx = this.droppable.findIndex(droppable => {
+		return targets.indexOf(droppable.element) !== -1;
+	});
+
 	this.dragMove$.onNext({
 		descriptor: this.dragInfo,
 		event: e,
-		target
+		target: idx > -1 ? this.droppable[idx].element : null,
 	});
 }
 

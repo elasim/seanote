@@ -48,12 +48,9 @@ export default class Droppable extends Component {
 
 function move({ descriptor, event, target }) {
 	const { isHover } = this.state;
-	let node = target;
 	const element = findDOMNode(this);
-	while (node && node !== element && node !== document.body) {
-		node = node.parentNode;
-	}
-	if (node === document.body || !node) {
+
+	if (target !== element) {
 		if (isHover) {
 			const { props: { onDragOut } } = this;
 			this::onDragOut(event, descriptor);
@@ -63,6 +60,7 @@ function move({ descriptor, event, target }) {
 		}
 		return;
 	}
+
 	if (!isHover) {
 		const { props: { onDragOver } } = this;
 		this::onDragOver(event, descriptor);

@@ -34,7 +34,7 @@ export default class HammerPreview extends Component {
 			}
 			if (this.state.offset) {
 				const {x, y} = this.state.offset;
-				const transform = `translate(${x}px, ${y}px)`;
+				const transform = `translate3d(${x}px, ${y}px, 0)`;
 				offset = {
 					'MSTransform': transform,
 					'WebkitTransform': transform,
