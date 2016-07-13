@@ -3,37 +3,50 @@ export default {
 	create,
 	rename,
 	moveTrash,
-	update,
+	receiveServerData,
 };
 
 export const ActionTypes = {
 	create: 'BOARD_CREATE',
 	rename: 'BOARD_RENAME',
+	sort: 'BOARD_SORT',
 	moveTrash: 'BOARD_MOVE_TRASH',
-	update: 'BOARD_UPDATE',
+	receiveServerData: 'BOARD_RECEIVE_SERVER_DATA',
 };
 
-export function create() {
+// create new board
+export function create(name) {
 	return {
 		type: ActionTypes.create,
 	};
 }
 
-export function rename() {
+// rename a board
+export function rename(id, name) {
 	return {
 		type: ActionTypes.rename,
 	};
 }
 
+// swap a & b
+export function sort(a, b) {
+	return {
+		type: ActionTypes.sort,
+		payload: { a, b },
+	};
+}
+
+// move a board to trash
 export function moveTrash() {
 	return {
 		type: ActionTypes.moveTrash,
 	};
 }
 
-export function update(data) {
+// receive board data from server
+export function receiveServerData(data) {
 	return {
-		type: ActionTypes.update,
+		type: ActionTypes.receiveServerData,
 		payload: data,
 	};
 }

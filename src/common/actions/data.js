@@ -27,7 +27,7 @@ function prefetch() {
 				notification: ['/notification', { filter: 'unread', sort: 'updatedAt' }],
 			});
 			const data = await res.json();
-			dispatch(BoardAction.update({
+			dispatch(BoardAction.receiveServerData({
 				items: data.boardList.items,
 				counts: data.boardList.counts
 			}));
