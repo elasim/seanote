@@ -20,7 +20,7 @@ class HomeView extends Component {
 						It will save your data when it available
 					</p>
 				</div>
-				<div clasasName={css.section}>
+				<div className={css.section}>
 					<h3>You can use Seanote Anywhere</h3>
 					<p>
 						Seanote will work even offline.<br/>
