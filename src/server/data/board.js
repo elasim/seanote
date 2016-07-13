@@ -30,24 +30,34 @@ const List = sequelize.define('List', {
 		defaultValue: Sequelize.UUIDV4,
 		primaryKey: true,
 	},
-	position: Sequelize.INTEGER,
 	name: Sequelize.STRING,
 	isClosed: { type: Sequelize.BOOLEAN, defaultValue: true },
-	items: {
+	// items: {
+	// 	type: Sequelize.TEXT,
+	// 	get: function () {
+	// 		return JSON.parse(this.items);
+	// 	},
+	// 	set: function (value) {
+	// 		this.setDataValue('items', JSON.stringify(value));
+	// 	},
+	// },
+});
+
+const Card = sequelize.define('Card', {
+	id: {
+		type: Sequelize.UUID,
+		defaultValue: Sequelize.UUIDV4,
+		primaryKey: true,
+	},
+	value: {
 		type: Sequelize.TEXT,
 		get: function () {
 			return JSON.parse(this.items);
 		},
 		set: function (value) {
-			this.setDataValue('items', JSON.stringify(value));
+			this.setDataValue('value', JSON.stringify(value));
 		},
-	},
-}, {
-	position: {
-		validate: {
-			min: 0,
-		}
 	},
 });
 
-export { Author, Board, List };
+export { Author, Board, List, Card };

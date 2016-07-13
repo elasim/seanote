@@ -1,63 +1,73 @@
 {
-	"board": {
-		"name": "Learn Seanote"
-	},
-	"list": [
+	"board": [
 		{
-			"position": 0,
-			"name": "Getting Started",
-			"items": [
+			"name": "Welcome to Seanote",
+			"list": [
 				{
-					"type": "note",
-					"detail": "This is a basic card"
+					"name": "Getting Started",
+					"items": [
+						{
+							"type": "note",
+							"text": "This is a basic card"
+						},
+						{
+							"type": "note",
+							"text": "You can set label on any card",
+							"label": {
+								"tag": "basic-label",
+								"color": "#F44336"
+							}
+						},
+						{
+							"type": "note",
+							"text": "There are other cards"
+						},
+						{
+							"type": "people",
+							"who": {
+								"name": "@elasim"
+							}
+						},
+						{
+							"type": "photo",
+							"uri": "seanote-storage://public/getting-started.png"
+						},
+						{
+							"type": "location",
+							"coord": {
+								"latitude": "37.5760076",
+								"longitude": "126.974728,17z"
+							}
+						},
+						{
+							"type": "time",
+							"when": 1467945815206
+						}
+					]
 				},
 				{
-					"type": "note",
-					"detail": "You can set label on any card",
-					"label": {
-						"tag": "basic-label",
-						"color": "#F44336"
-					}
-				},
-				{
-					"type": "note",
-					"detail": "There are other cards"
-				},
-				{
-					"type": "people",
-					"detail": {
-						"name": "@elasim"
-					}
-				},
-				{
-					"type": "photo",
-					"detail": "seanote-storage://public/getting-started.png"
-				},
-				{
-					"type": "location",
-					"detail": {
-						"latitude": "37.5760076",
-						"longitude": "126.974728,17z"
-					}
-				},
-				{
-					"type": "time",
-					"detail": 1467945815206
+					"name": "Share your board",
+					"items": [
+						{
+							"type": "note",
+							"text": "You can share your board with friend"
+						},
+						{
+							"type": "note",
+							"text": "Or You can create group and invite your friends"
+						}
+					]
 				}
 			]
 		},
 		{
-			"position": 1,
-			"name": "Share your board",
-			"items": [
-				{
-					"type": "note",
-					"detail": "You can share your board with friend"
-				},
-				{
-					"type": "note",
-					"detail": "Or You can create group and invite your friends"
-				}
+			"name": "First Board",
+			"list": [
+			]
+		},
+		{
+			"name": "Second Board",
+			"list": [
 			]
 		}
 	]

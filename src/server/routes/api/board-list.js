@@ -8,22 +8,40 @@ export default {
 			limit: Math.max(1, Math.min(100, req.query.limit || 10)),
 			offset: Math.max(req.query.offset || 0, 0)
 		};
-		const where = {
-			OwnerId: user.AuthorId
-		};
+		const where = { OwnerId: user.AuthorId };
 		const items = await Board.findAll({
 			where,
-			attributes: ['id', 'name', 'isPublic', 'updatedAt'],
+			attributes: ['id', 'name', 'isPublic', 'updatedAt', 'BeforeId'],
 			...paging
 			// 1 ~ 100 at once
 		});
+
+		const list = items
+			.reduce((ordered, current) => {
+				if (current.BeforeId !== null) {
+					const beforeIdx = ordered.findIndex(sortedItem => {
+						return sortedItem.id === current.BeforeId;
+					});
+					if (beforeIdx !== -1) {
+						ordered.splice(beforeIdx + 1, 0, current);
+					} else {
+						ordered.push(current);
+					}
+				} else {
+					ordered.unshift(current);
+				}
+				return ordered;
+			}, [])
+			.map(item => {
+				const data = item.toJSON();
+				data.updatedAt = Date.parse(item.updatedAt);
+				delete data.BeforeId;
+				return data;
+			});
+
 		const counts = await Board.count({ where });
 		return {
-			items: items.map(board => {
-				const data = board.toJSON();
-				data.updatedAt = Date.parse(board.updatedAt);
-				return data;
-			}),
+			items: list,
 			counts,
 			...paging,
 		};
