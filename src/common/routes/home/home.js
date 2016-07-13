@@ -13,7 +13,7 @@ class HomeView extends Component {
 		return (
 			<div>
 				<h2>Welcome!</h2>
-				<div clasasName={css.section}>
+				<div className={css.section}>
 					<h3>You can use Seanote Anywhere</h3>
 					<p>
 						Seanote will work even offline.<br/>
