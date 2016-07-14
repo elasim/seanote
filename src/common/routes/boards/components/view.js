@@ -10,12 +10,22 @@ export default class View extends Component {
 		setTitle: PropTypes.func.isRequired,
 		hammer: PropTypes.object,
 	}
+	static propTypes = {
+		id: PropTypes.string,
+		actions: PropTypes.object,
+		full: PropTypes.bool,
+	}
 	componentWillMount() {
 		this.context.setTitle('Board Item View');
 		this.state = {
 			activeOverlay: false,
 			frontOverlay: false,
 		};
+	}
+	componentWillReceiveProps(nextProps) {
+		if (this.props.id !== nextProps.id) {
+			this.loadListData();
+		}
 	}
 	componentDidMount() {
 		window.scrollTo(0, 1);
@@ -25,10 +35,18 @@ export default class View extends Component {
 			null,
 			::this.moveBackOverlay
 		);
+		this.loadListData();
+		
 	}
 	componentWillUnmount() {
 		this.resizeSpy.dispose();
 		this.disposeDragHook();
+	}
+	loadListData() {
+		const { id, actions: { load } } = this.props;
+		if (id) {
+			load(id);
+		}
 	}
 	render() {
 		const { activeOverlay, frontOverlay } = this.state;

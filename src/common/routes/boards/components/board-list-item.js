@@ -23,7 +23,7 @@ export default function BoardListItem(props, context) {
 				{...text}
 				leftIcon={handle}
 				rightIconButton={props.children}
-				onClick={props.onClick} />
+				onTouchTap={props.onClick} />
 		</Droppable>
 	);
 }

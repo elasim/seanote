@@ -2,6 +2,7 @@
 export default {
 	create,
 	rename,
+	sort,
 	moveTrash,
 	receiveServerData,
 };

@@ -1,18 +1,29 @@
+import flow from 'lodash/flow';
 import connect from 'react-redux/lib/components/connect';
-import Board from './boards';
+import bindActionCreators from 'redux/lib/bindActionCreators';
+import injectHammer from '../../lib/dnd/inject-hammer';
 import { setDim } from '../../actions/app';
-import { create, rename, sort, moveTrash } from '../../actions/board';
+import BoardActions from '../../actions/board';
+import ListActions from '../../actions/list';
+import Board from './boards';
 
-export default connect(
-	state => ({
+export default flow(
+	connect(mapStateToProps, mapDispatchToProps),
+	injectHammer()
+)(Board);
+
+function mapStateToProps(state, props) {
+	return {
 		headerVisibility: state.app.headerVisibility,
 		board: state.board,
-	}),
-	{
-		create,
-		rename,
-		sort,
-		moveTrash,
-		setDim
-	}
-)(Board);
+		list: state.list[props.params.id],
+	};
+}
+
+function mapDispatchToProps(dispatch) {
+	return {
+		setDim: (dimArg) => dispatch(setDim(dimArg)),
+		boardAction: bindActionCreators(BoardActions, dispatch),
+		listActions: bindActionCreators(ListActions, dispatch),
+	};
+}
