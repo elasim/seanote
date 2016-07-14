@@ -72,6 +72,10 @@ module.exports = {
 		}),
 		// new webpack.NoErrorsPlugin()
 	],
+	node: {
+		__dirname: false,
+		__filename: false,
+	},
 	// node: {
 	// 	console: false,
 	// 	global: false,

@@ -10,6 +10,8 @@ module.exports = {
 	},
 	output: {
 		filename: 'client.js',
+		path: '/lib/prod/assets/',
+		publicPath: '/assets/',
 	},
 	module: {
 		loaders: [
