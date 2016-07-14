@@ -2,7 +2,6 @@ import React, { Component, PropTypes, } from 'react';
 import Subheader from 'material-ui/Subheader';
 import { List } from 'material-ui/List';
 import ContentCopyIcon from 'material-ui/svg-icons/content/content-copy';
-import injectHammer from '../../lib/dnd/inject-hammer';
 import DragPreview from '../../lib/dnd/preview';
 import BoardList from './components/board-list';
 import View from './components/view';
@@ -10,7 +9,6 @@ import FAB from './components/fab';
 import cx from 'classnames';
 import css from './styles/boards.scss';
 
-@injectHammer()
 class Boards extends Component {
 	static contextTypes = {
 		setTitle: PropTypes.func,
@@ -39,11 +37,13 @@ class Boards extends Component {
 		const {
 			params: { id },
 			headerVisibility,
+			list,
+			listActions,
 		} = this.props;
 		const { fabIcon, fabFront } = this.state;
 		let view;
 		if (id) {
-			view = <View full={!headerVisibility} id={id}/>;
+			view = <View full={!headerVisibility} id={id} data={list} actions={listActions}/>;
 		} else {
 			view = <div>Select item</div>;
 		}
@@ -73,7 +73,7 @@ class Boards extends Component {
 			case BoardList.EventTypes.DragOver: {
 				const [descriptor, drop] = args;
 				if (descriptor.data.id === drop.id) return;
-				this.props.sort(descriptor.data.id, drop.id);
+				this.props.boardAction.sort(descriptor.data.id, drop.id);
 				return;
 			}
 			default:
