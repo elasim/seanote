@@ -21,16 +21,13 @@ function prefetch() {
 			const res = await request.post('/api/_bulk', {
 				// change these tag to action type
 				// so, that can use them later
-				boardList: ['/board/list', { sort: 'updatedAt' }],
-				groupList: ['/group/list', { filter: 'favorite', sort: 'accessAt'}],
+				boards: ['/board', { sort: 'updatedAt' }],
+				groups: ['/group', { filter: 'favorite', sort: 'accessAt'}],
 				messages: ['/message', { filter: 'unread', sort: 'updatedAt' }],
 				notification: ['/notification', { filter: 'unread', sort: 'updatedAt' }],
 			});
 			const data = await res.json();
-			dispatch(BoardAction.receiveServerData({
-				items: data.boardList.items,
-				counts: data.boardList.counts
-			}));
+			dispatch(BoardAction.receiveServerData(data.boards));
 		} catch (e) {
 			dispatch(prefetchFailure(e));
 		}
