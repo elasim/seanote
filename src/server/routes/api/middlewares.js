@@ -29,9 +29,9 @@ export function cacheControl(value) {
 	};
 }
 
-export function catchError(status, defaultError) {
+export function catchError(defaultStatusCode, defaultError) {
 	return (error, req, res, next) => {
-		res.status(status).json({
+		res.status(error.statusCode || defaultStatusCode).json({
 			error: error.message || defaultError
 		});
 	};

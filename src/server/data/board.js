@@ -43,7 +43,7 @@ const Card = sequelize.define('Card', {
 	value: {
 		type: Sequelize.TEXT,
 		get: function () {
-			return JSON.parse(this.items);
+			return JSON.parse(this.getDataValue('value'));
 		},
 		set: function (value) {
 			this.setDataValue('value', JSON.stringify(value));

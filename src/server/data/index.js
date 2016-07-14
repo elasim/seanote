@@ -44,11 +44,15 @@ export {
 	// Groups
 	Group,
 	GroupProfile,
+	beginTransaction
 };
 
+function beginTransaction() {
+	return sequelize.transaction();
+}
 
 User.createWithClaim = (provider, id, profiles) => {
-	return sequelize.transaction().then(async transaction => {
+	return beginTransaction().then(async transaction => {
 		const t = { transaction };
 		try {
 			const user = await createUser(t, profiles);
@@ -68,7 +72,7 @@ User.createWithClaim = (provider, id, profiles) => {
 };
 
 User.createWithLogin = (username, password) => {
-	return sequelize.transaction().then(async transaction => {
+	return beginTransaction().then(async transaction => {
 		const t = { transaction };
 		try {
 			const user = await createUser(t);
@@ -88,17 +92,17 @@ User.createWithLogin = (username, password) => {
 
 // Because sequelize don't support stored procedure for some rdbms
 // create user template manually on single transaction
-async function createUser(t, profiles) {
+async function createUser(transaction, profiles) {
 	const author = await Author.create({
 		type: 'user'
-	}, t);
+	}, transaction);
 	const user = await User.create({
 		AuthorId: author.id
-	}, t);
+	}, transaction);
 	await UserProfile.create({
 		UserId: user.id,
 		...profiles,
-	}, t);
+	}, transaction);
 
 	await userTemplate.board.reduce(async (beforeId, boardTemplate) => {
 		const { list, ...props } = boardTemplate;
@@ -106,27 +110,27 @@ async function createUser(t, profiles) {
 			...props,
 			OwnerId: author.id,
 			BeforeId: await beforeId,
-		}, t);
+		}, transaction);
 		await list.reduce(async (beforeId, listTemplate) => {
 			const { name, items } = listTemplate;
 			const list = await List.create({
 				name,
 				BoardId: board.id,
 				BeforeId: await beforeId,
-			}, t);
+			}, transaction);
 			await items.reduce(async (beforeId, cardTemplate) => {
 				const card = await Card.create({
 					value: cardTemplate,
 					ListId: list.id,
 					BeforeId: await beforeId,
-				}, t);
+				}, transaction);
 				return card.id;
 			}, Promise.resolve(null));
 			return list.id;
 		}, Promise.resolve(null));
 		return board.id;
 	}, Promise.resolve(null));
-	
+
 	return user;
 }
 
@@ -141,4 +145,4 @@ async function createUser(t, profiles) {
 	UserProfile,
 	Group,
 	GroupProfile,
-].forEach(t => t.sync({ force: !0 }));
+].forEach(t => t.sync({ force: !1 }));

@@ -21,13 +21,12 @@ export default function configure(router, descriptors) {
 }
 
 function createHandler(action) {
-	return async (req, res) => {
+	return async (req, res, next) => {
 		try {
 			const result = await action(req);
 			return result ? res.json(result) : res.end();
 		} catch (e) {
-			console.error(e);
-			return res.status(500).end();
+			return next(e);
 		}
 	};
 }
