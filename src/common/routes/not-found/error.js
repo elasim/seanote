@@ -7,7 +7,7 @@ export default class ErrorView extends Component {
 	render() {
 		return (
 			<div>
-				FUCK YOU
+				Page not found 404
 			</div>
 		);
 	}
