@@ -37,7 +37,7 @@ const messages = defineMessages({
 	},
 });
 
-const MENU_ITEMS = [
+const NAV_HEADERS = [
 	{
 		label: 'My Boards',
 		icon: <FontIcon className="material-icons" color="#fff">&#xE8EF;</FontIcon>,
@@ -64,15 +64,23 @@ export default class View extends Component {
 	static contextTypes = {
 		setTitle: PropTypes.func,
 	};
-	constructor(...args) {
-		super(...args);
-
-	}
 	componentWillMount() {
 		this.context.setTitle('Seanote');
 		this.state = {
 			showDrawer: false,
+			navItems: {
+				0: this.props.boards,
+			},
 		};
+	}
+	componentWillReceiveProps(nextProps) {
+		if (this.props.boards !== nextProps.boards) {
+			this.setState({
+				navItems: {
+					0: nextProps.boards
+				}
+			});
+		}
 	}
 	componentDidMount() {
 		// refresh token in a minute
@@ -100,7 +108,7 @@ export default class View extends Component {
 		}
 	}
 	render() {
-		const { dim } = this.props;
+		const { dim, } = this.props;
 		return (
 			<div className={cx(css.root, {
 				[css['hide-top']]: !this.props.headerVisibility,
@@ -113,8 +121,13 @@ export default class View extends Component {
 					<FlatButton onClick={() => this.props.prefetch()} label="Send"/>
 				</div>
 				<Dim active={!!dim} {...dim} />
-				<Nav className={css.nav} items={MENU_ITEMS} />
+				<Nav className={css.nav} headers={NAV_HEADERS}
+					items={this.state.navItems}
+				/>
 				{this.props.children}
+				<div style={{height: 4000}}>
+					{/* 4k padding to debug scroll event */}
+				</div>
 			</div>
 		);
 	}

@@ -9,9 +9,11 @@ import {
 	getViewportWidth,
 } from '../../../lib/dom-helpers';
 
+@pure
 class Nav extends Component {
 	static propTypes = {
-		items: PropTypes.array,
+		headers: PropTypes.array,
+		items: PropTypes.object,
 		className: PropTypes.string,
 		style: PropTypes.object,
 	}
@@ -35,17 +37,18 @@ class Nav extends Component {
 		}
 	}
 	render() {
-		const { className, style, items } = this.props;
+		const { className, style, headers, items } = this.props;
 		const { narrow } = this.state;
-		const menus = items.map((item, i) => {
+		const menus = headers.map((header, headIndex) => {
 			const props = {
-				key:  i,
+				key:  headIndex,
 				narrow,
-				...item,
+				...header,
 				style: {
 					width: narrow ?
-						`${Math.floor(1 / items.length * 100)}%` : '100%'
-				}
+						`${Math.floor(1 / headers.length * 100)}%` : '100%'
+				},
+				items: items[headIndex] || [],
 			};
 			return <NavMenu {...props} />;
 		});
@@ -64,35 +67,62 @@ function adjustLayout() {
 	}
 }
 
-class NavMenu extends Component {
-	static propTypes = {
-		className: PropTypes.string,
-		style: PropTypes.object,
-		narrow: PropTypes.bool,
-		icon: PropTypes.element,
-		label: PropTypes.string,
-		link: PropTypes.string,
-		items: PropTypes.array,
+NavMenu.propTypes = {
+	className: PropTypes.string,
+	style: PropTypes.object,
+	narrow: PropTypes.bool,
+	icon: PropTypes.element,
+	label: PropTypes.string,
+	link: PropTypes.string,
+	items: PropTypes.array,
+};
+
+function NavMenu(props) {
+	const {
+		label,
+		icon,
+		narrow,
+		className,
+		style,
+		link,
+		items,
+	} = props;
+	const commonProps = {
+		labelStyle: {color: '#fff'},
 	};
-	render() {
-		const { label, icon, narrow, className, style, link } = this.props;
+	const childs = items.map((item, index) => {
 		return (
-			<div className={cx(css.menu, className)} style={style}>
-				<Link to={link}>
-					<FlatButton
-						icon={icon}
-						label={!narrow ? label : null}
-						labelStyle={{color: '#fff'}}
-						style={{
-							width: '100%',
-							height: 50,
-							textAlign: !narrow ? 'left' : 'center',
-						}} />
-				</Link>
-				{/* items here */}
-			</div>
+			<Link to={`${link}/${item.id}`} key={index}>
+				<FlatButton {...commonProps}
+					style={{
+						textAlign: 'left',
+						width: '100%',
+					}}
+					label={item.name}
+				/>
+			</Link>
 		);
-	}
+	});
+	return (
+		<div className={cx(css.menu, className)} style={style}>
+			<Link to={link}>
+				<FlatButton
+					{...commonProps}
+					icon={icon}
+					label={!narrow ? label : null}
+					style={{
+						width: '100%',
+						height: 50,
+						textAlign: !narrow ? 'left' : 'center',
+					}} />
+			</Link>
+			<div style={{
+				display: narrow ? 'none' : 'block'
+			}}>
+				{childs}
+			</div>
+		</div>
+	);
 }
 
-export default pure(Nav);
+export default Nav;
