@@ -21,3 +21,26 @@ export async function requireAuth(req, res, next) {
 		return next(new Error('authentication required'));
 	}
 }
+
+export function cacheControl(value) {
+	return (req, res, next) => {
+		res.set('Cache-Control', value);
+		next();
+	};
+}
+
+export function catchError(status, defaultError) {
+	return (error, req, res, next) => {
+		res.status(status).json({
+			error: error.message || defaultError
+		});
+	};
+}
+
+export function notFound(message) {
+	return (req, res) => {
+		res.status(404).json({
+			error: message
+		});
+	};
+}

@@ -1,4 +1,4 @@
-import EventStream from '../../lib/event-stream';
+import EventStream from '../../../lib/event-stream';
 
 export default function(req, res) {
 	if (!req.user) {

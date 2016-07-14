@@ -1,6 +1,7 @@
 import url from 'url';
 import qs from 'querystring';
-import APIDescriptors from './api-descriptors';
+import pathToRegexp from 'path-to-regexp';
+import APIDescriptors from '../descriptors';
 
 export default function (req, res) {
 	const tasks = parseBody(req.body);
@@ -77,14 +78,24 @@ function executeMiddlewareSteps(req, res, middlewares) {
 	}));
 }
 
+const routeKeys = Object.keys(APIDescriptors);
+const routeMatches = routeKeys.map(route => pathToRegexp(route));
+
 function getTaskSteps(tasks) {
 	const middlewares = [];
 	const actions = [];
 	for (let task of tasks) {
-		const methods = APIDescriptors[task.api];
-		if (!methods || !methods.get) {
-			console.log(methods, task.api);
-			return null;
+		const matchedAPIs = routeMatches.filter(pattern => pattern.test(task.api));
+		if (matchedAPIs.length > 1) {
+			throw new Error('ambiguous request');
+		}
+		if (matchedAPIs.length === 0) {
+			throw new Error('invalid request');
+		}
+		const idx = routeMatches.indexOf(matchedAPIs[0]);
+		const methods = APIDescriptors[routeKeys[idx]];
+		if (!methods.get) {
+			throw new Error('bulk api is unusable for this request');
 		}
 		const actionInfo = methods.get;
 		if (actionInfo instanceof Array) {

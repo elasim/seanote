@@ -1,4 +1,4 @@
-import { requireAuth } from './middlewares';
+import { requireAuth } from '../middlewares';
 
 export default {
 	// whoami
