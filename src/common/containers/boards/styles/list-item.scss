@@ -9,7 +9,7 @@
 .root {
 	background-color: #fff;
 	cursor: default;
-	color: #000;
+	font-family: Roboto, sans-serif;
 
 	height: 48px;
 	padding: 6px 0;
@@ -36,21 +36,28 @@
 .primary {
 	@include hide-text-overflow;
 
-	font-size: 16px;
-	font-weight: bold;
+	color: #212121;
+	font-size: 15px;
 	line-height: 16px;
 
 	padding: 4px 0 8px 0;
+}
+.active .primary {
+	color: #fff;
 }
 
 .secondary {
 	@include hide-text-overflow;
 
+	color: #757575;
 	font-size: 14px;
 	line-height: 16px;
 
 	margin: 0;
 	padding-bottom: 4px;
+}
+.active .secondary {
+	color: #fff;
 }
 
 .left-icon {
