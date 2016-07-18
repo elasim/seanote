@@ -61,6 +61,9 @@ class Boards extends Component {
 				<div ref="list" className={css.list}>
 					<List activeItem={id} list={board.list} onMessage={this.handleBoardListEvent} />
 				</div>
+				<div className={cx(css.overlay, {
+					[css.active]: board.renumbering
+				})} />
 				<div className={css.content}>
 					{view}
 				</div>
@@ -69,9 +72,6 @@ class Boards extends Component {
 				<DragPreview className={css.preview} />
 			</div>
 		);
-					// <div className={cx(css.overlay, {
-					// 	[css.active]: board.renumbering
-					// })} />
 	}
 	listLoadMore() {
 		const listElement = findDOMNode(this.refs.list);

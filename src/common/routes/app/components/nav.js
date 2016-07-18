@@ -2,14 +2,39 @@ import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import Link from 'react-router/lib/Link';
 import FlatButton from 'material-ui/FlatButton';
+import FontIcon from 'material-ui/FontIcon';
 import pure from 'recompose/pure';
 import css from '../styles/nav.scss';
+
 import {
 	createResizeSpy,
 	getViewportWidth,
 } from '../../../lib/dom-helpers';
 
 const PureNavMenu = pure(NavMenu);
+
+const NAV_HEADERS = [
+	{
+		label: 'My Boards',
+		icon: <FontIcon className="material-icons" color="#fff">&#xE8EF;</FontIcon>,
+		link: '/boards',
+	},
+	{
+		label: 'Groups',
+		icon: <FontIcon className="material-icons" color="#fff">&#xE886;</FontIcon>,
+		link: '/groups',
+	},
+	{
+		label: 'Messages',
+		icon: <FontIcon className="material-icons" color="#fff">&#xE0B7;</FontIcon>,
+		link: '/messages',
+	},
+	{
+		label: 'Notifications',
+		icon: <FontIcon className="material-icons" color="#fff">&#xE7F4;</FontIcon>,
+		link: '/notifications',
+	}
+];
 
 @pure
 class Nav extends Component {
@@ -41,16 +66,16 @@ class Nav extends Component {
 
 	}
 	render() {
-		const { className, style, headers } = this.props;
+		const { className, style } = this.props;
 		const { narrow } = this.state;
-		const menus = headers.map((header, headIndex) => {
+		const menus = NAV_HEADERS.map((header, headIndex) => {
 			const props = {
 				key:  headIndex,
 				narrow,
 				...header,
 				style: {
 					width: narrow ?
-						`${Math.floor(1 / headers.length * 100)}%` : '100%'
+						`${Math.floor(1 / NAV_HEADERS.length * 100)}%` : '100%'
 				},
 			};
 			return <PureNavMenu {...props} />;
@@ -102,7 +127,6 @@ function NavMenu(props) {
 		</div>
 	);
 }
-
 
 NavMenu.propTypes = {
 	className: PropTypes.string,

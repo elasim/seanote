@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { IntlProvider } from 'react-intl';
 import AppActions from '../actions/app';
 
-export default (Container) => {
-	class ComposedContainer extends Component {
+export default (ComposedComponent) => {
+	class WithContext extends Component {
 		static childContextTypes = {
 			getTitle: PropTypes.func,
 			setTitle: PropTypes.func,
@@ -43,7 +43,7 @@ export default (Container) => {
 		render() {
 			return (
 				<IntlProvider locale={this.props.locale}>
-					<Container {...this.props}/>
+					<ComposedComponent {...this.props}/>
 				</IntlProvider>
 			);
 		}
@@ -54,5 +54,5 @@ export default (Container) => {
 			locale: state.app.locale
 		}),
 		{ ...AppActions },
-	)(ComposedContainer);
+	)(WithContext);
 };
