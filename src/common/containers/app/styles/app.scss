@@ -46,8 +46,9 @@
 	z-index: $dim-index + 1;
 	left: 0;
 	top: 0;
-	width: $drawer-width;
 	bottom: 0;
+	width: $drawer-width;
+	padding-top: 40px;
 	overflow: auto;
 
 	transition:

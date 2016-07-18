@@ -3,7 +3,8 @@ import React, { Component, PropTypes } from 'react';
 import Header from './components/header';
 import Nav from './components/nav';
 import Dim from './components/dim';
-import FlatButton from 'material-ui/FlatButton';
+import { List, ListItem } from 'material-ui/List';
+import Subheader from 'material-ui/Subheader';
 import css from './styles/app.scss';
 import messages from './define-messages';
 import {
@@ -51,7 +52,17 @@ export default class App extends Component {
 			})}>
 				<Header className={css.header} onMessage={this.onMessage} />
 				<div className={cx(css.drawer)}>
-					<FlatButton onClick={this.props.prefetch} label="Send"/>
+					<List>
+						<Subheader>USER NAME</Subheader>
+						<ListItem primaryText="Setting"/>
+						<ListItem primaryText="Logout"/>
+						<Subheader>Developer</Subheader>
+						<ListItem primaryText="Prefetch" onClick={this.props.prefetch}/>
+						<ListItem primaryText="ver.20160719.nightly"/>
+						<Subheader>Supports</Subheader>
+						<ListItem primaryText="Feedback"/>
+						<ListItem primaryText="Help"/>
+					</List>
 				</div>
 				<Dim active={!!dim} {...dim} />
 				<Nav className={css.nav} />
