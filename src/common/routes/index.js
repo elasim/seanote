@@ -1,18 +1,18 @@
 import React from 'react';
 import { IndexRoute, Route } from 'react-router';
-import App from './app';
-import Landing from './landing';
 
-import Home from './home';
-import About from './about';
-import SignIn from './signin';
-import Dashboard from './dashboard';
-import Boards from './boards';
-import Groups from './groups';
-import Messages from './messages';
-import Notifications from './notifications';
-import Setting from './setting';
-import NotFound from './not-found';
+import App from '../containers/app';
+import Landing from '../containers/landing';
+import Home from '../containers/home';
+import About from '../containers/about';
+import SignIn from '../containers/signin';
+import Dashboard from '../containers/dashboard';
+import Boards from '../containers/boards';
+import Groups from '../containers/groups';
+import Messages from '../containers/messages';
+import Notifications from '../containers/notifications';
+import Setting from '../containers/setting';
+import NotFound from '../containers/not-found';
 
 // Configure Routes
 export function configureRoutes(store, initalState) {
