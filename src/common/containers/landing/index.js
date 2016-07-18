@@ -1,8 +1,8 @@
 import cx from 'classnames';
 import React, { Component } from 'react';
-import withContext from '../with-context';
-import Header from './header';
+import withContext from '../../lib/with-context';
 import { createScrollSpy } from '../../lib/dom-helpers';
+import Header from './header';
 
 import css from './landing.scss';
 

@@ -5,7 +5,7 @@ import flow from 'lodash/flow';
 import AppAction from '../../actions/app';
 import AuthAction from '../../actions/auth';
 import DataAction from '../../actions/data';
-import withContext from '../with-context';
+import withContext from '../../lib/with-context';
 import App from './app';
 
 class AppContainer extends Component {
