@@ -29,50 +29,8 @@ $mobile-height: 80px;
 	margin: 0;
 }
 .list > li {
-	position: relative;
-	border-bottom: 1px solid #ccc;
-
-	a {
-		height: $mobile-height;
-		color: inherit;
-		display: block;
-	}
-	a:hover, {
-		color: inherit;
-	}
-	a:active {
-		color: #fff;
-		background-color: #607D8B;
-	}
-	h3, p {
-		position: absolute;
-		margin: 0;
-		padding: 0;
-	}
-	h3 {
-		top: 5px;
-		left: 5px;
-
-		i {
-			vertical-align: top;
-		}
-	}
-	p {
-		text-align: right;
-		right: 5px;
-		bottom: 5px;
-	}
-	@media (min-width: 840px) {
+	@media (min-width: 960px + 1) {
 		@include col(1, 2);
-
-		background-color: #fff;
-		border-radius: 4px;
-		border: 1px solid #ccc;
-		box-shadow: 2px 2px 2px #ccc;
-
-		a {
-			height: $desktop-height;
-		}
 	}
 	@media (min-width: 1280px) {
 		@include col(1, 4);

@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import Link from 'react-router/lib/Link';
 import { intlShape } from 'react-intl';
+import Link from 'react-router/lib/Link';
+import FlatButton from 'material-ui/FlatButton';
+import { Card, CardHeader, CardText, CardActions } from 'material-ui/Card';
 import css from './groups.scss';
 
 export default class Groups extends Component {
@@ -49,10 +51,17 @@ export default class Groups extends Component {
 				);
 				return (
 					<li key={index}>
-						<Link to={`/groups/${group.id}`}>
-							<h3>{locked}{group.name}</h3>
-							<p>Member {intl.formatNumber(group.peoples)}</p>
-						</Link>
+						<Card>
+							<CardHeader title={group.name}
+								subtitle={`Member ${intl.formatNumber(group.peoples)}`}
+							/>
+							<CardActions>
+								<Link to={`/groups/${group.id}`}>
+									<FlatButton label="Go" backgroundColor="#90A4AE" />
+								</Link>
+								<FlatButton label="Join" backgroundColor="#B0BEC5" />
+							</CardActions>
+						</Card>
 					</li>
 				);
 			});
