@@ -1,0 +1,64 @@
+@mixin hide-text-overflow {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	overflow: hidden;
+	display: block;
+}
+
+.root {
+	background-color: #fff;
+	cursor: default;
+	color: #000;
+
+	height: 48px;
+	padding: 6px 0;
+
+	a,
+	a:active,
+	a:focus {
+		color: inherit;
+	}
+	a:hover {
+		color: #666;
+	}
+
+}
+.root.active {
+	background-color: #607D8B;
+	color: #fff;
+
+	a {
+		color: #fff;
+	}
+}
+
+.primary {
+	@include hide-text-overflow;
+
+	font-size: 16px;
+	font-weight: bold;
+	line-height: 16px;
+
+	padding: 4px 0 8px 0;
+}
+
+.secondary {
+	@include hide-text-overflow;
+
+	font-size: 14px;
+	line-height: 16px;
+
+	margin: 0;
+	padding-bottom: 4px;
+}
+
+.left-icon {
+	padding: 12px 8px;
+	float: left;
+	height: 24px;
+}
+
+.right-icon {
+	float: right;
+}

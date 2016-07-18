@@ -10,6 +10,6 @@ export default handleActions({
 function load(state, { payload }) {
 	return {
 		...state,
-		[payload.id]: payload
+		[payload.id]: payload.items
 	};
 }

@@ -1,7 +1,7 @@
-import { createAction } from 'redux-actions';
 import { browserHistory } from 'react-router';
 import emptyFunction from 'fbjs/lib/emptyFunction';
 import User from '../data/user';
+import execute from '../data/execute';
 
 export default {
 	acquireToken,
@@ -13,22 +13,10 @@ export const ActionTypes = {
 	tokenFailure: 'AUTH_TOKEN_FAIL',
 };
 
-const requestToken = createAction(
-	ActionTypes.requestToken
-);
-const responseToken = createAction(
-	ActionTypes.responseToken,
-	token => token
-);
-const notifyFailure = createAction(
-	ActionTypes.tokenFailure,
-	e => e
-);
-
-function acquireToken(callback = emptyFunction) {
+export function acquireToken(callback = emptyFunction) {
 	return async dispatch => {
 		dispatch(requestToken());
-		const user = await User.whoami();
+		const user = await execute(User.whoami());
 		if (user) {
 			dispatch(responseToken(user.token));
 			if (!user.token) {
@@ -41,6 +29,24 @@ function acquireToken(callback = emptyFunction) {
 			callback(e);
 			redirectToHome();
 		}
+	};
+}
+
+function requestToken() {
+	return {
+		type: ActionTypes.requestToken,
+	};
+}
+function responseToken(token) {
+	return {
+		type: ActionTypes.responseToken,
+		payload: token,
+	};
+}
+function notifyFailure(error) {
+	return {
+		type: ActionTypes.tokenFailure,
+		payload: error,
 	};
 }
 

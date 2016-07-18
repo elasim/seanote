@@ -1,4 +1,3 @@
-import { createAction } from 'redux-actions';
 import request from '../lib/request';
 import BoardAction from './board';
 
@@ -10,26 +9,32 @@ export const ActionTypes = {
 	prefetchFailure: 'DATA_PREFETCH_FAILURE',
 };
 
-const prefetchStart = createAction(ActionTypes.prefetchStart);
-// const prefetchSuccess = createAction(ActionTypes.prefetchSuccess);
-const prefetchFailure = createAction(ActionTypes.prefetchFailure);
-
-function prefetch() {
+export function prefetch() {
 	return async dispatch => {
 		dispatch(prefetchStart());
 		try {
-			const res = await request.post('/api/_bulk', {
-				// change these tag to action type
-				// so, that can use them later
-				boards: ['/board', { sort: 'updatedAt' }],
-				groups: ['/group', { filter: 'favorite', sort: 'accessAt'}],
-				messages: ['/message', { filter: 'unread', sort: 'updatedAt' }],
-				notification: ['/notification', { filter: 'unread', sort: 'updatedAt' }],
-			});
+			const res = await request.bulk('/api/_bulk', [
+				{ '/board?offset=0&limit=10': 'get' },
+				{ '/group?sort=updatedAt&filter=favorites': 'get' },
+				{ '/message?sort=updatedAt&filter=unread': 'get' },
+				{ '/notification?sort=updatedAt&filter=unread': 'get' },
+			]);
 			const data = await res.json();
-			dispatch(BoardAction.receiveServerData(data.boards));
+			const [ board, group, message, notification ] = data.results;
+			dispatch(BoardAction.receiveServerData(board));
 		} catch (e) {
 			dispatch(prefetchFailure(e));
 		}
+	};
+}
+
+function prefetchStart() {
+	return {
+		type: ActionTypes.prefetchStart,
+	};
+}
+function prefetchFailure() {
+	return {
+		type: ActionTypes.prefetchFailure,
 	};
 }

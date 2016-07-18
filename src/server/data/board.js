@@ -21,6 +21,7 @@ const Board = sequelize.define('Board', {
 		primaryKey: true,
 	},
 	name: Sequelize.STRING,
+	priority: { type: Sequelize.DOUBLE.UNSIGNED },
 	isPublic: { type: Sequelize.BOOLEAN, defaultValue: false },
 });
 
@@ -31,6 +32,7 @@ const List = sequelize.define('List', {
 		primaryKey: true,
 	},
 	name: Sequelize.STRING,
+	priority: { type: Sequelize.DOUBLE.UNSIGNED },
 	isClosed: { type: Sequelize.BOOLEAN, defaultValue: true },
 });
 
@@ -40,6 +42,7 @@ const Card = sequelize.define('Card', {
 		defaultValue: Sequelize.UUIDV4,
 		primaryKey: true,
 	},
+	priority: { type: Sequelize.DOUBLE.UNSIGNED },
 	value: {
 		type: Sequelize.TEXT,
 		get: function () {

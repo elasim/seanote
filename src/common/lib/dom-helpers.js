@@ -1,10 +1,17 @@
 import Rx from 'rx';
 
-export function createScrollSpy(handle) {
-	return Rx.Observable.fromEvent(window, 'scroll')
-		.map(() => document.body.scrollTop)
-		.distinctUntilChanged()
-		.subscribe(handle);
+export function createScrollSpy(handle, element = window, value = 'scrollTop') {
+	if (element !== window) {
+		return Rx.Observable.fromEvent(element, 'scroll')
+			.map(() => element[value])
+			.distinctUntilChanged()
+			.subscribe(handle);
+	} else {
+		return Rx.Observable.fromEvent(window, 'scroll')
+			.map(() => document.body[value])
+			.distinctUntilChanged()
+			.subscribe(handle);
+	}
 }
 
 export function createResizeSpy(handle, capture) {

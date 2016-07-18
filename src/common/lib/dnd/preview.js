@@ -3,7 +3,11 @@ import React, { Component, PropTypes } from 'react';
 export default class HammerPreview extends Component {
 	static contextTypes = {
 		hammer: PropTypes.object,
-	}
+	};
+	static propTypes = {
+		className: PropTypes.string,
+		style: PropTypes.object,
+	};
 	componentWillMount() {
 		this.state = {
 			view: null
@@ -21,6 +25,7 @@ export default class HammerPreview extends Component {
 	}
 	render() {
 		const { view } = this.state;
+		const { className, style } = this.props;
 		if (view) {
 			let position;
 			let offset;
@@ -44,6 +49,7 @@ export default class HammerPreview extends Component {
 				};
 			}
 			return React.cloneElement(view, {
+				className,
 				style: Object.assign(
 					// @TODO: Need workaround to support old browser
 					{
@@ -56,7 +62,7 @@ export default class HammerPreview extends Component {
 					},
 					position,
 					offset,
-				)
+					style)
 			});
 		}
 		return null;

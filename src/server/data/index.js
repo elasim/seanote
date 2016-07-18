@@ -20,15 +20,10 @@ User.belongsToMany(Group, GroupUsersRelations);
 UserLogin.belongsTo(User);
 UserClaim.belongsTo(User);
 
-Board.belongsTo(Board, { as: 'Before', foreginKey: { allowNull: true } });
 Board.hasMany(List);
 Board.belongsTo(Author, { as: 'Owner' });
 
-List.belongsTo(List, { as: 'Before', foreginKey: { allowNull: true }  });
-
 List.hasMany(Card);
-
-Card.belongsTo(Card, { as: 'Before', foreginKey: { allowNull: true }  });
 
 export {
 	// Boards
@@ -47,8 +42,8 @@ export {
 	beginTransaction
 };
 
-function beginTransaction() {
-	return sequelize.transaction();
+function beginTransaction(opt) {
+	return sequelize.transaction(opt);
 }
 
 User.createWithClaim = (provider, id, profiles) => {
@@ -103,34 +98,29 @@ async function createUser(transaction, profiles) {
 		UserId: user.id,
 		...profiles,
 	}, transaction);
-
-	await userTemplate.board.reduce(async (beforeId, boardTemplate) => {
+	await Promise.all(userTemplate.board.map(async (boardTemplate, boardTemplateIndex) => {
 		const { list, ...props } = boardTemplate;
 		const board = await Board.create({
 			...props,
+			priority: boardTemplateIndex + 1,
 			OwnerId: author.id,
-			BeforeId: await beforeId,
 		}, transaction);
-		await list.reduce(async (beforeId, listTemplate) => {
+		return await Promise.all(list.map(async (listTemplate, listTemplateIndex) => {
 			const { name, items } = listTemplate;
 			const list = await List.create({
 				name,
+				priority: listTemplateIndex + 1,
 				BoardId: board.id,
-				BeforeId: await beforeId,
 			}, transaction);
-			await items.reduce(async (beforeId, cardTemplate) => {
-				const card = await Card.create({
-					value: cardTemplate,
+			return await Card.bulkCreate(items.map((item, index) => {
+				return {
+					priority: index + 1,
+					value: item,
 					ListId: list.id,
-					BeforeId: await beforeId,
-				}, transaction);
-				return card.id;
-			}, Promise.resolve(null));
-			return list.id;
-		}, Promise.resolve(null));
-		return board.id;
-	}, Promise.resolve(null));
-
+				};
+			}), transaction);
+		}));
+	}));
 	return user;
 }
 
@@ -145,4 +135,4 @@ async function createUser(transaction, profiles) {
 	UserProfile,
 	Group,
 	GroupProfile,
-].forEach(t => t.sync({ force: !1 }));
+].forEach(t => t.sync({ force: false }));

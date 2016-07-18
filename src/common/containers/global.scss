@@ -1,0 +1,19 @@
+@import "./variables.scss";
+
+:global {
+	html {
+	  -ms-content-zooming: none;
+	}
+	a[type=button],
+	span[type=button] {
+		appearance: none;
+	}
+	body {
+		color: $font-color;
+		background: $back-color;
+
+		@media(max-width: $three-column-width) {
+			background-color: #fff;
+		}
+	}
+}

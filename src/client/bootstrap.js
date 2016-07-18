@@ -33,7 +33,8 @@ window.bootstrap = (serverSentState = {}) => {
 
 	// DEBUG ONLY
 	const User = require('../common/data/user').default;
-	User.whoami()
+	const execute = require('../common/data/execute').default;
+	execute(User.whoami())
 		.then((user) => {
 			initialState.auth.token = user.token;
 		}, (/* ignore error */) => { })

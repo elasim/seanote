@@ -1,24 +1,12 @@
-@import "../../variables.scss";
+@import "../../global.scss";
 @import "./variables.scss";
-
-:global {
-	html {
-	  -ms-content-zooming: none;
-	}
-	span[type=button] {
-		appearance: none;
-	}
-	a[type=button] {
-		appearance: none;
-	}
-}
 
 .root {
 	padding-top: $header-container-height + $nav-narrow-height;
 
 	transition: padding-top $header-animation-props;
 
-	@media(min-width: 600px + 1) {
+	@media(min-width: $two-column-width + 1) {
 		padding-left: $nav-side-width;
 		padding-top: $header-container-height;
 	}
@@ -80,13 +68,13 @@
 	width: $nav-side-width;
 	overflow: auto;
 
-	@media (max-width: 600px) {
+	@media (max-width: $two-column-width) {
 		position: absolute;
 		right: 0;
 		bottom: auto;
 		width: auto;
 		height: $nav-narrow-height;
-		overflow: hiddden;
+		overflow: hidden;
 	}
 }
 .hide-top .nav {

@@ -1,13 +1,6 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,700,700italic|Noto+Sans:400,400italic,700,700italic);
-@import "../variables.scss";
+@import "../global.scss";
 @import "./variables.scss";
-
-:global {
-	body {
-		color: $font-color;
-		background: $back-color;
-	}
-}
 
 .root {
 	padding-top: $header-expand-height + $header-expand-padding-top;

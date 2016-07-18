@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
+import isEqual from 'lodash/isEqual';
 
 export default class Draggable extends Component {
 	static contextTypes = {
@@ -25,6 +26,10 @@ export default class Draggable extends Component {
 	componentWillUnmount() {
 		this.context.hammer.unregisterDraggable(this.dragDescriptor);
 		this.dragDescriptor = null;
+	}
+	shouldComponentUpdate(nextProps) {
+		const { data, preview } = this.props;
+		return nextProps.preview !== preview || !isEqual(nextProps.data, data);
 	}
 	render() {
 		const { children, ...props } = this.props;

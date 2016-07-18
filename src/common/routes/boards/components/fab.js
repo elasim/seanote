@@ -2,6 +2,7 @@ import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import FAButton from 'material-ui/FloatingActionButton';
 import ContentAddIcon from 'material-ui/svg-icons/content/add';
+import pure from 'recompose/pure';
 import Droppable from '../../../lib/dnd/droppable';
 import css from '../styles/fab.scss';
 
@@ -13,8 +14,8 @@ const EventTypes = {
 	Close: Symbol('FAB.Event.Close'),
 };
 
+@pure
 class FAB extends Component {
-	static EventTypes = EventTypes;
 	static contextTypes = {
 		hammer: PropTypes.object,
 	};
@@ -87,6 +88,8 @@ class FAB extends Component {
 		}
 	}
 }
+
+FAB.EventTypes = EventTypes;
 
 export default FAB;
 

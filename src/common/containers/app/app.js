@@ -68,24 +68,12 @@ export default class View extends Component {
 		this.context.setTitle('Seanote');
 		this.state = {
 			showDrawer: false,
-			navItems: {
-				0: this.props.boards,
-			},
 		};
-	}
-	componentWillReceiveProps(nextProps) {
-		if (this.props.boards !== nextProps.boards) {
-			this.setState({
-				navItems: {
-					0: nextProps.boards
-				}
-			});
-		}
 	}
 	componentDidMount() {
 		// refresh token in a minute
 		this.tokenRefresher = this::createTokenRefresher();
-		this.dataUpdater = this::createDataUpdater();
+		this.props.prefetch();
 
 		const _adjustLayout = this::adjustLayout;
 		this.scrollSpy = createScrollSpy(_adjustLayout);
@@ -96,9 +84,6 @@ export default class View extends Component {
 	componentWillUnmount() {
 		if (this.tokenRefresher) {
 			this.tokenRefresher.dispose();
-		}
-		if (this.dataUpdater) {
-			this.dataUpdater.dispose();
 		}
 		if (this.scrollSpy) {
 			this.scrollSpy.dispose();
@@ -121,9 +106,7 @@ export default class View extends Component {
 					<FlatButton onClick={() => this.props.prefetch()} label="Send"/>
 				</div>
 				<Dim active={!!dim} {...dim} />
-				<Nav className={css.nav} headers={NAV_HEADERS}
-					items={this.state.navItems}
-				/>
+				<Nav className={css.nav} headers={NAV_HEADERS} />
 				{this.props.children}
 				<div style={{height: 4000}}>
 					{/* 4k padding to debug scroll event */}
@@ -164,11 +147,4 @@ function adjustLayout() {
 function createTokenRefresher() {
 	return Rx.Observable.interval(1000 * 60)
 		.subscribe(() => this.props.acquireToken());
-}
-
-// keep up to date
-function createDataUpdater() {
-	return Rx.Observable.timer(1, 5 * 60 * 1000)
-		.timeInterval()
-		.subscribe(() => this.props.prefetch());
 }

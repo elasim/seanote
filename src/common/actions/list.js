@@ -14,7 +14,7 @@ export function load(id) {
 	return async dispatch => {
 		dispatch(loadStart());
 		try {
-			const res = await request.get(`/api/board/list/${id}`);
+			const res = await request.get(`/api/board/${id}`);
 			if (200 < res.status || res.status >= 300) throw new Error('Request Status Error');
 			const data = await res.json();
 			dispatch(loadSuccess(data));

@@ -2,7 +2,7 @@ import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import Droppable from '../../../lib/dnd/droppable';
 import { createResizeSpy, getViewportWidth } from '../../../lib/dom-helpers';
-
+import { CardList } from './card-list';
 import css from '../styles/view.scss';
 
 export default class View extends Component {
@@ -21,10 +21,14 @@ export default class View extends Component {
 			activeOverlay: false,
 			frontOverlay: false,
 		};
+		this.toggleOverlay = ::this.toggleOverlay;
 	}
 	componentWillReceiveProps(nextProps) {
 		if (this.props.id !== nextProps.id) {
-			this.loadListData();
+			this.loadListData(nextProps.id);
+			if (typeof window !== 'undefined') {
+				window.scrollTo(0, 1);
+			}
 		}
 	}
 	componentDidMount() {
@@ -35,37 +39,40 @@ export default class View extends Component {
 			null,
 			::this.moveBackOverlay
 		);
-		this.loadListData();
+		this.loadListData(this.props.id);
 		
 	}
 	componentWillUnmount() {
 		this.resizeSpy.dispose();
 		this.disposeDragHook();
 	}
-	loadListData() {
-		const { id, actions: { load } } = this.props;
-		if (id) {
-			load(id);
+	loadListData(id) {
+		if (!id) {
+			return;
 		}
+		const { actions: { load } } = this.props;
+		return load(id);
 	}
 	render() {
 		const { activeOverlay, frontOverlay } = this.state;
+		const dropEvents = {
+			onDragOver: this.toggleOverlay,
+			onDragOut: this.toggleOverlay,
+			onDrop: this.toggleOverlay,
+		};
+		const rootClassName = cx(css.root, {
+			[css.full]: this.props.full
+		});
+		const overlayClassName = cx(css.overlay, {
+			[css.front]: frontOverlay,
+			[css.active]: activeOverlay
+		});
+
 		return (
-			<Droppable
-				onDragOver={::this.toogleOverlay}
-				onDragOut={::this.toogleOverlay}
-				onDrop={::this.toogleOverlay}
-			>
-				<div className={cx(css.root, {
-					[css.full]: this.props.full
-				})}>
-					Board {this.props.id}
-					Content
-					<input />
-					<div className={cx(css.overlay, {
-						[css.front]: frontOverlay,
-						[css.active]: activeOverlay
-					})} />
+			<Droppable {...dropEvents}>
+				<div className={rootClassName}>
+					<CardList items={this.props.data}/>
+					<div className={overlayClassName} />
 				</div>
 			</Droppable>
 		);
@@ -81,7 +88,7 @@ export default class View extends Component {
 			frontOverlay: false
 		});
 	}
-	toogleOverlay(e, descriptor) {
+	toggleOverlay(e, descriptor) {
 		const { data } = descriptor;
 		if (data.id === this.props.id) {
 			return;

@@ -1,5 +1,8 @@
 @import "../../../containers/variables.scss";
 @import "../../../containers/app/styles/variables.scss";
 
-$three-column-width: 960px;
 $list-width: 340px;
+
+$fab-index: $dim-index + 1;
+$list-overlay-index: $dim-index + 2;
+$list-preview-index: $dim-index + 2;

@@ -1,3 +1,4 @@
+import debug from 'debug';
 
 export default function configure(router, descriptors) {
 	for (let route in descriptors) {
@@ -20,12 +21,15 @@ export default function configure(router, descriptors) {
 	}
 }
 
+const DEBUG_LOG_RESPONSE = debug('app.api.handler');
 function createHandler(action) {
 	return async (req, res, next) => {
+		DEBUG_LOG_RESPONSE(req.originalUrl, req.params);
 		try {
 			const result = await action(req);
 			return result ? res.json(result) : res.end();
 		} catch (e) {
+			DEBUG_LOG_RESPONSE(e.stack);
 			return next(e);
 		}
 	};

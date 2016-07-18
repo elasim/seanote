@@ -7,7 +7,7 @@
 
 	transition: top $header-animation-props;
 
-	@media (max-width: 600px) {
+	@media (max-width: $two-column-width) {
 		.menu {
 			display: inline-block;
 			text-align: center;

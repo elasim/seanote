@@ -5,14 +5,43 @@
 	
 	.list {
 		transition: top $header-animation-props;
+		.overlay {
+			position: fixed;
+			z-index: $list-overlay-index;
+			bottom: 0;
+			display: none;
+			background-color: #333;
+			opacity: 0.5;
+		}
+		.overlay.active {
+			display: block;
+		}
 	}
+	&.hide-top .list .overlay {
+		top: 0;
+	}
+
+	.preview {
+		z-index: $list-preview-index;
+
+		opacity: 0.5;
+
+		@media (max-width: $three-column-width) {
+			left: $nav-side-width;
+			right: 0;
+		}
+		@media(min-width: $three-column-width + 1) {
+			width: $list-width - 1;
+		}
+	}
+
 	.fab {
 		position: fixed;
 		right: 20px;
 		bottom: 20px;
 	}
 	.fab.front {
-		z-index: $dim-index + 1;
+		z-index: $fab-index;
 	}
 
 	@media(max-width: $three-column-width) {
@@ -22,6 +51,12 @@
 		.list {
 			//prevent overlap last item by FAButton
 			padding-bottom: 54px + 20px;
+		}
+		.list .overlay {
+			top: $header-container-height;
+			left: $nav-side-width;
+			bottom: 0;
+			right: 0;
 		}
 		&.viewer .list {
 			display: none;
@@ -37,16 +72,28 @@
 
 		.list {
 			background-color: #fff;
-
 			position: fixed;
-			top: $header-height + $header-padding-top;
+			top: $header-container-height;
 			left: $nav-side-width;
 			bottom: 0;
-			width: $list-width;
+			width: $list-width - 1;
 			overflow: auto;
+			border-right: 1px solid #ccc;
+		}
+		.list .overlay {
+			left: $nav-side-width;
+			width: $list-width;
+			top: $header-container-height;
 		}
 		&.hide-top .list {
 			top: 0;
+		}
+	}
+
+	@media(max-width: $two-column-width) {
+		.list .overlay {
+			top: $header-container-height;
+			left: 0;
 		}
 	}
 }

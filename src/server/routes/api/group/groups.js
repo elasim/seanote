@@ -1,8 +1,10 @@
+import HttpError from '../utils/http-error';
 
 export default {
-	get(req) {
-		return Promise.resolve({
-			error: 'not imple'
-		});
+	async get(req) {
+		return {
+			error: 'Not Implemented',
+		};
+		//throw new HttpError('Not Implemented', 500);
 	}
 };

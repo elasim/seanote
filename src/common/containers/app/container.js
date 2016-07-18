@@ -11,7 +11,6 @@ export default flow(
 		state => ({
 			headerVisibility: state.app.headerVisibility,
 			dim: state.app.dim,
-			boards: state.board.list,
 		}),
 		{
 			setHeaderVisibility: AppAction.setHeaderVisibility,
