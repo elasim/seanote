@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { intlShape } from 'react-intl';
 import Link from 'react-router/lib/Link';
 import FlatButton from 'material-ui/FlatButton';
-import { Card, CardHeader, CardText, CardActions } from 'material-ui/Card';
+import { Card, CardHeader, CardActions } from 'material-ui/Card';
 import css from './groups.scss';
 
 export default class Groups extends Component {
