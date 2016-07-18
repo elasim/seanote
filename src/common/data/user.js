@@ -1,6 +1,3 @@
-export default {
-	whoami,
-};
 
 export function whoami() {
 	return {

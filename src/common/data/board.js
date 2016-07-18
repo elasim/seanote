@@ -1,7 +1,3 @@
-export default {
-	getList,
-	renumber,
-};
 
 export function getList(offset, limit) {
 	return {

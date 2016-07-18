@@ -1,0 +1,20 @@
+.item {
+	p {
+		margin: 0;
+		padding: 0;
+	}
+	.title {
+		font-weight: 'bold';
+		margin-bottom: 5px;
+	}
+	.who {
+		width: 30%;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+
+		float: right;
+		font-size: 0.8em;
+		text-align: right;
+	}
+}

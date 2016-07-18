@@ -1,55 +1,29 @@
-import cx from 'classnames';
-import React from 'react';
-import css from './list.scss';
+import React, { Component } from 'react';
+import { intlShape } from 'react-intl';
+import { List } from 'material-ui/List';
+import Divider from 'material-ui/Divider';
+import isEqual from 'lodash/isEqual';
+import ListItem from './list-item';
 
-function ListItem(props) {
-	return (
-		<li>{props.data.name}</li>
-	);
-}
-
-export default function List(props) {
-	const { style, className } = props;
-	const testdata = [
-		// room info info
-		{
-			id: 1,
-			name: 'Test Chat Room 1',
-			users: [
-				'admin',
-				'tester1',
-				'test2'
-			],
-		},
-		{
-			id: 2,
-			name: 'Test Chat Room 2',
-			users: [
-				'admin',
-				'test2',
-			],
-		},
-		{
-			id: 3,
-			name: 'Supports',
-			users: [
-				'tester1',
-				'seanote-supports',
-			],
-		},
-	];
-	const listItems = testdata.map(room => {
-		return (
-			<ListItem key={room.id} data={room}/>
-		);
-	});
-	const rootProps = {
-		className: cx(css.root, className),
-		style,
+export default class ListView extends Component {
+	static contextTypes = {
+		intl: intlShape.isRequired,
 	};
-	return (
-		<ul {...rootProps}>
-			{listItems}
-		</ul>
-	);
+	shouldComponentUpdate(nextProps) {
+		return !isEqual(nextProps, this.props);
+	}
+	render() {
+		const { className, style, items } = this.props;
+		const listItems = items.map((item, index) => {
+			return [
+				<ListItem key={index * 2 - 1} item={item} index={index} />,
+				<Divider key={index * 2} />
+			];
+		});
+		return (
+			<List className={className} style={style}>
+				{listItems}
+			</List>
+		);
+	}
 }

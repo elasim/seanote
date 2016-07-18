@@ -32,9 +32,9 @@ window.bootstrap = (serverSentState = {}) => {
 	const initialState = getInitialState(serverSentState);
 
 	// DEBUG ONLY
-	const User = require('../common/data/user').default;
+	const whoami = require('../common/data/user').whoami;
 	const execute = require('../common/data/execute').default;
-	execute(User.whoami())
+	execute(whoami())
 		.then((user) => {
 			initialState.auth.token = user.token;
 		}, (/* ignore error */) => { })

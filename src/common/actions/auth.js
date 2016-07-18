@@ -1,6 +1,6 @@
 import { browserHistory } from 'react-router';
 import emptyFunction from 'fbjs/lib/emptyFunction';
-import User from '../data/user';
+import { whoami } from '../data/user';
 import execute from '../data/execute';
 
 export default {
@@ -16,7 +16,7 @@ export const ActionTypes = {
 export function acquireToken(callback = emptyFunction) {
 	return async dispatch => {
 		dispatch(requestToken());
-		const user = await execute(User.whoami());
+		const user = await execute(whoami());
 		if (user) {
 			dispatch(responseToken(user.token));
 			if (!user.token) {
