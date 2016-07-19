@@ -71,26 +71,40 @@ export default class View extends Component {
 		return (
 			<Droppable {...dropEvents}>
 				<div className={rootClassName}>
-					<CardList items={this.props.data}/>
+					<CardList
+						items={this.props.data}
+						onMessage={this.handleListEvent}
+					/>
 					<div className={overlayClassName} />
 				</div>
 			</Droppable>
 		);
 	}
-
-	prepareOverlay() {
+	handleListEvent(type, arg) {
+		switch (type) {
+			case CardList.EventTypes.DragOver: {
+				const [descriptor, drop] = arg;
+				this.props.actions.sort(descriptor.data.id, drop.id);
+				return;
+			}
+		}
+	}
+	prepareOverlay(e) {
+		if (e.descriptor.type !== 'board') return;
 		this.setState({
 			frontOverlay: true,
 		});
 	}
 	moveBackOverlay() {
-		this.setState({
-			frontOverlay: false
-		});
+		if (this.state.frontOverlay) {
+			this.setState({
+				frontOverlay: false
+			});
+		}
 	}
 	toggleOverlay(e, descriptor) {
 		const { data } = descriptor;
-		if (data.id === this.props.id) {
+		if (data.id === this.props.id || !this.state.frontOverlay) {
 			return;
 		}
 		this.setState({ activeOverlay: !this.state.activeOverlay });

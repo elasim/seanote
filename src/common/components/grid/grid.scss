@@ -1,0 +1,22 @@
+.root {
+	position: relative;
+	overflow: hidden;
+}
+
+.item {
+	will-change: transform, width, height;
+	transition:
+		transform 0.2s ease-in,
+		width 0.2s ease-in,
+		height 0.2s ease-in;
+	position: absolute;
+}
+.column {
+	visibility: hidden;
+	position: static;
+	margin: 0;
+}
+.dummy {
+	width: 100%;
+	margin: 0;
+}

@@ -4,6 +4,7 @@
 .root {
 	padding-top: $header-container-height + $nav-narrow-height;
 
+	will-change: padding-top;
 	transition: padding-top $header-animation-props;
 
 	@media(min-width: $two-column-width + 1) {

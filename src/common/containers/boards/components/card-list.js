@@ -1,27 +1,43 @@
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
-import { findDOMNode } from 'react-dom';
-import diffWith from 'lodash/differenceWith';
+import { Card, CardHeader, CardText, CardActions } from 'material-ui/Card';
+import { Grid, GridItem } from '../../../components/grid';
+import Draggable from '../../../lib/dnd/draggable';
+import Droppable from '../../../lib/dnd/droppable';
 import css from '../styles/card-list.scss';
 
+function ListPreview(props) {
+	return (
+		<div style={props.style} className={props.className}>
+			{'ListPreview'}
+		</div>
+	);
+}
+
+const listStyle = {listStyle:'none', margin: 0, padding: 0};
 export class CardItem extends Component {
 	render() {
 		const { data, type } = this.props;
 		const items = data.Cards.map(card => {
 			return (
-				<li>
-					{type}
-					{JSON.stringify(card)}
+				<li key={card.id}>
+					{card.id}
 				</li>
 			);
 		});
 		return (
-			<div className={css.item}>
-				<div>{data.name}</div>
-				<ol>
-				{items}
-				</ol>
-			</div>
+			<Droppable>
+				<Draggable data={data} type="list" preview={<ListPreview />} >
+					<Card className={this.props.className} style={this.props.style}>
+						<CardHeader title={data.name}/>
+						<CardText>
+							<ol style={listStyle}>
+								{items}
+							</ol>
+						</CardText>
+					</Card>
+				</Draggable>
+			</Droppable>
 		);
 	}
 }
@@ -30,52 +46,23 @@ export class CardList extends Component {
 	static propTypes = {
 		items: PropTypes.array,
 	};
-	componentWillMount() {
-		this.state = {
-			ready: false,
-			positions: [],
-		};
-	}
-	componentWillReceiveProps(nextProps) {
-		const diff = diffWith(nextProps.items, this.props.items);
-		if (diff.length > 0) {
-			console.log('Make diff');
-			this.setState({
-				positions: this.makePositions(nextProps.items)
-			});
-		}
-	}
-	componentDidMount() {
-		// find component width and arrange items
-		const { items } = this.props;
-		const state = {
-			ready: true,
-			positions: this.makePositions(items)
-		};
-		this.setState(state);
-	}
+	// componentWillMount() {
+	// 	this.onDragOver = ::this.onDragOver;
+	// }
 	render() {
-		const { className, items } = this.props;
-		const { ready, width } = this.state;
-		let cards;
-		if (items) {
-			let style;
-			if (ready && width) {
-				style = { width };
-			}
-			cards = items.map(item => {
-				const { id, type, ...data } = item;
-				return <CardItem ref={id} key={id} type={type} data={data} />;
-			});
-		}
-		const rootClassName = cx(css.root, className, {
-			[css.ready]: ready
-		});
-		return <div className={rootClassName}>{cards}</div>;
-	}
-	makePositions(items) {
-		if (!items) return [];
-		const element = findDOMNode(this);
-		// figure out height and width of grids
+		const { className } = this.props;
+
+		const rootClassName = cx(css.root, className);
+		const items = this.props.items ? this.props.items.map(item => (
+			<GridItem key={item.id} id={item.id} className={css.topic}>
+				<CardItem data={item}/>
+			</GridItem>
+		)) : null;
+	
+		return (
+			<Grid className={rootClassName} columnClassName={css.topic}>
+				{items}
+			</Grid>
+		);
 	}
 }

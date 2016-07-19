@@ -3,18 +3,6 @@
 $desktop-height: 124px;
 $mobile-height: 80px;
 
-@mixin grid {
-	overflow: auto;
-}
-
-@mixin col($size, $max) {
-	$size: percentage($size / $max);
-	width: calc(#{$size} - 10px);
-	box-sizing: border-box;
-	margin: 5px;
-	float: left;
-}
-
 .root {
 	overflow: auto;
 }

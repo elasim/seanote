@@ -78,7 +78,7 @@ class BoardListItem extends Component {
 		);
 		const dragHandle = (
 			<Droppable onDragOver={this.onDragOver}>
-				<Draggable data={props.data} preview={preview}>
+				<Draggable data={props.data} preview={preview} type="board">
 					{handle}
 				</Draggable>
 			</Droppable>

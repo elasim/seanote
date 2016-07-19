@@ -85,11 +85,19 @@ function onPanMove(e) {
 	if (this.dragInfo === null) return;
 	e.preventDefault();
 
-	const target = document.elementFromPoint(e.pointers[0].clientX, e.pointers[0].clientY);
-	const targets = getElementParentNodes(target);
-	const idx = this.droppable.findIndex(droppable => {
-		return targets.indexOf(droppable.element) !== -1;
-	});
+	const pointing = document.elementFromPoint(e.pointers[0].clientX, e.pointers[0].clientY);
+	const targets = getElementParentNodes(pointing);
+
+	let idx = -1;
+	for (const target of targets) {
+		const testIdx = this.droppable.findIndex(droppable => {
+			return droppable.element === target;
+		});
+		if (testIdx > -1) {
+			idx = testIdx;
+			break;
+		}
+	}
 
 	this.dragMove$.onNext({
 		descriptor: this.dragInfo,

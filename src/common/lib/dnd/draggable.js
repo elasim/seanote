@@ -9,18 +9,26 @@ export default class Draggable extends Component {
 	static propTypes = {
 		preview: PropTypes.element,
 		data: PropTypes.object,
+		type: PropTypes.string,
 	};
 	componentDidMount() {
 		this.dragDescriptor = {
 			source: this,
 			element: findDOMNode(this),
 			data: this.props.data,
+			type: this.props.type,
 		};
 		this.context.hammer.registerDraggable(this.dragDescriptor);
+	}
+	componentDidUpdate() {
+		this.dragDescriptor.element = findDOMNode(this);
 	}
 	componentWillReceiveProps(nextProps) {
 		if (this.dragDescriptor.data !== nextProps.data) {
 			this.dragDescriptor.data = nextProps.data;
+		}
+		if (this.dragDescriptor.type !== nextProps.type) {
+			this.dragDescriptor.type = nextProps.type;
 		}
 	}
 	componentWillUnmount() {

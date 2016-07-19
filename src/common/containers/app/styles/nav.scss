@@ -6,6 +6,7 @@
 	background-color: #455A64;
 
 	transition: top $header-animation-props;
+	will-change: top;
 
 	@media (max-width: $two-column-width) {
 		.menu {
