@@ -1,0 +1,39 @@
+@import "../global.scss";
+
+.root {
+	@include grid;
+
+	position: relative;
+}
+
+.topic {
+	will-change: transform, width;
+	transition: transform 0.2s ease-in;
+	width: 100%;
+
+	position: absolute;
+	z-index: 50;
+
+	@media (min-width: 960px + 1) {
+		@include col(1, 2);
+	}
+	@media (min-width: 1280px) {
+		@include col(1, 4);
+	}
+	@media (min-width: 2560px) {
+		@include col(1, 8);
+	}
+
+}
+.ghost {
+	visibility: hidden;
+	position: static;
+}
+.ghost.topic.col {
+	margin: 0;
+}
+.ghost {
+	.topic {
+		width: 100%;
+	}
+}

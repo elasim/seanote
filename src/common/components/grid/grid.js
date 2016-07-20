@@ -31,25 +31,17 @@ export class Grid extends Component {
 		};
 		this.steps = 0;
 	}
-	shouldComponentUpdate(nextProps, nextState) {
-		for (const key in nextProps) {
-			if (nextProps[key] !== this.props[key]) {
-				if (this.steps >= 2 && key === 'children') continue;
-				console.log('Key', key);
-				return true;
-			}
-		}
-		return !isEqual(nextState, this.state);
-	}
-	componentWillReceiveProps(nextProps) {
-		for (const key in nextProps) {
-			if (nextProps[key] !== this.props[key]) {
-				if (this.steps >=2 && key === 'children') continue;
-				console.log('Key', key);
-				this.steps = 0;
-				return true;
-			}
-		}
+	// shouldComponentUpdate(nextProps, nextState) {
+	// 	for (const key in nextProps) {
+	// 		if (nextProps[key] !== this.props[key]) {
+	// 			if (this.steps >= 2 && key === 'children') continue;
+	// 			return true;
+	// 		}
+	// 	}
+	// 	return !isEqual(nextState, this.state);
+	// }
+	componentWillReceiveProps() {
+		this.steps = 0;
 	}
 	componentDidMount() {
 		this.stylePrefixer = new Prefixer({ userAgent: navigator.userAgent });
@@ -137,18 +129,18 @@ export class Grid extends Component {
 
 		// Clear items
 		const containerWidth = findDOMNode(this).getBoundingClientRect().width;
-		const items = Object.keys(this.refs)
-			.filter(refId => /^item-/.test(refId));
+		const items = Children.toArray(this.props.children)
+			.map(child => this.refs[`item-${child.props.id}`]);
 
 		if (!items.length) {
 			return;
 		}
 
-		const itemWidth = findDOMNode(this.refs[items[0]]).getBoundingClientRect().width;
+		const itemWidth = findDOMNode(items[0]).getBoundingClientRect().width;
 		const columns = Math.max(1, Math.floor(containerWidth / itemWidth));
 
 		const elementSizes = items.map(refId => {
-			const element = findDOMNode(this.refs[refId]);
+			const element = findDOMNode(refId);
 			const box = element.getBoundingClientRect();
 			return { width: box.width, height: box.height };
 		});
@@ -165,10 +157,9 @@ export class Grid extends Component {
 		if (this.state.elementSizes.length === 0) return;
 
 		const container = findDOMNode(this).getBoundingClientRect();
-		const positions = Object.keys(this.refs)
-			.filter(refId => /^dummy-/.test(refId))
-			.map((refId, index) => {
-				const node = findDOMNode(this.refs[refId]);
+		const positions = Children.toArray(this.props.children)
+			.map(child => findDOMNode(this.refs[`dummy-${child.props.id}`]))
+			.map((node, index) => {
 				const box = node.getBoundingClientRect();
 				const offsetX = Math.floor(index % this.state.columns) * 5;
 				const offsetY = Math.floor(index / this.state.columns) * 0;

@@ -1,0 +1,8 @@
+@import "../../variables.scss";
+@import "../../app/components/variables.scss";
+
+$list-width: 340px;
+
+$fab-index: $dim-index + 1;
+$list-overlay-index: $dim-index + 2;
+$list-preview-index: $dim-index + 2;

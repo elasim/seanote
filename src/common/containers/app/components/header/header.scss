@@ -1,0 +1,48 @@
+@import "../variables.scss";
+
+.root {
+	font-size: 21px;
+	color: $font-color-alt;
+	background-color: $back-color-alt;
+
+	height: $header-height;
+	padding-top: $header-padding-top;
+
+	h1 {
+		font-size: 24px;
+		line-height: 24px;
+
+		position: absolute;
+		top: 2px;
+		left: 55px;
+	}
+}
+.root.shrink-search {
+	@media (max-width: $two-column-width) {
+		left: -$nav-side-width;
+	}
+}
+.searchbar {
+	position: absolute;
+	top: 12px;
+	left: $nav-side-width + 10;
+	right: 50px;
+
+	.icon {
+		position: absolute;
+		top: 5px;
+		padding: 2px;
+		color: #CFD8DC;
+	}
+	input.query {
+		background-color: #455A64;
+		color: $font-color-alt;
+
+		width: 100%;
+		height: 28px;
+		border: 0;
+		padding: 5px 0 5px 40px;
+
+		outline: none;
+	}
+}

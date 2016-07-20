@@ -1,6 +1,6 @@
 import cx from 'classnames';
 import React, { Component } from 'react';
-import withContext from '../../lib/with-context';
+import withContext from '../with-context';
 import { createScrollSpy } from '../../lib/dom-helpers';
 import Header from './header';
 

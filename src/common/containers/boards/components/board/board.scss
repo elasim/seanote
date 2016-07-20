@@ -1,0 +1,46 @@
+@import "../variables.scss";
+@import "../../../global.scss";
+
+$overlay-animation: 0.1s linear;
+
+.root {
+	.overlay {
+		position: fixed;
+		left: $list-width + $nav-side-width;
+		top: $header-height + $header-padding-top;
+
+		border: #333 solid;
+		border-width: 0;
+		opacity: 0;
+	}
+	.overlay.front {
+		bottom: 0;
+		right: 0;
+	}
+	.overlay.active {
+		opacity: 0.5;
+		transition:
+			border-width $overlay-animation,
+			opacity $overlay-animation;
+		border-width: 10px;
+	}
+}
+.root.full {
+	.overlay {
+		top: 0;
+	}
+}
+
+.topic {
+	width: 100%;
+
+	@media (min-width: 640px) {
+		@include col(1, 2);
+	}
+	@media (min-width: 1440px) {
+		@include col(1, 4);
+	}
+	@media (min-width: 2560px) {
+		@include col(1, 16);
+	}
+}

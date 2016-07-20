@@ -1,1 +1,1 @@
-export default from './messages.js';
+export default from './components/messages';

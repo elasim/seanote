@@ -7,7 +7,6 @@ const RENUMBER_THRESHOLD = Number.EPSILON * 10E4;
 const initialState = {
 	list: [],
 	dirty: {},
-	origin: [],
 	counts: 0,
 	renumbering: false,
 	prev: 0,

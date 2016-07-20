@@ -1,0 +1,9 @@
+@import "../variables.scss";
+
+.root {
+	color: #fff;
+	background-color: #455A64;
+
+	transition: top $header-animation-props;
+	will-change: top;
+}

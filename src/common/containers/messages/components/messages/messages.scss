@@ -1,0 +1,48 @@
+@import "../variables.scss";
+
+.root {
+}
+.chat {
+	width: 100%;
+}
+.list {
+	//prevent overlap last item by FAButton
+	transition: top $header-animation-props;
+	padding-bottom: 54px + 20px;
+}
+.root.no-header .list {
+	top: 0;
+}
+@media(max-width: $three-column-width) {
+	.chat {
+		display: none;
+	}
+	.list {
+		//prevent overlap last item by FAButton
+		padding-bottom: 54px + 20px;
+		width: 100%;
+	}
+	.root.content .list {
+		display: none;
+	}
+	.root.content .chat {
+		display: initial;
+	}
+}
+
+@media(min-width: $three-column-width + 1) {
+	.root {
+		padding-left: $list-width;
+	}
+	.list {
+		background-color: #fff;
+		position: fixed;
+		top: $header-container-height;
+		left: $nav-side-width;
+		bottom: 0;
+		width: $list-width - 1;
+		overflow: auto;
+		border-right: 1px solid #ccc;
+		display: block;
+	}
+}
