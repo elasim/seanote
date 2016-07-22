@@ -1,4 +1,4 @@
-import { getCards } from '../data/list';
+import { getList } from '../data/list';
 import execute from '../data/execute';
 
 export default {
@@ -18,16 +18,15 @@ export const ActionTypes = {
 	loadFailure: 'LIST_LOAD_FAILURE',
 };
 
-export function sort(board, a, b) {
+export function sort(source, a, b) {
 	return async (dispatch, getState) => {
-		const { renumbering } = getState().list[board];
-		if (renumbering) {
+		if (getState().list[source].renumbering) {
 			// await execute(renumber());
-			load(board);
+			load(source);
 		}
 		dispatch(applyChanges({
 			type: ActionTypes.sort,
-			payload: { board, a, b },
+			payload: { source, a, b },
 		}));
 	};
 }
@@ -40,9 +39,10 @@ export function load(id) {
 	return async dispatch => {
 		dispatch(loadStart());
 		try {
-			const data = await execute(getCards(id));
+			const data = await execute(getList(id));
 			dispatch(loadSuccess(data));
 		} catch (e) {
+			console.error(e);
 			dispatch(loadFailure(e));
 		}
 	};

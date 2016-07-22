@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import connect from 'react-redux/lib/components/connect';
 import bindActionCreators from 'redux/lib/bindActionCreators';
 import flow from 'lodash/flow';
+import { createSelector } from 'reselect';
 import injectHammer from '../../components/dnd/inject-hammer';
 import { setDim } from '../../actions/app';
 import BoardActions from '../../actions/board';
@@ -30,6 +31,27 @@ class BoardContainer extends Component {
 	}
 }
 
+const getLists = (state, props) => state.list[props.params.id];
+const getCards = (state) => state.card;
+
+const selectLists = createSelector(
+	getLists,
+	lists => {
+		if (!lists) return null;
+		return lists.items;
+	});
+
+const selectCards = createSelector(
+	[selectLists, getCards],
+	(lists, cards) => {
+		if (!lists || lists.length === 0) return null;
+		return Object.assign(...lists.map(list => {
+			return {
+				[list.id]: cards[list.id].items
+			};
+		}));
+	});
+
 export default flow(
 	connect(mapStateToProps, mapDispatchToProps),
 	injectHammer()
@@ -39,7 +61,8 @@ function mapStateToProps(state, props) {
 	return {
 		headerVisibility: state.app.headerVisibility,
 		board: state.board,
-		list: state.list[props.params.id],
+		lists: selectLists(state, props),
+		cards: selectCards(state, props),
 	};
 }
 

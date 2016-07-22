@@ -1,6 +1,7 @@
 import { handleActions } from 'redux-actions';
 import cloneDeep from 'lodash/cloneDeep';
 import { ActionTypes } from '../actions/board';
+import { mean, isNearlyZero } from './lib/sortable';
 
 const RENUMBER_THRESHOLD = Number.EPSILON * 10E4;
 
@@ -20,51 +21,29 @@ export default handleActions({
 }, initialState);
 
 function sort(state, action) {
-	const { prev, next, dirty } = state;
+	const { prev, next } = state;
 	const { a, b } = action.payload;
 
-	let renumbering = false;
 	const list = cloneDeep(state.list);
+	const oldIndex = list.findIndex(item => item.id === a);
+	const newIndex = state.list.findIndex(item => item.id === b);
+	const item = list[oldIndex];
 
-	const indexA = list.findIndex(item => item.id === a);
-	const indexB = state.list.findIndex(item => item.id === b);
-	const itemA = list[indexA];
-	list.splice(indexA, 1);
-	list.splice(indexB, 0, itemA);
-
-	let prevPriority = (indexB - 1 >= 0)
-		? list[indexB - 1].priority : prev;
-
-	let nextPrioirty = (indexB + 1 < list.length)
-		? list[indexB + 1].priority : next;
-
-	const newPriority = (nextPrioirty + prevPriority) / 2;
-	
-	if (!Number.isInteger(newPriority)) {
-		const check = Math.abs(Math.round(newPriority) - newPriority);
-		console.log(check);
-
-		if (check <= RENUMBER_THRESHOLD) {
-			renumbering = true;
-			console.log('Renumbering');
-		}
-	}
-
-	itemA.priority = newPriority;
-	const newDirty = { ...dirty };
-	if (!newDirty[a]) {
-		newDirty[a] = {};
-	}
-	newDirty[a] = {
-		...newDirty[a],
-		priority: newPriority
-	};
+	list.splice(oldIndex, 1);
+	list.splice(newIndex, 0, item);
+	item.priority = mean(list, newIndex, prev, next);
 
 	return {
 		...state,
 		list,
-		dirty: newDirty,
-		renumbering
+		dirty: {
+			...state.dirty,
+			[a]: {
+				...state.dirty[a],
+				priority: item.priority,
+			}
+		},
+		renumbering: isNearlyZero(item.priority),
 	};
 }
 

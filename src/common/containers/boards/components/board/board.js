@@ -2,20 +2,23 @@ import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import { Grid, GridItem } from '../../../../components/grid';
 import Droppable from '../../../../components/dnd/droppable';
-import Card from '../card';
+import List from '../card';
 import css from './board.scss';
 
 export default class Board extends Component {
 	static contextTypes = {
 		setTitle: PropTypes.func.isRequired,
 		hammer: PropTypes.object,
-	}
+		list: PropTypes.object,
+	};
 	static propTypes = {
 		id: PropTypes.string,
-		data: PropTypes.object,
+		lists: PropTypes.array,
+		cards: PropTypes.object,
 		actions: PropTypes.object,
 		full: PropTypes.bool,
-	}
+		onMessage: PropTypes.func,
+	};
 	componentWillMount() {
 		this.context.setTitle('Board Item View');
 		this.state = {
@@ -24,6 +27,7 @@ export default class Board extends Component {
 		};
 		this.toggleOverlay = ::this.toggleOverlay;
 		this.dispatchMessage = ::this.dispatchMessage;
+		this.onDrop = ::this.onDrop;
 	}
 	componentWillReceiveProps(nextProps) {
 		if (this.props.id !== nextProps.id) {
@@ -60,9 +64,9 @@ export default class Board extends Component {
 			<Droppable
 				onDragOver={this.toggleOverlay}
 				onDragOut={this.toggleOverlay}
-				onDrop={this.toggleOverlay} >
-				<div>
-					<Grid className={rootClassName} columnClassName={css.topic}>
+				onDrop={this.onDrop} >
+				<div className={rootClassName}>
+					<Grid columnClassName={css.topic}>
 						{items}
 					</Grid>
 					<div className={overlayClassName} />
@@ -71,41 +75,37 @@ export default class Board extends Component {
 		);
 	}
 	renderItems() {
-		const { data } = this.props;
-		return data ? data.lists.map(item => (
-			<GridItem key={item.id} id={item.id} className={css.topic}>
-				<Card data={item} onMessage={this.dispatchMessage}/>
+		const { lists, cards } = this.props;
+		return lists ? lists.map(list => (
+			<GridItem key={list.id} id={list.id} className={css.topic}>
+				<List list={list} cards={cards[list.id]} onMessage={this.dispatchMessage}/>
 			</GridItem>
 		)) : null;
 	}
-	dispatchMessage(type, arg) {
-		switch (type) {
-			case Card.EventTypes.DragOver: {
+	dispatchMessage(msg, arg) {
+		switch (msg) {
+			case List.EventTypes.DragOver: {
 				const { descriptor, target } = arg;
-				if (descriptor.data.id === target.id || descriptor.type !== 'list') return;
-				this.props.actions.sort(this.props.id, descriptor.data.id, target.id);
+				const { type } = descriptor;
+				const source = descriptor.data.BoardId;
+				const sourceId = descriptor.data.id;
+				if (sourceId === target.id || type !== 'list') return;
+				this.context.list.sort(source, sourceId, target.BoardId, target.id);
 				break;
 			}
-			case Card.EventTypes.Drop: {
-				//return EventTypes.SubItemDrop;
-				break;
-			}
-			case Card.EventTypes.SubitemDragover: {
-				const { descriptor, target } = arg;
-				if (descriptor.data.id === target.id || descriptor.type !== 'card') return;
-				console.log('Sort Card');
-				//this.props.actions.sort(this.props.id, descriptor.data.id, target.id);
-				break;
-			}
-			default: {
-				console.log('Unhandled Event', type);
-				break;
-			}
+			default:
+				return this.sendMessage(msg, arg);
+		}
+	}
+	sendMessage(msg, arg) {
+		const { onMessage } = this.props;
+		if (onMessage) {
+			onMessage(msg, arg);
 		}
 	}
 	loadListData(id) {
 		if (typeof id === 'undefined') return;
-		return this.props.actions.load(id);
+		return this.context.list.load(id);
 	}
 	prepareOverlay(e) {
 		if (e.descriptor.type !== 'board') {
@@ -123,5 +123,11 @@ export default class Board extends Component {
 			return;
 		}
 		this.setState({ activeOverlay: !this.state.activeOverlay });
+	}
+	onDrop(event, descriptor) {
+		if (descriptor.type !== 'board') {
+			return;
+		}
+		this.toggleOverlay(event, descriptor);
 	}
 }

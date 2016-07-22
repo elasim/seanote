@@ -76,23 +76,32 @@ export default class HammerAdapter {
 	}
 }
 
+function selectContainer(origin, list) {
+	const targets = getElementParentNodes(origin);
+	let idx = -1;
+	for (const target of targets) {
+		const testIdx = list.findIndex(item => {
+			return item.element === target;
+		});
+		if (testIdx > -1) {
+			idx = testIdx;
+			break;
+		}
+	}
+	return (idx > -1) ? list[idx] : null;
+}
+
 function onPanStart(e) {
 	if (this.dragInfo) return;
 
-	const targets = getElementParentNodes(e.target);
-	const idx = this.draggable.findIndex(descriptor => {
-		return targets.indexOf(descriptor.element) !== -1;
-	});
-	if (idx === -1) return;
-
-	const descriptor = this.draggable[idx];
-	if (descriptor.press) return;
+	const descriptor = selectContainer(e.target, this.draggable);
+	if (!descriptor || descriptor.press) return;
 
 	this.dragInfo = { ...descriptor };
 	this.dragStart$.onNext({
 		descriptor: this.dragInfo,
 		event: e,
-		target: targets[idx],
+		target: descriptor.element,
 	});
 	e.preventDefault();
 }
@@ -102,23 +111,12 @@ function onPanMove(e) {
 	e.preventDefault();
 
 	const pointing = document.elementFromPoint(e.pointers[0].clientX, e.pointers[0].clientY);
-	const targets = getElementParentNodes(pointing);
-
-	let idx = -1;
-	for (const target of targets) {
-		const testIdx = this.droppable.findIndex(droppable => {
-			return droppable.element === target;
-		});
-		if (testIdx > -1) {
-			idx = testIdx;
-			break;
-		}
-	}
+	const descriptor = selectContainer(pointing, this.droppable);
 
 	this.dragMove$.onNext({
 		descriptor: this.dragInfo,
 		event: e,
-		target: idx > -1 ? this.droppable[idx].element : null,
+		target: descriptor ? descriptor.element : null,
 	});
 }
 
@@ -127,20 +125,15 @@ function onPanEnd(e) {
 }
 
 function onPress(e) {
-	const targets = getElementParentNodes(e.target);
-	const idx = this.draggable.findIndex(descriptor => {
-		return targets.indexOf(descriptor.element) !== -1;
-	});
-	if (idx === -1) return;
+	const descriptor = selectContainer(e.target,  this.draggable);
 
-	const descriptor = this.draggable[idx];
-	if (!descriptor.press) return;
+	if (!descriptor || !descriptor.press) return;
 
 	this.dragInfo = { ...descriptor };
 	this.dragStart$.onNext({
 		descriptor: this.dragInfo,
 		event: e,
-		target: targets[idx],
+		target: descriptor.element,
 	});
 }
 

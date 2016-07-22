@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
+import emptyFunction from 'fbjs/lib/emptyFunction';
 import isEqual from 'lodash/isEqual';
 
 export default class Draggable extends Component {
@@ -11,7 +12,14 @@ export default class Draggable extends Component {
 		data: PropTypes.object,
 		type: PropTypes.string,
 		press: PropTypes.bool,
+		onDragStart: PropTypes.func,
+		onDragEnd: PropTypes.func,
 	};
+	static defaultProps = {
+		press: false,
+		onDragStart: emptyFunction,
+		onDragEnd: emptyFunction,
+	}
 	componentDidMount() {
 		this.dragDescriptor = {
 			source: this,
@@ -21,6 +29,10 @@ export default class Draggable extends Component {
 			press: this.props.press
 		};
 		this.context.hammer.registerDraggable(this.dragDescriptor);
+		this.disposeHook = this.context.hammer.createHook(
+			::this.onDragStart,
+			null,
+			::this.onDragEnd);
 	}
 	componentDidUpdate() {
 		this.dragDescriptor.element = findDOMNode(this);
@@ -35,6 +47,7 @@ export default class Draggable extends Component {
 	componentWillUnmount() {
 		this.context.hammer.unregisterDraggable(this.dragDescriptor);
 		this.dragDescriptor = null;
+		this.disposeHook();
 	}
 	shouldComponentUpdate(nextProps) {
 		const { data, preview } = this.props;
@@ -44,5 +57,15 @@ export default class Draggable extends Component {
 		const { children, ...props } = this.props;
 		Object.keys(Draggable.propTypes).forEach(key => delete props[key]);
 		return React.cloneElement(children, props);
+	}
+	onDragStart(event) {
+		if (event.descriptor.source === this) {
+			this.props.onDragStart(event, this.dragDescriptor);
+		}
+	}
+	onDragEnd(event) {
+		if (event.descriptor.source === this) {
+			this.props.onDragEnd(event, this.dragDescriptor);
+		}
 	}
 }

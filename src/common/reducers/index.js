@@ -3,6 +3,7 @@ import app from './app';
 import auth from './auth';
 import board from './board';
 import list from './list';
+import card from './card';
 import message from './message';
 
 export default combineReducers({
@@ -10,5 +11,6 @@ export default combineReducers({
 	auth,
 	board,
 	list,
+	card,
 	message
 });

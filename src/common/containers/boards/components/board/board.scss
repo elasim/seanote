@@ -19,10 +19,7 @@ $overlay-animation: 0.1s linear;
 	}
 	.overlay.active {
 		opacity: 0.5;
-		transition:
-			border-width $overlay-animation,
-			opacity $overlay-animation;
-		border-width: 10px;
+		background-color: #333;
 	}
 }
 .root.full {

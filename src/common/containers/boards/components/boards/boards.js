@@ -41,21 +41,20 @@ class Boards extends Component {
 		const {
 			params: { id },
 			headerVisibility,
-			list,
-			listActions,
 			board,
-			params,
+			cards,
+			lists,
 		} = this.props;
 		const { fabIcon, fabFront } = this.state;
 		let view;
 		if (id) {
-			view = <Board full={!headerVisibility} id={id} data={list} actions={listActions}/>;
+			view = <Board full={!headerVisibility} id={id} lists={lists} cards={cards} />;
 		} else {
 			view = <div>Select item</div>;
 		}
 		return (
 			<div className={cx(css.root, {
-				[css.viewer]: !!params.id,
+				[css.viewer]: !!id,
 				[css['hide-top']]: !headerVisibility,
 			}) }>
 				<div ref="list" className={css.list}>
@@ -81,17 +80,14 @@ class Boards extends Component {
 
 		const WINDOW_SIZE = 10;
 		const { board: {list, counts}, boardActions } = this.props;
-		console.log(list, counts);
 		if (list.length < counts) {
-			console.log(list.length, WINDOW_SIZE);
 			boardActions.load(list.length, WINDOW_SIZE);
 		}
 	}
-	dispatchMessage(msg, args) {
-		console.log(msg, args);
+	dispatchMessage(msg, arg) {
 		switch (msg) {
 			case List.EventTypes.DragOver: {
-				const { descriptor, target } = args;
+				const { descriptor, target } = arg;
 				if (descriptor.data.id === target.id) return;
 				this.props.boardActions.sort(descriptor.data.id, target.id);
 				return;
@@ -103,7 +99,7 @@ class Boards extends Component {
 				});
 			}
 			case FAB.EventTypes.Drop: {
-				const { descriptor } = args;
+				const { descriptor } = arg;
 				console.log('Drop', descriptor);
 				return this.props.setDim(null);
 			}
@@ -112,7 +108,7 @@ class Boards extends Component {
 			}
 			case FAB.EventTypes.Open: {
 				this.props.setDim({
-					onClick: args.dimClick,
+					onClick: arg.dimClick,
 				});
 				this.setState({
 					fabFront: true,
@@ -127,7 +123,7 @@ class Boards extends Component {
 				return;
 			}
 			default: {
-				console.error('Unknown Event Dispatch');
+				console.error('Unhandled Message', msg);
 			}
 		}
 	}

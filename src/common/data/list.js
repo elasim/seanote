@@ -1,4 +1,4 @@
-export function getCards(id) {
+export function getList(id) {
 	return {
 		url: `/api/board/${id}`,
 		method: 'get',

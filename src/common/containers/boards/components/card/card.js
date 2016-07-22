@@ -1,58 +1,131 @@
+import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import { Card, CardHeader, CardText } from 'material-ui/Card';
 import isEqual from 'lodash/isEqual';
 import Droppable from '../../../../components/dnd/droppable';
 import Draggable from '../../../../components/dnd/draggable';
 import Symbol from '../../../../lib/symbol-debug';
+import Button from './button';''
 import CardItem from './card-item';
 import css from './card.scss';
 
 const EventTypes = {
 	DragOver: Symbol('Card.DragOver'),
 	Drop: Symbol('Card.Drop'),
-	SubitemDragover: CardItem.EventTypes.DragOver,
-	SubitemDrop: CardItem.EventTypes.Drop,
+	ItemDrop: CardItem.EventTypes.Drop,
 };
 
-export default class CardComponent extends Component {
+export default class CardList extends Component {
 	static EventTypes = EventTypes;
+	static contextTypes = {
+		card: PropTypes.object,
+	};
 	static propTypes = {
-		data: PropTypes.object,
+		list: PropTypes.object,
+		cards: PropTypes.array,
 		onMessage: PropTypes.func,
 	};
 	componentWillMount() {
 		this.dispatchMessage = ::this.dispatchMessage;
 		this.onDragOver = ::this.onDragOver;
+		this.onDragOut = ::this.onDragOut;
+		this.onDragStart = ::this.onDragStart;
+		this.onDragEnd = ::this.onDragEnd;
 		this.onDrop = ::this.onDrop;
+		this.state = {
+			overlay: false
+		};
 	}
-	shouldComponentUpdate(nextProps) {
-		return !isEqual(nextProps, this.props);
+	shouldComponentUpdate(nextProps, nextState) {
+		return !isEqual(nextProps, this.props) || !isEqual(nextState, this.state);
 	}
 	render() {
-		const { data } = this.props;
+		const { list, className, style } = this.props;
 		const items = this.renderItems();
+		const overlayClassName = cx(css.overlay, {
+			[css.active]: this.state.overlay,
+		});
 		return (
-			<Droppable onDragOver={this.onDragOver} onDrop={this.onDrop} delay={250}>
-				<Draggable data={data} type="list" preview={<CardPreview />} press>
-					<Card className={this.props.className} style={this.props.style}>
-						<CardHeader title={data.name}/>
-						<CardText>
-							<ol className={css.list}>
-								{items}
-							</ol>
-						</CardText>
-					</Card>
+			<Droppable delay={250}
+				onDragOver={this.onDragOver}
+				onDragOut={this.onDragOut}
+				onDrop={this.onDrop} >
+				<Draggable data={list} type="list" preview={<CardPreview />} press
+					onDragStart={this.onDragStart} onDragEnd={this.onDragEnd} >
+					<div>
+						<Card className={className} style={style}>
+							<CardHeader textStyle={{ width: '100%' }}
+								style={{
+									padding: '16px 16px 0px 16px'
+								}}
+								title={<div>
+								<Button style={{
+									float: 'right',
+									margin: 0, padding: 0
+								}}/>
+								{list.name}
+							</div>}/>
+							<CardText>
+								<ol className={css.list}>
+									{items}
+								</ol>
+							</CardText>
+						</Card>
+						<div className={overlayClassName}>
+							<i className="material-icons">&#xE154;</i>
+							<div className={css.background} />
+						</div>
+					</div>
 				</Draggable>
 			</Droppable>
 		);
 	}
 	renderItems() {
-		return this.props.data.Cards.map(card => {
-			return <CardItem data={card} key={card.id} onMessage={this.dispatchMessage}/>;
+		return this.props.cards.map(card => {
+			return (
+				<CardItem key={card.id} data={card}
+					onMessage={this.dispatchMessage}
+				/>
+			);
 		});
 	}
-	dispatchMessage(msg, args) {
-		this.sendMessage(msg, args);
+	dispatchMessage(msg, arg) {
+		switch (msg) {
+			case CardItem.EventTypes.DragOver: {
+				const { descriptor, target } = arg;
+				const listId = descriptor.data.ListId;
+				const cardId = descriptor.data.id;
+
+				if (descriptor.type !== 'card') break;
+				if (cardId === target.id) break;
+				if (listId === target.ListId) {
+					this.context.card.sort(listId, cardId, target.id);
+				} else {
+					this.setState({ overlay: true });
+				}
+				return;
+			}
+			case CardItem.EventTypes.DragOut: {
+				if (this.state.overlay) {
+					this.setState({ overlay: false });
+				}
+				return;
+			}
+			case CardItem.EventTypes.Drop: {
+				const { descriptor, target } = arg;
+				const listId = descriptor.data.ListId;
+				const cardId = descriptor.data.id;
+
+				if (descriptor.type !== 'card') break;
+				if (listId === target.ListId) break;
+				this.context.card.move(listId, cardId, target.ListId);
+				this.setState({
+					overlay: false
+				});
+				return;
+			}
+		}
+		return this.sendMessage(msg, arg);
 	}
 	sendMessage(msg, args) {
 		const { onMessage } = this.props;
@@ -60,24 +133,48 @@ export default class CardComponent extends Component {
 			onMessage(msg, args);
 		}
 	}
+	onDragStart(event) {
+
+	}
+	onDragEnd(event) {
+
+	}
 	onDragOver(event, descriptor) {
-		const { data } = this.props;
-		if (descriptor.type === 'list' || descriptor.type === 'card') {
+		const { list } = this.props;
+		if (descriptor.type === 'list') {
 			this.sendMessage(EventTypes.DragOver, {
 				event,
 				descriptor,
-				target: data
+				target: list,
 			});
 			return;
+		} else if (descriptor.type === 'card' && descriptor.data.ListId !== list.id) {
+			this.setState({
+				overlay: true
+			});
+		}
+	}
+	onDragOut(event, descriptor) {
+		if (descriptor.type === 'card' && this.state.overlay) {
+			this.setState({
+				overlay: false
+			});
 		}
 	}
 	onDrop(event, descriptor) {
-		const { data } = this.props;
-		if (descriptor.typ === 'list' || descriptor.type === 'card') {
+		const { list } = this.props;
+		if (descriptor.type === 'list') {
 			this.sendMessage(EventTypes.Drop, {
 				event,
 				descriptor,
-				target: data
+				target: list
+			});
+		} else if (descriptor.type === 'card') {
+			const listId = descriptor.data.ListId;
+			const cardId = descriptor.data.id;
+			this.context.card.move(listId, cardId, list.id);
+			this.setState({
+				overlay: false
 			});
 		}
 	}

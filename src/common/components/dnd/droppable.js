@@ -73,7 +73,10 @@ function move({ descriptor, event, target }) {
 
 	if (!isHover) {
 		if (delay > 0 && this.timer === null) {
-			this.timer = setTimeout(this::onDragOver, delay, event, descriptor);
+			this.timer = setTimeout(() => {
+				this.timer = null;
+				this::onDragOver(event, descriptor);
+			}, delay);
 		} else if (delay === 0) {
 			this::onDragOver(event, descriptor);
 		}
@@ -84,6 +87,10 @@ function move({ descriptor, event, target }) {
 }
 
 function end({ descriptor, event }) {
+	if (this.timer) {
+		clearTimeout(this.timer);
+		this.timer = null;
+	}
 	if (this.state.isHover) {
 		const { props: { onDrop } } = this;
 		this::onDrop(event, descriptor);
