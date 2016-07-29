@@ -27,21 +27,16 @@ router.get('/google-revoke', (req, res) => {
 
 passport.use(new Strategy(
 	config.auth.google,
-	async (accessToken, refreshToken, profile, done) => {
+	async (accessToken, refreshToken, profiles, done) => {
 		try {
-			const user = await UserController.getByClaim({
-				where: {
-					provider: 'google',
-					id: profile.id,
-				}
-			});
+			const user = await UserController.getByClaim('goobal', profiles.id);
 			if (!user) {
 				const user = await UserController.createWithClaim(
 					'google',
-					profile.id,
+					profiles.id,
 					{
-						displayName: profile.displayName,
-						gender: getGender(profile.gender),
+						displayName: profiles.displayName,
+						gender: getGender(profiles.gender),
 					}
 				);
 				done(null, user);

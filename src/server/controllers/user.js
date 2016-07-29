@@ -1,3 +1,4 @@
+import Sequelize from 'sequelize';
 import sequelize from '../data/sequelize';
 import { Publishers } from '../data/schema/publisher';
 import { Cards } from '../data/schema/card';
@@ -10,13 +11,14 @@ import UserDataTemplate from './user.template';
 
 export default new class UserController {
 	async getByClaim(provider, id) {
-		return await UserClaims.findOne({
+		const claim = await UserClaims.find({
 			where: {
 				provider: 'facebook',
-				id: id
+				id: id,
 			},
 			include: [Users]
 		});
+		return claim.User;
 	}
 	async createWithClaim(provider, id, profile) {
 		const transaction = await sequelize.transaction();

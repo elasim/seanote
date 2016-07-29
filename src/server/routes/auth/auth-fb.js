@@ -20,19 +20,16 @@ router.get('/fb-revoke', (req, res) => {
 
 passport.use(new Strategy(
 	config.auth.facebook,
-	async (accessToken, refreshToken, profile, done) => {
+	async (accessToken, refreshToken, profiles, done) => {
 		try {
-			const user = await UserController.getByClaim({
-				provider: 'facebook',
-				id: profile.id,
-			});
+			const user = await UserController.getByClaim('facebook', profiles.id);
 			if (!user) {
-				debug('create new user with facebook claim: ', profile.id);
+				debug('create new user with facebook claim: ', profiles.id);
 				const user = await UserController.createWithClaim(
 					'facebook',
-					profile.id,
+					profiles.id,
 					{
-						displayName: profile.displayName,
+						displayName: profiles.displayName,
 						// parse public-profiles and email
 					}
 				);

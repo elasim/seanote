@@ -55,14 +55,22 @@ export default new class BoardController {
 	async canRead(user, board) {
 		await validate(Validator.isUUID, board, 4);
 		const count = await Boards.count({
-			id: board,
 			where: {
-				PrivacySetting: {
-					UserId: user.id,
+				id: board,
+			},
+			include: [{
+				model: BoardPrivacySettings,
+				as: 'PrivacySetting',
+				where: {
+					roleId: {
+						$in: [
+							user.PublisherId,
+							...(await user.getGroups()).map(group => group.PublisherId),
+						],
+					},
 					rule: 'read'
 				}
-			},
-			include: [BoardPrivacySettings]
+			}]
 		});
 		debug('canRead() sorts.count %s', count);
 		return count === 1;
@@ -218,7 +226,6 @@ export default new class BoardController {
 				include: [{
 					model: BoardPrivacySettings,
 					as: 'PrivacySetting',
-					foreignKey: 'BoardId',
 					where: {
 						roleId: {
 							$in: [
