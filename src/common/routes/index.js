@@ -37,21 +37,21 @@ export function configureRoutes(store, initalState) {
 	);
 	function getContainer(params, cb) {
 		const state = initalState || store.getState();
-		cb(null, state.auth.token ? App : Landing);
+		cb(null, state.app.token ? App : Landing);
 	}
 	function getIndexComponent(params, cb) {
 		const state = initalState || store.getState();
-		cb(null, state.auth.token ? Dashboard : Home);
+		cb(null, state.app.token ? Dashboard : Home);
 	}
 	function redirectToDashboard(params, replace) {
 		const state = initalState || store.getState();
-		if (state.auth.token) {
+		if (state.app.token) {
 			return replace('/');
 		}
 	}
 	function redirectToSignIn(params, replace) {
 		const state = initalState || store.getState();
-		if (!state.auth.token) {
+		if (!state.app.token) {
 			replace('/signin');
 		}
 	}

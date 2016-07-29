@@ -4,9 +4,9 @@ import pathToRegexp from 'path-to-regexp';
 import ndJSON from 'ndjson';
 import debug from 'debug';
 import HttpError from './http-error';
-import APIDescriptors from '../descriptors';
+import edges from '../edges';
 
-const apiRoutes = Object.keys(APIDescriptors);
+const apiRoutes = Object.keys(edges);
 const apiRoutePatterns = apiRoutes.map(route => {
 	const opt = {};
 	const keys = [];
@@ -84,7 +84,7 @@ function parse(request) {
 		DEBUG_LOG_PARSE(match, parsedUrl.pathname);
 		if (!match) continue;
 
-		const apiDesc = APIDescriptors[apiRoutes[i]][method];
+		const apiDesc = edges[apiRoutes[i]][method];
 		if (apiDesc) {
 			result.params = keys.reduce((params, { name }, index) => {
 				DEBUG_LOG_PARSE(index, name, match[index+1]);
@@ -108,20 +108,6 @@ function parse(request) {
 		}
 	}
 	return Promise.reject(new HttpError(`unknown request : ${url}`, 400));
-}
-
-function findMiddlewares(tasks) {
-	const middlewares = [];
-	for (let task of tasks) {
-		if (task.middlewares) {
-			for (let middleware of task.middlewares) {
-				if (middlewares.indexOf(middleware) === -1) {
-					middlewares.push(middleware);
-				}
-			}
-		}
-	}
-	return middlewares;
 }
 
 function executeMiddlewares(middlewares, req, res) {

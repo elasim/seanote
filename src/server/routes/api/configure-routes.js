@@ -1,8 +1,9 @@
 import debug from 'debug';
 
-export default function configure(router, descriptors) {
-	for (let route in descriptors) {
-		const methods = descriptors[route];
+const DEBUG_CONFIGURE = debug('app.api.configure');
+export default function configure(router, edges) {
+	for (let route in edges) {
+		const methods = edges[route];
 		for (let method in methods) {
 			let action;
 			let middlewares;
@@ -16,6 +17,7 @@ export default function configure(router, descriptors) {
 				middlewares = [];
 			}
 
+			DEBUG_CONFIGURE('route', method, route);
 			router[method](route, ...middlewares, createHandler(action));
 		}
 	}

@@ -90,7 +90,7 @@ export default class Board extends Component {
 				const source = descriptor.data.BoardId;
 				const sourceId = descriptor.data.id;
 				if (sourceId === target.id || type !== 'list') return;
-				this.context.list.sort(source, sourceId, target.BoardId, target.id);
+				this.context.list.sort(source, sourceId, target.id);
 				break;
 			}
 			default:

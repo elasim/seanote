@@ -4,6 +4,7 @@ import isEqual from 'lodash/isEqual';
 import Draggable from '../../../../components/dnd/draggable';
 import Droppable from '../../../../components/dnd/droppable';
 import Symbol from '../../../../lib/symbol-debug';
+import CardContent from './card-content';
 import css from './card-item.scss';
 
 const EventTypes = {
@@ -47,7 +48,7 @@ export default class CardItem extends Component {
 					preview={<CardItemPreview />}
 					onDragStart={this.onDragStart} onDragEnd={this.onDragEnd}>
 					<li className={liClassName} style={style}>
-						{data.id}
+						<CardContent data={data.value} />
 					</li>
 				</Draggable>
 			</Droppable>

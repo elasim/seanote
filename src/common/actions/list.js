@@ -1,5 +1,6 @@
-import { getList } from '../data/list';
-import execute from '../data/execute';
+import App from './app';
+import Lists from '../data/lists';
+import { request } from './data';
 
 export default {
 	load,
@@ -7,63 +8,27 @@ export default {
 };
 
 export const ActionTypes = {
-	create: 'LIST_CREATE',
-	rename: 'LIST_RENAME',
+	load: 'LIST_LOAD',
 	sort: 'LIST_SORT',
-	moveTrash: 'LIST_MOVE_TRASH',
-
-	receiveServerData: 'LIST_RECEIVE_SERVER_DATA',
-	loadStart: 'LIST_LOAD_START',
-	loadSuccess: 'LIST_LOAD_SUCCESS',
-	loadFailure: 'LIST_LOAD_FAILURE',
 };
 
 export function sort(source, a, b) {
-	return async (dispatch, getState) => {
-		if (getState().list[source].renumbering) {
-			// await execute(renumber());
-			load(source);
-		}
-		dispatch(applyChanges({
-			type: ActionTypes.sort,
-			payload: { source, a, b },
-		}));
+	return {
+		type: ActionTypes.sort,
+		payload: { source, a, b },
 	};
-}
-
-function applyChanges(action) {
-	return action;
 }
 
 export function load(id) {
 	return async dispatch => {
-		dispatch(loadStart());
 		try {
-			const data = await execute(getList(id));
-			dispatch(loadSuccess(data));
+			const data = await request(dispatch, Lists.all(id));
+			dispatch({
+				type: ActionTypes.load,
+				payload: data
+			});
 		} catch (e) {
-			console.error(e);
-			dispatch(loadFailure(e));
+			dispatch(App.error(e));
 		}
-	};
-}
-
-function loadStart() {
-	return {
-		type: ActionTypes.loadStart
-	};
-}
-
-function loadSuccess(data) {
-	return {
-		type: ActionTypes.loadSuccess,
-		payload: data,
-	};
-}
-
-function loadFailure(error) {
-	return {
-		type: ActionTypes.loadFailure,
-		payload: error,
 	};
 }

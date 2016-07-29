@@ -6,6 +6,7 @@ const DEFAULT_STATE = {
 	headerVisibility: true,
 	dim: null,
 	locale: 'en',
+	token: null,
 };
 
 export default handleActions({
@@ -13,32 +14,40 @@ export default handleActions({
 	[ActionTypes.setHeaderVisibility]: setHeaderVisibility,
 	[ActionTypes.setDim]: setDim,
 	[ActionTypes.setLocale]: setLocale,
+	[ActionTypes.getToken]: getToken,
 }, DEFAULT_STATE);
 
-function setTitle(state, action) {
+function setTitle(state, { payload }) {
 	return {
 		...state,
-		title: action.payload,
+		title: payload,
 	};
 }
 
-function setHeaderVisibility(state, action) {
+function setHeaderVisibility(state, { payload }) {
 	return {
 		...state,
-		headerVisibility: action.payload
+		headerVisibility: payload
 	};
 }
 
-function setDim(state, action) {
+function setDim(state, { payload }) {
 	return {
 		...state,
-		dim: action.payload,
+		dim: payload,
 	};
 }
 
-function setLocale(state, action) {
+function setLocale(state, { payload }) {
 	return {
 		...state,
-		locale: action.payload,
+		locale: payload,
+	};
+}
+
+function getToken(state, { payload }) {
+	return {
+		...state,
+		token: payload
 	};
 }

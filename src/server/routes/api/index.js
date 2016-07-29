@@ -1,19 +1,12 @@
-import { Router } from 'express';
-import bodyParser from 'body-parser';
-
-import APIDescriptors from './descriptors';
+import router from './router';
+import edges from './edges';
 import configureRoutes from './configure-routes';
-import { cacheControl, catchError, notFound } from './middlewares';
+import { catchError, notFound } from './middlewares';
 
 import StreamHandler from './utils/stream';
 import BulkHandler from './utils/bulk';
 
-const router = new Router();
-router.use(bodyParser.json());
-router.use(bodyParser.urlencoded({ extended: true }));
-router.use(cacheControl('no-cache'));
-
-configureRoutes(router, APIDescriptors);
+configureRoutes(router, edges);
 
 router.get('/_stream', StreamHandler);
 router.post('/_bulk', BulkHandler);

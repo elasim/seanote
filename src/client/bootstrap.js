@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router, browserHistory } from 'react-router';
 import injectTapEventPlugin from 'react-tap-event-plugin';
+import emptyFunction from 'fbjs/lib/emptyFunction';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import appMuiTheme from '../common/themes/mui';
@@ -13,9 +14,8 @@ import { configureLocale } from './intl';
 
 const defaultState = {
 	app: {
-		locale: navigator.languages ? navigator.languages[0] : 'en'
-	},
-	auth: {
+		headerVisibility: true,
+		locale: navigator.languages ? navigator.languages[0] : 'en',
 		token: null,
 	},
 };
@@ -32,15 +32,18 @@ window.bootstrap = (serverSentState = {}) => {
 	const initialState = getInitialState(serverSentState);
 
 	// DEBUG ONLY
-	const whoami = require('../common/data/user').whoami;
+	const Users = require('../common/data/users').default;
 	const execute = require('../common/data/execute').default;
-	execute(whoami())
-		.then((user) => {
-			initialState.auth.token = user.token;
-		}, (/* ignore error */) => { })
+
+	execute(Users.getToken())
+		.then(user => {
+			initialState.app.token = user.token;
+		}, e => {
+			console.error(e);
+		})
 		.then(() => {
 			const { store, routes } = configure(initialState);
-			const muiTheme = getMuiTheme(appMuiTheme);			
+			const muiTheme = getMuiTheme(appMuiTheme);
 			render(
 				<Provider store={store}>
 					<MuiThemeProvider muiTheme={muiTheme}>
@@ -50,7 +53,6 @@ window.bootstrap = (serverSentState = {}) => {
 				document.getElementById('app')
 			);
 		});
-
 	delete window.bootstrap;
 };
 

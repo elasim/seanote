@@ -19,10 +19,10 @@ export default {
 	...extend('/message', Message),
 };
 
-function extend(prefix, descriptors) {
+function extend(prefix, edges) {
 	return Object.assign(
-		...Object.keys(descriptors).map(key => {
-			return { [`${prefix}${key}`]: descriptors[key] };
+		...Object.keys(edges).map(key => {
+			return { [`${prefix}${key}`]: edges[key] };
 		})
 	);
 }

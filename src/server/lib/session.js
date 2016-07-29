@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import uuid from 'uuid';
 import jwt from 'jsonwebtoken';
-import { User } from '../data';
+import { Users } from '../data';
 import config from './config';
 
 // @Refactors: Scalability, Security
@@ -36,7 +36,7 @@ export async function veifySession(session) {
 		// but, It doesn't means about that the user is actually exist.
 		// User data could be deleted during session is still active.
 		// In this case, verification must be failed.
-		const user = await User.findById(claim.aud);
+		const user = await Users.findById(claim.aud);
 		if (!user) {
 			console.log('Token verified, but User not exists');
 			delete sessions[id];

@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { OAuth2Strategy as Strategy } from 'passport-google-oauth';
-import { User, UserClaim } from '../../data';
+import UserController from '../../controllers/user';
 import router from './router';
 import { loginWithPassport } from './auth-passport';
 import config from '../../lib/config';
@@ -29,20 +29,23 @@ passport.use(new Strategy(
 	config.auth.google,
 	async (accessToken, refreshToken, profile, done) => {
 		try {
-			const claim = await UserClaim.findOne({
+			const user = await UserController.getByClaim({
 				where: {
 					provider: 'google',
 					id: profile.id,
 				}
 			});
-			if (!claim) {
-				const user = await User.createWithClaim('google', profile.id, {
-					displayName: profile.displayName,
-					gender: getGender(profile.gender),
-				});
+			if (!user) {
+				const user = await UserController.createWithClaim(
+					'google',
+					profile.id,
+					{
+						displayName: profile.displayName,
+						gender: getGender(profile.gender),
+					}
+				);
 				done(null, user);
 			} else {
-				const user = await claim.getUser();
 				done(null, user);
 			}
 		} catch (e) {

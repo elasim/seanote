@@ -1,13 +1,31 @@
 import { requireAuth } from '../middlewares';
+import { Users } from '../../../data';
 
 export default {
 	// whoami
-	get: [requireAuth, (req) => {
-		return Promise.resolve({ token: req.session.passport.user.token });
+	get: [requireAuth, async (req) => {
+		const profile = await req.user.db.getUserProfile();
+		return profile.toJSON();
 	}],
-	/*
-	put(req, res) {}
-	post(req, res) {}
-	delete(req, res) {}
-	*/
+	// put: [requireAuth, async (req) => {
+	// 	req.
+	// }],
+	post(req, res) {
+		const {
+			name,
+			picture,
+			email,
+			compnay,
+			website,
+			location,
+			gender,
+		} = res.body;
+	},
+	delete: [requireAuth, async (req) => {
+		await Users.delete({
+			where: {
+				id: req.user.db.id
+			}
+		});
+	}]
 };

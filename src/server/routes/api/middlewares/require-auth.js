@@ -1,6 +1,7 @@
 import debug from 'debug';
+import HttpError from '../utils/http-error';
 import { verifyToken } from '../../../lib/session';
-import { User } from '../../../data';
+import { Users } from '../../../data';
 
 const DEBUG_LOG = debug('app.api.middleware.requireAuth');
 
@@ -14,14 +15,14 @@ export default async function requireAuth(req, res, next) {
 	} else if (req.query.token) {
 		try {
 			const claim = await verifyToken(req.query.token);
-			const db = await User.findById(claim.aud);
+			const db = await Users.findById(claim.aud);
 			req.user = { claim, db };
 			next();
 		} catch (e) {
 			DEBUG_LOG('api token failure', e);
-			return next(new Error('invalid token'));
+			return next(new HttpError('invalid token', 401));
 		}
 	} else {
-		return next(new Error('authentication required'));
+		return next(new HttpError('authentication required', 400));
 	}
 }

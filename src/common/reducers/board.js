@@ -1,9 +1,8 @@
 import { handleActions } from 'redux-actions';
 import cloneDeep from 'lodash/cloneDeep';
 import { ActionTypes } from '../actions/board';
+import { ActionTypes as  DataActionTypes } from '../actions/data';
 import { mean, isNearlyZero } from './lib/sortable';
-
-const RENUMBER_THRESHOLD = Number.EPSILON * 10E4;
 
 const initialState = {
 	list: [],
@@ -16,8 +15,8 @@ const initialState = {
 
 export default handleActions({
 	[ActionTypes.sort]: sort,
-	[ActionTypes.receiveServerData]: receiveServerData,
-	[ActionTypes.updateSuccess]: updateSuccess,
+	[ActionTypes.load]: load,
+	[DataActionTypes.prefetch]: prefetch,
 }, initialState);
 
 function sort(state, action) {
@@ -26,7 +25,7 @@ function sort(state, action) {
 
 	const list = cloneDeep(state.list);
 	const oldIndex = list.findIndex(item => item.id === a);
-	const newIndex = state.list.findIndex(item => item.id === b);
+	const newIndex = list.findIndex(item => item.id === b);
 	const item = list[oldIndex];
 
 	list.splice(oldIndex, 1);
@@ -47,22 +46,12 @@ function sort(state, action) {
 	};
 }
 
-function updateSuccess(state) {
-	return {
-		...state,
-		dirty: {}
-	};
-}
-
-function receiveServerData(state, { payload }) {
+function load(state, { payload }) {
 	const {
-		data: {
-			items,
-			counts,
-			prev,
-			next,
-		},
-		renumbered
+		items,
+		counts,
+		prev,
+		next,
 	} = payload;
 	const newDirty = { ...state.dirty };
 
@@ -98,6 +87,11 @@ function receiveServerData(state, { payload }) {
 		counts: counts,
 		prev: Math.min(state.prev, prev),
 		next: Math.max(state.next, next),
-		renumbering: renumbered ? false : state.renumbering,
 	};
+}
+
+function prefetch(state, { payload }) {
+	return load(state, {
+		payload: payload.board
+	});
 }

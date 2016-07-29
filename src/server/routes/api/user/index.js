@@ -1,5 +1,9 @@
-import User from './user';
+import query from './query';
+import user from './user';
+import token from './token';
 
 export default {
-	'/': User,
+	'/': query,
+	'/token': token,
+	'/:user': user,
 };

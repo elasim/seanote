@@ -1,5 +1,5 @@
 import debug from 'debug';
-import { Author, Board, Group } from '../../../data';
+import { Authors, Boards, Groups } from '../../../data';
 import HttpError from '../utils/http-error';
 
 const DEBUG_LOG_REQUIRE_BOARD = debug('app.api.middleware.requireBoard');
@@ -7,9 +7,9 @@ const DEBUG_LOG_REQUIRE_BOARD = debug('app.api.middleware.requireBoard');
 export default async function requireBoard(req, res, next) {
 	try {
 		DEBUG_LOG_REQUIRE_BOARD('params', req.params);
-		const board = await Board.findById(req.params.board, {
+		const board = await Boards.findById(req.params.board, {
 			attributes: ['id', 'updatedAt', 'createdAt'],
-			include: [{ model: Author, as: 'Owner'}]
+			include: [{ model: Authors, as: 'Owner'}]
 		});
 		if (!board) {
 			return next(new HttpError('invald id', 404));
@@ -27,7 +27,7 @@ export default async function requireBoard(req, res, next) {
 		}
 		switch (board.Owner.type) {
 			case 'group': {
-				const group = await Group.findOne({
+				const group = await Groups.findOne({
 					where: {
 						AuthorId: board.OwnerId
 					}

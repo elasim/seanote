@@ -7,7 +7,7 @@ const initialState = {
 };
 
 export default handleActions({
-	[List.loadSuccess]: load,
+	[List.load]: load,
 	[List.sort]: (state, action) => sort(state, action),
 	[List.copy]: (state, action) => copy(state, action, 'BoardId'),
 	[List.move]: (state, action) => move(state, action, 'BoardId'),

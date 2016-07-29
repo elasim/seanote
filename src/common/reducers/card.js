@@ -8,8 +8,8 @@ const initialState = {
 };
 
 export default handleActions({
-	[List.loadSuccess]: loadList,
-	[Card.loadSuccess]: loadCard,
+	[List.load]: loadList,
+	[Card.load]: loadCard,
 	[Card.sort]: (state, action) => sort(state, action),
 	[Card.move]: (state, action) => move(state, action, 'ListId'),
 	[Card.copy]: (state, action) => copy(state, action, 'ListId'),
