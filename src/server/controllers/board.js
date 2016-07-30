@@ -2,123 +2,45 @@ import Sequelize from 'sequelize';
 import Validator from 'validator';
 import validate from './validation';
 import { Boards, BoardSorts, BoardPrivacySettings } from '../data/schema/board';
-import { Users } from '../data/schema/user';
-import { Groups, GroupUsers } from '../data/schema/group';
 import sequelize from '../data/sequelize';
 
+const IS_DEBUG = process.env.NODE_ENV !== 'production';
 const debug = require('debug')('app.BoardController');
 
 const VALID_NAME_MAX = 140;
-const VALID_PRIORITY_MIN = Number.EPSILON;
+const VALID_PRIORITY_MIN = Number.EPSILON * 1000;
 
-const TBL_BOARDS = Boards.getTableName();
 const TBL_BOARD_SORTS = BoardSorts.getTableName();
-const TBL_BOARD_PRIVACIES = BoardPrivacySettings.getTableName();
-const TBL_USERS = Users.getTableName();
-const TBL_GROUPS = Groups.getTableName();
-const TBL_GROUP_USERS = GroupUsers.getTableName();
-// Use raw SQL to get list (sequelize doesn't supports complex sub-query)
-const QUERY_BODY_GET_LIST = `
-	FROM
-		${TBL_BOARDS} B
-		LEFT OUTER JOIN
-			${TBL_BOARD_PRIVACIES} BP ON B.id = BP.BoardId
-		LEFT OUTER JOIN
-			${TBL_BOARD_SORTS} BS ON B.id = BS.BoardId
-	WHERE
-		OwnerId = (
-			SELECT AuthorId FROM ${TBL_USERS} U WHERE id = :UserId
-		)
-		OR B.id IN (
-			SELECT BoardId FROM ${TBL_GROUPS} G WHERE id in (
-				SELECT
-					GroupId
-				FROM ${TBL_GROUP_USERS} GU
-				WHERE GU.UserId = :UserId
-			)
-		)
-`;
-const QUERY_RENUMBER = `
-	UPDATE ${TBL_BOARD_SORTS}
-	SET priority=(
-		SELECT count(*) + 1.0
-		FROM ${TBL_BOARD_SORTS} B
-		WHERE
-			B.priority < ${TBL_BOARD_SORTS}.priority
-			and B.UserId = ${TBL_BOARD_SORTS}.UserId
-		)
-	WHERE
-		UserId=:UserId
-`;
 
 export default new class BoardController {
-	async canRead(user, board) {
+	async havePermission(user, board, privilege) {
+		debug('can()', user.id, board, privilege);
 		await validate(Validator.isUUID, board, 4);
-		const count = await Boards.count({
+		await validate(Validator.isIn, privilege, [
+			'read',
+			'write'
+		]);
+		const count = await BoardPrivacySettings.count({
 			where: {
-				id: board,
+				BoardId: board,
+				roleId: {
+					$in: [
+						user.PublisherId,
+						...(await user.getGroups()).map(group => group.PublisherId),
+					]
+				},
+				rule: privilege
 			},
-			include: [{
-				model: BoardPrivacySettings,
-				as: 'PrivacySetting',
-				where: {
-					roleId: {
-						$in: [
-							user.PublisherId,
-							...(await user.getGroups()).map(group => group.PublisherId),
-						],
-					},
-					rule: 'read'
-				}
-			}]
+			benchmark: IS_DEBUG,
 		});
-		debug('canRead() sorts.count %s', count);
 		return count === 1;
-		// If the request is valid,
-		// BoardSorts must be exists
-		// const count = await BoardSorts.count({
-		// 	where: {
-		// 		UserId: user.id,
-		// 		BoardId: board
-		// 	}
-		// });
-		// debug('canRead() sorts.count %s', count);
-		// return count === 1;
-		const privacy = await BoardPrivacySettings.find({
-			where: {
-				BoardId: board,
-				readables: {
-					$like: `%${user.id}%`
-				}
-			}
-		});
-		return !!privacy;
-	}
-	async haveWritePermission(user, board) {
-		const privacy = await BoardPrivacySettings.find({
-			where: {
-				BoardId: board,
-				writables: {
-					$like: `%${user.id}%`
-				}
-			}
-		});
-		return !!privacy;
-		// if (privacy.OwnerId === user.id) {
-		// 	return true;
-		// }
-		// user.hasGroup()
-		// if (privacy.Groups === BoardPrivacySettings.WRITE ) {
-		// }
 	}
 	async create(user, { name, isPublic }, options = {}) {
 		await validate(Validator.isLength, name, {
 			min: 1,
 			max: VALID_NAME_MAX,
 		});
-		await validate(value => {
-			return typeof value === 'boolean';
-		}, isPublic);
+		await validate(value => typeof value === 'boolean', isPublic);
 
 		const transaction = options.transaction || await sequelize.transaction();
 		const t = { transaction };
@@ -162,14 +84,12 @@ export default new class BoardController {
 			throw e;
 		}
 	}
-	async update(user, { board, name, isPublic }) {
+	async update(user, { board, name, isPublic }, options = {}) {
 		await validate(Validator.isLength, name, {
 			min: 1,
 			max: VALID_NAME_MAX,
 		});
-		await validate(value => {
-			return value === 0 || value === 1;
-		}, isPublic);
+		await validate(value => value === 0 || value === 1, isPublic);
 		await validate(async value => {
 			return await BoardSorts.count({
 				where: {
@@ -185,10 +105,11 @@ export default new class BoardController {
 		}, {
 			where: {
 				id: board
-			}
+			},
+			transaction: options.transaction,
 		});
 	}
-	async delete(user, { board }) {
+	async delete(user, { board }, options = {}) {
 		await validate(async value => {
 			return await BoardSorts.count({
 				where: {
@@ -202,10 +123,11 @@ export default new class BoardController {
 			where: {
 				BoardId: board
 			},
-			cascade: true
+			cascade: true,
+			transaction: options.transaction,
 		});
 	}
-	async all(user, { offset, limit }) {
+	async all(user, { offset, limit }, options = {}) {
 		await validate(value => {
 			return Number.isInteger(value) && value >= 0;
 		}, offset);
@@ -218,66 +140,65 @@ export default new class BoardController {
 			limit: limit + (offset > 0 ? 2 : 1),
 		};
 
-		const transaction = await sequelize.transaction();
-		let count;
+		const transaction = options.transaction || await sequelize.transaction();
+		const t = { transaction };
 		let boards;
 		try {
+			const groups = await user.getGroups(t);
+			const readables = groups.map(group => group.PublisherId);
+			readables.push(user.PublisherId);
 			boards = await Boards.findAndCount({
-				include: [{
-					model: BoardPrivacySettings,
-					as: 'PrivacySetting',
-					where: {
-						roleId: {
-							$in: [
-								user.PublisherId,
-								...(await user.getGroups()).map(group => group.PublisherId),
-							],
+				include: [
+					{
+						model: BoardPrivacySettings,
+						as: 'PrivacySetting',
+						where: {
+							roleId: { $in: readables },
+							rule: 'read'
 						},
-						rule: 'read'
-					}
-				}]
-			}, { transaction });
-			// count = await sequelize.query(`
-			// 	SELECT count(*) as count
-			// 	${QUERY_BODY_GET_LIST}
-			// `, {
-			// 	type: Sequelize.QueryTypes.SELECT,
-			// 	replacements: {
-			// 		UserId: user.id
-			// 	},
-			// 	transaction,
-			// });
-			// boards = await sequelize.query(`
-			// 	SELECT B.*, BS.priority
-			// 	${QUERY_BODY_GET_LIST}
-			// 	ORDER BY
-			// 		BS.priority IS NOT NULL,
-			// 		BS.priority ASC,
-			// 		B.createdAt DESC
-			// 	LIMIT
-			// 		${paging.offset},
-			// 		${paging.limit}
-			// `, {
-			// 	type: Sequelize.QueryTypes.SELECT,
-			// 	replacements: {
-			// 		UserId: user.id
-			// 	},
-			// 	transaction,
-			// });
+					},
+					{
+						model: BoardSorts,
+						where: { UserId: user.id },
+						required: false,
+					},
+				],
+				order: [
+					'BoardSort.priority IS NULL',
+					'BoardSort.priority ASC',
+					'createdAt DESC',
+				].join(','),
+				transaction,
+			});
+			let maxPriority = 0;
 			for (let i = 0; i < boards.rows.length; ++i) {
-				if (boards.rows[i].priority === null) {
-					boards.rows[i].priority = i + 1;
+				if (!boards.rows[i].BoardSort) {
+					const priority = 1.0 + Math.floor(maxPriority);
+					debug('all() generate sort index', boards.rows[i].id, priority);
+					boards.rows[i].BoardSort = {
+						priority,
+					};
 					await BoardSorts.create({
 						UserId: user.id,
 						BoardId: boards.rows[i].id,
-						priority: boards.rows[i].priority
-					}, { transaction });
+						priority,
+					}, t);
+					maxPriority = priority;
+				} else {
+					maxPriority = Math.max(
+						maxPriority,
+						boards.rows[i].BoardSort.priority
+					);
 				}
 			}
-			await transaction.commit();
+			if (!options.transaction) {
+				await transaction.commit();
+			}
 		} catch (e) {
 			debug('all()', e);
-			await transaction.rollback();
+			if (!options.transaction) {
+				await transaction.rollback();
+			}
 			throw e;
 		}
 
@@ -288,20 +209,31 @@ export default new class BoardController {
 		if (offset === 0 || boards.rows.length === 0) {
 			prev = 0.0;
 		} else {
-			prev = boards.rows[0].priority;
+			prev = boards.rows[0].BoardSort.priority;
 			boards.rows.shift();
 		}
 
 		// results contain the last item
 		if (paging.limit > boards.rows.length) {
-			next = count + 1;
+			next = boards.count + 1;
 		} else {
-			next = boards[boards.rows.length - 1].priority;
+			next = boards[boards.rows.length - 1].BoardSort.priority;
 			boards.rows.pop();
 		}
 
+		const items = boards.rows.map(row => ({
+			id: row.id,
+			AuthorId: row.AuthorId,
+			PublisherId: row.PublisherId,
+			name: row.name,
+			priority: row.BoardSort.priority,
+			permissions: row.PrivacySetting.map(priv => priv.rule),
+			createdAt: row.createdAt,
+			updatedAt: row.updatedAt,
+		}));
+
 		return {
-			items: boards.rows,
+			items,
 			prev,
 			next,
 			count: boards.count,
@@ -309,38 +241,105 @@ export default new class BoardController {
 			limit: limit,
 		};
 	}
-	async renumber(user) {
-		const result = await sequelize.query(QUERY_RENUMBER, {
-			type: Sequelize.QueryTypes.UPDATE,
-			replacements: {
-				UserId: user.id
-			},
-		});
-		return result;
-	}
-	async sort(user, { BoardId, priority }) {
-		await validate(Validator.isUUID, BoardId, 4);
-		await validate(Validator.isFloat, priority, {
-			min: VALID_PRIORITY_MIN
-		});
-		const transaction = sequelize.transaction();
+	async renumber(user, options = {}) {
+		debug('renumber()', options.transaction
+			? 'Use Extern Transaction' : 'Use Internal Transaction');
+		const transaction = options.transaction || await sequelize.transaction();
+		const queries = `
+			CREATE TEMP TABLE IF NOT EXISTS :UserId (
+				seq INTEGER PRIMARY KEY,
+				id VARCHAR(255) 
+			);
+			CREATE INDEX IF NOT EXISTS board_index
+				ON :UserId (seq);
+			DELETE FROM :UserId;
+			INSERT INTO :UserId (id)
+				SELECT BoardId FROM ${TBL_BOARD_SORTS}
+					WHERE UserId=:UserId
+					ORDER BY priority;
+			UPDATE BoardSorts
+				SET priority=(
+					SELECT T.seq
+					FROM :UserId T
+					WHERE
+						T.id = BoardSorts.BoardId
+				)
+				WHERE
+					UserId=:UserId;
+			DROP TABLE :UserId;`
+			.split(/;/g)
+			.map(query => query.trim())
+			.filter(query => query.length > 0);
 		try {
-			const sort = BoardSorts.findOne({
-				BoardId,
-				UserId: user.id,
-			}, { transaction });
+			for (let i = 0; i < queries.length; ++i) {
+				await sequelize.query(queries[i], {
+					replacements: {
+						UserId: user.id
+					},
+					transaction,
+				});
+			}
+			if (!options.transaction) {
+				await transaction.commit();
+			}
+			return;
+		} catch (e) {
+			debug('renumber()', e);
+			if (!options.transaction) {
+				await transaction.rollback();
+			}
+			throw e;
+		}
+	}
+	async sort(user, { BoardId, priority }, options = {}) {
+		debug('sort()', BoardId, typeof BoardId);
+		debug('sort()', priority, typeof priority);
+		await validate(Validator.isUUID, BoardId, 4);
+		await validate(value => {
+			return !Number.isNaN(value) && value >= VALID_PRIORITY_MIN;
+		}, priority);
+
+		debug('sort()', options.transaction
+			? 'Use Extern Transaction' : 'Use Internal Transaction');
+		const transaction = options.transaction || await sequelize.transaction();
+
+		try {
+			const sort = await BoardSorts.find({
+				where: {
+					BoardId,
+					UserId: user.id,
+				},
+				transaction
+			});
 			// If this request is sent by normal use-case,
 			// this data should be already created by all() method during display
 			// in other cases, It was possibly abnormal request
 			if (!sort) {
 				throw new Error('invalid parameter');
 			}
+			await debug('sort()', sort.priority, priority);
 			sort.priority = priority;
 			await sort.save({ transaction });
-			await transaction.commit();
+			// Fall-Safe
+			const equals = await BoardSorts.count({
+				where: {
+					UserId: user.id,
+					priority
+				},
+				transaction,
+			});
+			debug('sort() fail-safe, equal counts: ', equals);
+			if (equals > 1) {
+				this.renumber(user, options);
+			}
+			if (!options.transaction) {
+				await transaction.commit();
+			}
 			return;
 		} catch (e) {
-			await transaction.rollback();
+			if (!options.transaction) {
+				await transaction.rollback();
+			}
 			throw e;
 		}
 	}

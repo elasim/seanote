@@ -22,7 +22,7 @@ export default {
 		async post(req) {
 			return await boardCtrl.sort(req.user.db, {
 				BoardId: String(req.body.id),
-				priority: parseFloat(req.body.pid),
+				priority: parseFloat(req.body.value),
 			});
 		},
 	},

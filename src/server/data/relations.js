@@ -45,3 +45,5 @@ Lists.hasMany(Cards);
 // });
 BoardSorts.belongsTo(Boards, { foreignKey: 'BoardId' });
 BoardSorts.belongsTo(Users, { foreignKey: 'UserId' });
+Boards.hasOne(BoardSorts, { foreignKey: 'BoardId' });
+Users.hasOne(BoardSorts, { foreignKey: 'UserId' });

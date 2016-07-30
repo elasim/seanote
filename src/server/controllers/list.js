@@ -11,12 +11,12 @@ const debug = require('debug')('app.ListController');
 
 export default new class ListController {
 	async renumber(user, { board }) {
-		debug('renumber(): %s %s', board, typeof board);
-		await validate(boardCtrl.canWrite, user, board);
+		debug('renumber(): %s %s', board, typeof board, );
+		await validate(boardCtrl.havePermission, user, board, 'write');
 	}
 	async all(user, { board }) {
 		debug('all(): %s %s', board, typeof board);
-		await validate(boardCtrl.canRead, user, board);
+		await validate(boardCtrl.havePermission, user, board, 'read');
 		const lists = await Lists.findAll({
 			where: { BoardId: board },
 			include: [Cards],

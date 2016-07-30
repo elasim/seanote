@@ -18,7 +18,7 @@ export default new class UserController {
 			},
 			include: [Users]
 		});
-		return claim.User;
+		return claim ? claim.User : null;
 	}
 	async createWithClaim(provider, id, profile) {
 		const transaction = await sequelize.transaction();
@@ -67,29 +67,12 @@ async function createUserData(t, profiles, template) {
 		UserId: user.id,
 		...profiles,
 	}, t);
-	await Promise.all(template.board.map(async (boardTemplate, boardTemplateIndex) => {
+	await Promise.all(template.board.map(async (boardTemplate) => {
 		const { list, ...props } = boardTemplate;
 		const board = await boardCtrl.create(user, {
 			name: props.name,
 			isPublic: false,
 		}, t);
-		// const board = await Boards.create({
-		// 	...props,
-		// 	PublisherId: publisher.id,
-		// 	OwnerId: user.id,
-		// 	PrivacySettings: [
-		// 		{ rule: 'read' },
-		// 		{ rule: 'write' },
-		// 	]
-		// }, {
-		// 	transaction: t.transaction,
-		// 	include: [BoardPrivacySettings],
-		// });
-		// await BoardSorts.create({
-		// 	priority: boardTemplateIndex + 1,
-		// 	BoardId: board.id,
-		// 	UserId: user.id,
-		// }, t);
 		return await Promise.all(list.map(async (listTemplate, listTemplateIndex) => {
 			const { name, items } = listTemplate;
 			const list = await Lists.create({
