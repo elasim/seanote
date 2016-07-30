@@ -46,7 +46,7 @@ export default {
 			});
 		},
 		async delete(req) {
-			return await boardCtrl.update(req.user.db, {
+			return await boardCtrl.delete(req.user.db, {
 				board: req.params.board
 			});
 		},

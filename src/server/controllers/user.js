@@ -9,12 +9,14 @@ import validate from './validation';
 import boardCtrl from './board';
 import UserDataTemplate from './user.template';
 
+const debug = require('debug')('app.UserController');
+
 export default new class UserController {
 	async getByClaim(provider, id) {
 		const claim = await UserClaims.find({
 			where: {
-				provider: 'facebook',
-				id: id,
+				provider,
+				id,
 			},
 			include: [Users]
 		});
@@ -31,25 +33,28 @@ export default new class UserController {
 				id: id,
 			}, t);
 			await transaction.commit();
-			return Promise.resolve(user);
+			return user;
 		} catch (e) {
 			await transaction.rollback();
 			throw e;
 		}
 	}
-	async createWithLogin(context, id, pw) {
+	async createWithLogin(username, password, profile = {}) {
+		debug('createWithLogin()', 'username', username, typeof username);
+		debug('createWithLogin()', 'password', password, typeof password);
 		const transaction = await sequelize.transaction();
 		const t = { transaction };
 		try {
-			const user = await createUserData(t, {}, UserDataTemplate);
+			const user = await createUserData(t, profile, UserDataTemplate);
 			await UserLogins.create({
 				UserId: user.id,
-				username: id,
-				password: pw,
+				username: username,
+				password: password,
 			}, t);
 			await transaction.commit();
-			return Promise.resolve(user);
+			return user;
 		} catch (e) {
+			debug('createWithLogin()', e);
 			await transaction.rollback();
 			throw e;
 		}
@@ -57,37 +62,45 @@ export default new class UserController {
 };
 
 async function createUserData(t, profiles, template) {
-	const publisher = await Publishers.create({
-		type: 'user'
-	}, t);
-	const user = await Users.create({
-		PublisherId: publisher.id
-	}, t);
-	await UserProfiles.create({
-		UserId: user.id,
-		...profiles,
-	}, t);
-	await Promise.all(template.board.map(async (boardTemplate) => {
-		const { list, ...props } = boardTemplate;
-		const board = await boardCtrl.create(user, {
+	debug('createUserData()');
+	const pub = await Publishers.create({
+		type: 'user',
+		Users: [{
+			role: 'user',
+			UserProfile: profiles
+		}],
+	}, {
+		transaction: t.transaction,
+		include: [{
+			model: Users,
+			include: [UserProfiles]
+		}],
+	});
+	const user = await Users.find({
+		where: {
+			PublisherId: pub.id
+		},
+		transaction: t.transaction,
+	});
+	for (let i = 0; i < template.board.length; ++i) {
+		const { list, ...props } = template.board[i];
+		await boardCtrl.create(user, {
 			name: props.name,
-			isPublic: false,
-		}, t);
-		return await Promise.all(list.map(async (listTemplate, listTemplateIndex) => {
-			const { name, items } = listTemplate;
-			const list = await Lists.create({
-				name,
-				priority: listTemplateIndex + 1,
-				BoardId: board.id,
-			}, t);
-			return await Cards.bulkCreate(items.map((item, index) => {
+			isPublic: 0,
+			Lists: list.map((listTemplate, listTemplateIndex) => {
+				const { name, items } = listTemplate;
 				return {
-					priority: index + 1,
-					value: item,
-					ListId: list.id,
+					name: name,
+					priority: listTemplateIndex + 1,
+					Cards: items.map((cardTemplate, cardTemplateIndex) => {
+						return {
+							value: cardTemplate.value,
+							priority: cardTemplateIndex + 1,
+						};
+					})
 				};
-			}), t);
-		}));
-	}));
+			})
+		}, { transaction: t.transaction });
+	}
 	return user;
 }

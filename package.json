@@ -69,6 +69,7 @@
     "body-parser": "^1.15.2",
     "browser-sync": "^2.13.0",
     "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
     "command-line-args": "^3.0.0",
     "command-line-usage": "^3.0.1",
     "css-loader": "^0.23.1",
