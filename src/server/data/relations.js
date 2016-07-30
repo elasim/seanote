@@ -37,12 +37,6 @@ Publishers.hasMany(BoardPrivacySettings, {
 
 Lists.hasMany(Cards);
 
-// BoardSorts.belongsToMany(Boards, {
-// 	through: BoardSorts,
-// });
-// BoardSorts.belongsToMany(Users, {
-// 	through: BoardSorts,
-// });
 BoardSorts.belongsTo(Boards, { foreignKey: 'BoardId' });
 BoardSorts.belongsTo(Users, { foreignKey: 'UserId' });
 Boards.hasOne(BoardSorts, { foreignKey: 'BoardId' });
