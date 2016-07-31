@@ -3,6 +3,8 @@ import querystring from 'querystring';
 import passport from 'passport';
 import { createSession, veifySession } from '../../lib/session';
 
+const debug = require('debug')('app.auth.passport');
+
 // This function used to handle login return like OAuth
 export function loginWithPassport(vender, req, res, next) {
 	passport.authenticate(vender, (authError, user) => {
@@ -16,19 +18,21 @@ export function loginWithPassport(vender, req, res, next) {
 }
 
 passport.serializeUser((user, done) => {
+	debug('serializeUser()');
 	if (!user) return done(new Error('User data not found'));
 	done(null, createSession(user));
 });
 
 // session : { id, token }
-passport.deserializeUser((session, done) => {
-	veifySession(session)
-		.then(({claim, user}) => {
-			done(null, claim ? { ssid: session.id, claim, db: user } : null);
-		}, e => {
-			console.log('session verification failed with Error', e);
-			done(null, null);
-		});
+passport.deserializeUser(async (session, done) => {
+	debug('deserializeUser()');
+	try {
+		const { claim, user } = await veifySession(session);
+		done(null, claim ? { ssid: session.id, claim, db: user } : null);
+	} catch (e) {
+		debug('session verification failed with Error', e);
+		done(null, null);
+	}
 });
 
 function success(req, res) {

@@ -5,14 +5,12 @@ import router from './router';
 import { loginWithPassport } from './auth-passport';
 import config from '../../lib/config';
 
+const debug = require('debug')('app.auth.google');
+
 const googleOAuth = passport.authenticate('google', {
 	scope: ['profile']
 });
 
-router.use((req, res, next) => {
-	console.log(req.method, req.originalUrl, req.body);
-	next();
-});
 router.get('/google', (req, res, next) => {
 	req.session.redirect = req.query.redirect;
 	return googleOAuth(req, res, next);
@@ -21,7 +19,7 @@ router.get('/google-return', (req, res, next) => {
 	loginWithPassport('google', req, res, next);
 });
 router.get('/google-revoke', (req, res) => {
-	console.log('Revoke Google Auth');
+	debug('Revoke Google Auth');
 	res.status(200).end();
 });
 
@@ -44,7 +42,7 @@ passport.use(new Strategy(
 				done(null, user);
 			}
 		} catch (e) {
-			console.log('Error', e);
+			debug(e);
 			done(e);
 		}
 	}

@@ -18,7 +18,8 @@ export const UserClaims = sequelize.define('UserClaim', {
 
 export const UserLogins = sequelize.define('UserLogin', {
 	username: { type: Sequelize.STRING, primaryKey: true },
-	password: { type: Sequelize.STRING, primaryKey: true },
+	password: Sequelize.STRING,
+	salt: Sequelize.STRING,
 }, {
 	timestamps: false,
 });

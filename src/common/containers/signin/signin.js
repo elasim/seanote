@@ -8,10 +8,10 @@ import RaisedButton from 'material-ui/RaisedButton';
 import css from './signin.scss';
 
 const messages = defineMessages({
-	username: {
-		id: 'app.signin.username',
-		description: 'label for Username field',
-		defaultMessage: 'Username',
+	email: {
+		id: 'app.signin.email',
+		description: 'label for Email field',
+		defaultMessage: 'Email',
 	},
 	password: {
 		id: 'app.signin.password',
@@ -108,10 +108,10 @@ export default class SignInView extends Component {
 					<h2>Sign-in with Seanote</h2>
 					<form method="post" action="/auth/local">
 						<div className={css.row}>
-							<TextField hintText={intl.formatMessage(messages.username)}
-								{...textfieldProps} />
+							<TextField hintText={intl.formatMessage(messages.email)}
+								type="email" {...textfieldProps} name="email" id="email"/>
 							<TextField hintText={intl.formatMessage(messages.password)}
-								type="password" {...textfieldProps} />
+								type="password" {...textfieldProps} name="password" id="password" />
 						</div>
 						<RaisedButton type="submit"
 							label={intl.formatMessage(messages.signin)}

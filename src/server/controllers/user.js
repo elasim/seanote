@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import Sequelize from 'sequelize';
 import sequelize from '../data/sequelize';
 import { Publishers } from '../data/schema/publisher';
@@ -12,6 +13,31 @@ import UserDataTemplate from './user.template';
 const debug = require('debug')('app.UserController');
 
 export default new class UserController {
+	getHash(key, salt) {
+		const hasher = crypto.createHash('sha256');
+		hasher.update(key);
+		hasher.update(salt);
+		return hasher.digest('hex');
+	}
+	async getByLogin(username, password) {
+		await validate(Validator.isEmail, username, {
+			require_tld: false
+		});
+		await validate(Validator.isLength, password, {
+			min: 8,
+			max: 255
+		});
+		const login = await UserLogins.findById(username, {
+			include: [Users]
+		});
+		if (login) {
+			const given = this.getHash(password, login.salt);
+			if (given === login.password) {
+				return login.User;
+			}
+		}
+		return null;
+	}
 	async getByClaim(provider, id) {
 		const claim = await UserClaims.find({
 			where: {
@@ -46,10 +72,12 @@ export default new class UserController {
 		const t = { transaction };
 		try {
 			const user = await createUserData(t, profile, UserDataTemplate);
+			const salt = crypto.randomBytes(32).toString('hex');
 			await UserLogins.create({
 				UserId: user.id,
 				username: username,
-				password: password,
+				password: this.getHash(password, salt),
+				salt,
 			}, t);
 			await transaction.commit();
 			return user;
