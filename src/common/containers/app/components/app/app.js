@@ -1,5 +1,6 @@
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
+import Link from 'react-router/lib/Link';
 import Header from '../header';
 import Nav from '../nav';
 import Dim from '../dim';
@@ -55,7 +56,7 @@ export default class App extends Component {
 					<List>
 						<Subheader>USER NAME</Subheader>
 						<ListItem primaryText="Setting"/>
-						<ListItem primaryText="Logout"/>
+						<a href="/logout"><ListItem primaryText="Logout"/></a>
 						<Subheader>Developer</Subheader>
 						<ListItem primaryText="Prefetch" onClick={this.props.prefetch}/>
 						<ListItem primaryText="ver.20160719.nightly"/>
