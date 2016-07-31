@@ -7,14 +7,13 @@ chai.use(chaiPromise);
 
 // Override DB ConnStr
 const config = require('../src/server/lib/config').default;
-config.sequelize.connectionString = 'sqlite://:memory:';
+config.sequelize.connectionString = 'sqlite://:memomry:';
 config.sequelize.logging = false;
 // Prevent of Hositing
 const sequelize = require('../src/server/data/sequelize').default;
-const { Boards } = require('../src/server/data');
+const { Boards, BoardPrivacySettings } = require('../src/server/data');
 const UserController = require('../src/server/controllers/user').default;
 const BoardController = require('../src/server/controllers/board').default;
-
 
 /* globals describe, before, it */
 describe('Board Controller', () => {
@@ -60,13 +59,104 @@ describe('Board Controller', () => {
 		});
 	});
 
+	describe('setMode()', () => {
+		it('grant read permission to another your',
+			async (done) => {
+				try {
+					const boards = await BoardController.all(user1, {});
+					const sharedItemId = boards.items[0].id;
+					await BoardController.setMode(user1, {
+						board: sharedItemId,
+						rule: [{
+							user: user2.PublisherId,
+							mode: BoardController.Mode.READ
+						}],
+					});
+					const canRead = await BoardController.havePermission(
+						user2,
+						sharedItemId,
+						BoardController.Mode.READ);
+					assert(canRead);
+					done();
+				} catch (e) {
+					done(e);
+				}
+			}
+		);
+		it('throws permission error when user granting permission \n'
+			+ '\t which does not have ownership',
+			async (done) => {
+				try {
+					const boards = await user2.getBoards();
+					await BoardController.setMode(user1, {
+						board: boards[0].id,
+						rule: {
+							user: user3.PublisherId,
+							mode: BoardController.Mode.READ,
+						},
+					});
+					done(new Error('permission error not thrown'));
+				} catch (e) {
+					if (!/permission error/.test(e.message)) {
+						done(e);
+					} else {
+						done();
+					}
+				}
+			}
+		);
+		it('mode 0 must have to delete rule on database',
+			async (done) => {
+				const transaction = await sequelize.transaction();
+				try {
+					const boards = await user3.getBoards();
+					await BoardController.setMode(user3, {
+						board: boards[0].id,
+						rule: {
+							user: user1.PublisherId,
+							mode: 4,
+						},
+					}, { transaction });
+					const before = await BoardPrivacySettings.find({
+						where: {
+							BoardId: boards[0].id,
+							roleId: user1.PublisherId,
+						},
+						transaction
+					});
+					assert(before !== null);
+					await BoardController.setMode(user3, {
+						board: boards[0].id,
+						rule: {
+							user: user1.PublisherId,
+							mode: 0,
+						},
+					}, { transaction });
+					const after = await BoardPrivacySettings.find({
+						where: {
+							BoardId: boards[0].id,
+							roleId: user1.PublisherId,
+						},
+						transaction
+					});
+					assert(after === null);
+					await transaction.commit();
+					done();
+				} catch (e) {
+					await transaction.rollback();
+					done(e);
+				}
+			}
+		);
+	});
+
 	describe('all()', () => {
-		it('user must have read permission for all retrieved items',
+		it('user must have permission or ownership for all retrieved items',
 			async (done) => {
 				try {
 					const boards = await BoardController.all(user1, {});
 					boards.items.forEach(item => {
-						assert(item.permissions.indexOf('read') > -1);
+						assert(item.permissions.mode > 0 || item.AuthorId === user1.id);
 					});
 					done();
 				} catch (e) {
@@ -154,50 +244,6 @@ describe('Board Controller', () => {
 					done();
 				} catch (e) {
 					done(e);
-				}
-			}
-		);
-	});
-
-	describe('share()', () => {
-		it('grant read permission to another your',
-			async (done) => {
-				try {
-					const boards = await BoardController.all(user1, {});
-					const sharedItemId = boards.items[0].id;
-					await BoardController.share(user1, {
-						board: sharedItemId,
-						to: [user2.PublisherId],
-						permissions: ['read']
-					});
-					const canRead = await BoardController.havePermission(
-						user2,
-						sharedItemId,
-						'read');
-					assert(canRead);
-					done();
-				} catch (e) {
-					done(e);
-				}
-			}
-		);
-		it('throws permission error when user granting permission \n'
-			+ '\t which does not have ownership',
-			async (done) => {
-				try {
-					const boards = await user2.getBoards();
-					await BoardController.share(user1, {
-						board: boards[0].id,
-						to: user3.PublisherId,
-						permissions: ['read'],
-					});
-					done(new Error('permission error not thrown'));
-				} catch (e) {
-					if (!/permission error/.test(e.message)) {
-						done(e);
-					} else {
-						done();
-					}
 				}
 			}
 		);
@@ -324,10 +370,12 @@ describe('Board Controller', () => {
 				const t = { transaction };
 				try {
 					const boards = await BoardController.all(user2, {}, t);
-					await BoardController.share(user2, {
+					await BoardController.setMode(user2, {
 						board: boards.items[2].id,
-						to: user1.PublisherId,
-						permissions: 'read'
+						rule: {
+							user: user1.PublisherId,
+							mode: BoardController.Mode.READ,
+						},
 					}, t);
 					await BoardController.sort(user1, {
 						board: boards.items[2].id,

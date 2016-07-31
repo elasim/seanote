@@ -94,13 +94,19 @@ async function createUserData(t, profiles, template) {
 					priority: listTemplateIndex + 1,
 					Cards: items.map((cardTemplate, cardTemplateIndex) => {
 						return {
-							value: cardTemplate.value,
+							value: cardTemplate,
 							priority: cardTemplateIndex + 1,
 						};
 					})
 				};
 			})
-		}, { transaction: t.transaction });
+		}, {
+			transaction: t.transaction,
+			include: [{
+				model: Lists,
+				include: [Cards],
+			}]
+		});
 	}
 	return user;
 }

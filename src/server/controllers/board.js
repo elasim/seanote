@@ -13,14 +13,28 @@ const VALID_PRIORITY_MIN = Number.EPSILON * 1000;
 
 const TBL_BOARD_SORTS = BoardSorts.getTableName();
 
+function checkPermissionValue(value) {
+	return Number.isInteger(value) && value >= 0 && value <= 7;
+}
+
+function checkPermissionRule(value) {
+	return Validator.isUUID(value.user, 4)
+	&& checkPermissionValue(value.mode);
+}
+
+function checkIsPublic(value) {
+	return validate.isOneOf(value, [0, 1, undefined]);
+}
+
+const MODE = BoardPrivacySettings.Mode;
+
 export default new class BoardController {
-	async havePermission(user, board, privilege, options = {}) {
-		debug('can()', user.id, board, privilege);
+	Mode = MODE;
+	async havePermission(user, board, mode, options = {}) {
+		debug('can()', user.id, board, mode);
 		await validate(Validator.isUUID, board, 4);
-		await validate(Validator.isIn, privilege, [
-			'read',
-			'write'
-		]);
+		await validate(checkPermissionValue, mode);
+
 		const count = await BoardPrivacySettings.count({
 			where: {
 				BoardId: board,
@@ -30,7 +44,7 @@ export default new class BoardController {
 						...(await user.getGroups()).map(group => group.PublisherId),
 					]
 				},
-				rule: privilege
+				mode: Sequelize.where(Sequelize.literal(`mode & ${mode}`), mode),
 			},
 			benchmark: IS_DEBUG,
 			transaction: options.transaction
@@ -66,7 +80,9 @@ export default new class BoardController {
 						as: 'PrivacySettings',
 						where: {
 							roleId: { $in: readables },
-							rule: 'read'
+							mode: {
+								$gte: 1
+							}
 						},
 					},
 					{
@@ -75,13 +91,13 @@ export default new class BoardController {
 						required: false,
 					},
 				],
-				...paging,
 				order: [
 					'BoardSorts.priority IS NULL',
 					'BoardSorts.priority ASC',
 					'createdAt DESC',
 				].join(','),
 				transaction,
+				...paging,
 			});
 			let maxPriority = 0;
 			for (let i = 0; i < boards.rows.length; ++i) {
@@ -138,13 +154,11 @@ export default new class BoardController {
 				PublisherId: row.PublisherId,
 				name: row.name,
 				priority: row.BoardSorts[0].priority,
-				permissions: row.PrivacySettings.map(priv => priv.rule),
+				permissions: row.PrivacySettings[0].mode,
 				createdAt: row.createdAt,
 				updatedAt: row.updatedAt,
 			};
 		});
-
-		debug(boards.rows.length);
 
 		return {
 			items,
@@ -155,14 +169,14 @@ export default new class BoardController {
 			limit: limit,
 		};
 	}
-	async create(user, { name, isPublic }, options = {}) {
+	async create(user, { name, isPublic=0, Lists }, options = {}) {
 		debug('create()', name, typeof name);
 		debug('create()', isPublic, typeof isPublic);
 		await validate(Validator.isLength, name, {
 			min: 1,
 			max: VALID_NAME_MAX,
 		});
-		await validate(value => value === 0 || value === 1, isPublic);
+		await validate(checkIsPublic, isPublic);
 
 		const transaction = await beginTransaction(options);
 		try {
@@ -171,6 +185,7 @@ export default new class BoardController {
 				transaction,
 			});
 			const board = await Boards.create({
+				Lists,
 				name,
 				isPublic,
 				PublisherId: user.PublisherId,
@@ -179,19 +194,14 @@ export default new class BoardController {
 					UserId: user.id,
 					priority: Math.floor(maxPriority) + 1,
 				}],
-				PrivacySettings: [
-					{
-						roleId: user.PublisherId,
-						rule: 'write'
-					},
-					{
-						roleId: user.PublisherId,
-						rule: 'read'
-					}
-				]
+				PrivacySettings: {
+					roleId: user.PublisherId,
+					mode: MODE.ALL,
+				},
 			}, {
 				transaction,
 				include: [
+					...(options.include || []),
 					{
 						model: BoardSorts,
 					},
@@ -228,7 +238,7 @@ export default new class BoardController {
 				max: VALID_NAME_MAX
 			});
 		}, name);
-		await validate(validate.isOneOf, isPublic, [undefined, 0, 1]);
+		await validate(checkIsPublic, isPublic);
 
 		try {
 			const boardDb = await Boards.find(
@@ -242,7 +252,10 @@ export default new class BoardController {
 						where: {
 							BoardId: board,
 							roleId: user.PublisherId,
-							rule: 'write'
+							mode: sequelize.where(
+								sequelize.literal(`mode & ${MODE.WRITE}`),
+								MODE.WRITE
+							),
 						},
 						required: true,
 					}],
@@ -253,7 +266,7 @@ export default new class BoardController {
 				throw new Error('permission error');
 			}
 			if (name) boardDb.name = name;
-			if (isPublic === 0 || isPublic === 1) boardDb.isPublic = 1;
+			if (validate.isOneOf(isPublic, [0, 1])) boardDb.isPublic = 1;
 
 			return boardDb.save({
 				transaction: options.transaction
@@ -292,32 +305,57 @@ export default new class BoardController {
 			throw e;
 		}
 	}
-	async share(user, { board, to, permissions }, options = {}) {
-		debug('share()', board, typeof board);
-		debug('share()', to, typeof to);
-		debug('share()', permissions, typeof permissions);
-		await validate(Validator.isUUID, board, 4);
+	async getMode(user, { board, users }, options = {}) {
+		debug('getMode()', boardData, typeof boardData);
+		debug('getMode()', users, typeof rules);
+		await validate(Validator.isUUID, boardData, 4);
 		await validate(value => {
 			return validate.isArrayWith(value, Validator.isUUID, 4)
 			|| Validator.isUUID(value, 4);
-		}, to);
-		await validate(value => {
-			const tester = /^(read|write)$/;
-			return validate.isArrayWith(value, (val) => {
-				return tester.test(val);
-			}) || tester.test(value);
-		}, permissions);
-
-		const grantUsers = [].concat(to);
-		const grantPerms = [].concat(permissions);
-		const rules = flatMap(grantUsers, user => {
-			return grantPerms.map(perm => ({
-				BoardId: board,
-				roleId: user,
-				rule: perm,
-			}));
+		}, users);
+		const userPubIds = [].concat(users);
+		const boardData = await Boards.find({
+			where: {
+				id: boardData,
+				AuthorId: user.id,
+			},
+			include: [
+				{
+					model: BoardPrivacySettings,
+					as: 'PrivacySettings',
+					where: {
+						roleId: {
+							$in: userPubIds
+						}
+					},
+				},
+			],
+			transaction: options.transaction,
 		});
+		if (!boardData) {
+			throw new Error('permission error');
+		}
+		return {
+			modes: boardData.PrivacySettings,
+		};
+	}
+	async setMode(user, { board, rule }, options = {}) {
+		debug('setMode()', board, typeof board);
+		debug('setMode()', rule, typeof rule);
+		await validate(Validator.isUUID, board, 4);
+		await validate(value => {
+			debug('setMode().validate', value);
+			return validate.isArrayWith(value, checkPermissionRule)
+			|| checkPermissionRule(value);
+		}, rule);
+		await validate(() => {
+			return [].concat(rule)
+				.filter(rule => rule.user === user.PublisherId).length === 0;
+		});
+		debug('setMode()', validate.isArrayWith(rule, checkPermissionRule)
+			|| checkPermissionRule(rule));
 
+		const rules = [].concat(rule);
 		const results = [];
 		const transaction = await beginTransaction(options);
 		try {
@@ -341,11 +379,39 @@ export default new class BoardController {
 			if (!boardData) {
 				throw new Error('permission error');
 			}
+			const deleteRules = [];
 			for (let i = 0; i < rules.length; ++i) {
-				results.push(await BoardPrivacySettings.findOrCreate({
-					where: rules[i],
+				if (rules[i].mode === 0) {
+					debug('setMode() mode is 0', rules[i]);
+					deleteRules.push(rules[i]);
+					continue;
+				}
+				const [rule, created] = await BoardPrivacySettings.findOrCreate({
+					where: {
+						BoardId: board,
+						roleId: rules[i].user,
+					},
+					defaults: {
+						mode: rules[i].mode,
+					},
 					transaction
-				}));
+				});
+				if (!created) {
+					rule.mode = rules[i].mode;
+					await rule.save({ transaction });
+				}
+				results.push(rule);
+			}
+			for (let i = 0; i < deleteRules.length; ++i) {
+				await BoardPrivacySettings.destroy({
+					where: {
+						BoardId: board,
+						roleId: {
+							$in: deleteRules.map(rule => rule.user),
+						}
+					},
+					transaction
+				});
 			}
 			if (!options.transaction) {
 				await transaction.commit();
@@ -463,7 +529,8 @@ export default new class BoardController {
 				await transaction.commit();
 			}
 			return {
-				renumber
+				priority,
+				renumber,
 			};
 		} catch (e) {
 			if (!options.transaction) {

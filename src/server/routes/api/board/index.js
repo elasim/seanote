@@ -2,6 +2,7 @@
 import boardCtrl from '../../../controllers/board';
 import listCtrl from '../../../controllers/list';
 // import cardCtrl from '../../../controllers/card';
+import HttpError from '../utils/http-error';
 
 export default {
 	'/': {
@@ -21,7 +22,7 @@ export default {
 	'/_sort': {
 		async post(req) {
 			return await boardCtrl.sort(req.user.db, {
-				BoardId: String(req.body.id),
+				board: String(req.body.id),
 				priority: parseFloat(req.body.value),
 			});
 		},
@@ -47,9 +48,39 @@ export default {
 		},
 		async delete(req) {
 			return await boardCtrl.delete(req.user.db, {
-				board: req.params.board
+				board: req.params.board,
 			});
 		},
+	},
+	'/:board/mode': {
+		async get(req) {
+			const users = (req.query.users || req.user.db.PublisherId)
+				.split(/,/g)
+				.filter(x => x.length);
+			return await boardCtrl.getMode(req.user.db, {
+				board: req.params.board,
+				user: users,
+			});
+		},
+		async post(req) {
+			const rules = (req.body.rules || '')
+				.split(/,/g)
+				.filter(x => x.length)
+				.map(ruleStr => {
+					const matched = ruleStr.match(/^([^:]+):([0-7])$/);
+					if (!matched) {
+						throw new HttpError('invalid parameter', 400);
+					}
+					return {
+						user: matched[1],
+						mode: parseInt(matched[2], 10),
+					};
+				});
+			return await boardCtrl.setMode(req.user.db, {
+				board: req.params.board,
+				rule: rules,
+			});
+		}
 	},
 	// '/:board/_sort': {
 	// 	post: sortLists,

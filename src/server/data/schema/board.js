@@ -30,17 +30,32 @@ export const BoardSorts = sequelize.define('BoardSort', {
 	timestamps: false,
 });
 
-// Pros: Easily Update and Find for Single Row
-// Cons: Need to full-text search and application level processing
-export const BoardPrivacySettings = sequelize.define('BoardPrivacySetting', {
-	BoardId: Sequelize.UUID,
-	roleId: Sequelize.UUID,
-	rule: Sequelize.STRING,
+const MODE = {
+	EXECUTE: 1,
+	WRITE: 2,
+	READ: 4,
+	ALL: 7,
+};
+
+const BoardPrivacySettings = sequelize.define('BoardPrivacySetting', {
+	BoardId: {
+		type: Sequelize.UUID,
+		primaryKey: true,
+	},
+	roleId: {
+		type: Sequelize.UUID,
+		primaryKey: true,
+	},
+	mode: {
+		type: Sequelize.INTEGER,
+		defaultValue: MODE.READ | MODE.WRITE
+	}
 }, {
 	timestamps: false,
 	indexes: [
 		{ fields: ['roleId'] },
-		{ fields: ['BoardId', 'roleId'] },
-		{ fields: ['roleId', 'rule'] },
+		{ fields: ['roleId', 'mode'] },
 	]
 });
+BoardPrivacySettings.Mode = MODE;
+export { BoardPrivacySettings };
