@@ -26,7 +26,6 @@ export default function configure(router, edges) {
 const DEBUG_LOG_RESPONSE = debug('app.api.handler');
 function createHandler(action) {
 	return async (req, res, next) => {
-		DEBUG_LOG_RESPONSE(req.originalUrl, req.params);
 		try {
 			const result = await action(req);
 			return result ? res.json(result) : res.end();

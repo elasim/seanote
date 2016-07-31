@@ -1,8 +1,12 @@
 //import './params.js';
+import router from '../router';
+import configureParams from './param';
 import boardCtrl from '../../../controllers/board';
 import listCtrl from '../../../controllers/list';
 // import cardCtrl from '../../../controllers/card';
 import HttpError from '../utils/http-error';
+
+configureParams(router);
 
 export default {
 	'/': {
