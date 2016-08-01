@@ -1,18 +1,19 @@
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import { Card, CardHeader, CardText } from 'material-ui/Card';
+import TextField from 'material-ui/TextField';
+import IconButton from 'material-ui/IconButton';
 import isEqual from 'lodash/isEqual';
 import Droppable from '../../../../components/dnd/droppable';
 import Draggable from '../../../../components/dnd/draggable';
 import Symbol from '../../../../lib/symbol-debug';
-import Button from './button';''
+import Button from './button';
 import CardItem from './card-item';
 import css from './card.scss';
 
 const EventTypes = {
 	DragOver: Symbol('Card.DragOver'),
 	Drop: Symbol('Card.Drop'),
-	ItemDrop: CardItem.EventTypes.Drop,
 };
 
 export default class CardList extends Component {
@@ -55,20 +56,23 @@ export default class CardList extends Component {
 					<div>
 						<Card className={className} style={style}>
 							<CardHeader textStyle={{ width: '100%' }}
-								style={{
-									padding: '16px 16px 0px 16px'
-								}}
+								style={{ padding: '16px 16px 0px 16px' }}
 								title={<div>
-								<Button style={{
-									float: 'right',
-									margin: 0, padding: 0
-								}}/>
-								{list.name}
-							</div>}/>
+									<Button style={{ float: 'right', margin: 0, padding: 0 }}/>
+									{list.name}
+								</div>}
+							/>
 							<CardText>
 								<ol className={css.list}>
 									{items}
 								</ol>
+								<div style={{ display: 'flex' }}>
+									<TextField id={list.id} rowsMax={3} fullWidth multiLine
+										style={{ flex: 1 }} hintText="Types"
+									/>
+									<IconButton style={{ flex: 0 }} iconStyle={{ color: '#999' }}
+										iconClassName="material-icons">add_circle</IconButton>
+								</div>
 							</CardText>
 						</Card>
 						<div className={overlayClassName}>
@@ -89,10 +93,14 @@ export default class CardList extends Component {
 			);
 		});
 	}
-	dispatchMessage(msg, arg) {
+	dispatchMessage(msg, args) {
 		switch (msg) {
+			case CardItem.EventTypes.DataChange: {
+				this.context.card.update(args.ListId, args.id, args.nextValue);
+				return;
+			}
 			case CardItem.EventTypes.DragOver: {
-				const { descriptor, target } = arg;
+				const { descriptor, target } = args;
 				const listId = descriptor.data.ListId;
 				const cardId = descriptor.data.id;
 
@@ -112,7 +120,7 @@ export default class CardList extends Component {
 				return;
 			}
 			case CardItem.EventTypes.Drop: {
-				const { descriptor, target } = arg;
+				const { descriptor, target } = args;
 				const listId = descriptor.data.ListId;
 				const cardId = descriptor.data.id;
 
@@ -125,7 +133,7 @@ export default class CardList extends Component {
 				return;
 			}
 		}
-		return this.sendMessage(msg, arg);
+		return this.sendMessage(msg, args);
 	}
 	sendMessage(msg, args) {
 		const { onMessage } = this.props;

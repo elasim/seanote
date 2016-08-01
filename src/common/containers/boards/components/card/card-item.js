@@ -1,34 +1,39 @@
 import cx from 'classnames';
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import isEqual from 'lodash/isEqual';
+import { Card, CardText } from 'material-ui/Card';
+import ComponentEx from '../../../component';
 import Draggable from '../../../../components/dnd/draggable';
 import Droppable from '../../../../components/dnd/droppable';
 import Symbol from '../../../../lib/symbol-debug';
 import CardContent from './card-content';
 import css from './card-item.scss';
 
+const debug = require('debug')('Component::CardItem');
+
 const EventTypes = {
+	DataChange: Symbol('CardItem.DataChange'),
 	DragOver: Symbol('CardItem.DragOver'),
 	DragOut: Symbol('CardItem.DragOut'),
 	Drop: Symbol('CardItem.Drop'),
 };
 
-export default class CardItem extends Component {
+export default class CardItem extends ComponentEx {
 	static EventTypes = EventTypes;
 	static propTypes = {
 		style: PropTypes.object,
 		className: PropTypes.string,
 		data: PropTypes.object,
-		onMessage: PropTypes.func,
 	};
 	componentWillMount() {
+		this.dispatchMessage = ::this.dispatchMessage;
 		this.onDragStart = ::this.onDragStart;
 		this.onDragOver = ::this.onDragOver;
 		this.onDragOut = ::this.onDragOut;
 		this.onDragEnd = ::this.onDragEnd;
 		this.onDrop = ::this.onDrop;
 		this.state = {
-			isDragging: false
+			isDragging: false,
 		};
 	}
 	shouldComponentUpdate(nextProps, nextState) {
@@ -47,17 +52,29 @@ export default class CardItem extends Component {
 				<Draggable data={data} type="card" press={true}
 					preview={<CardItemPreview />}
 					onDragStart={this.onDragStart} onDragEnd={this.onDragEnd}>
-					<li className={liClassName} style={style}>
-						<CardContent data={data.value} />
+					<li ref="field" className={liClassName} style={style}>
+						<Card>
+							<CardText>
+								<CardContent data={data.value} onMessage={this.dispatchMessage} />
+							</CardText>
+						</Card>
 					</li>
 				</Draggable>
 			</Droppable>
 		);
 	}
-	sendMessage(msg, args) {
-		const { onMessage } = this.props;
-		if (onMessage) {
-			onMessage(msg, args);
+	dispatchMessage(msg, args) {
+		const { data } = this.props;
+		switch (msg) {
+			case 'change':
+				this.sendMessage(EventTypes.DataChange, {
+					ListId: data.ListId,
+					id: data.id,
+					nextValue: args,
+				});
+				break;
+			default:
+				debug('Unhandled Event');
 		}
 	}
 	onDragOver(event, descriptor) {

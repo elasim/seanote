@@ -13,7 +13,16 @@ class AboutView extends Component {
 	}
 	render() {
 		return (
-			<div className="mdl-layout__content">ABOUT</div>
+			<div>
+				<section>
+					<h2>Seanote is...</h2>
+					<p>I designed seanote to help managing your project</p>
+				</section>
+				<section>
+					<h2>It still underdeveloping</h2>
+					<p></p>
+				</section>
+			</div>
 		);
 	}
 }

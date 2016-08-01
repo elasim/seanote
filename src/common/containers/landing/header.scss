@@ -5,6 +5,8 @@
 	color: $font-color-alt;
 	text-align: center;
 	background-color: $back-color-alt;
+	background: linear-gradient(lighten($back-color-alt, 10%), $back-color-alt);
+	zoom: 1;
 
 	position: fixed;
 	z-index: $dim-index - 1;

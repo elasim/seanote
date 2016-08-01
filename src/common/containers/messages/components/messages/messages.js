@@ -107,7 +107,10 @@ export default class Messages extends Component {
 		return (
 			<div className={rootClassName}>
 				<div className={css.list} ref="list">
-					<List items={items} />
+					<List items={items} style={{
+						paddingTop: 0,
+						paddingBottom: 0,
+					}}/>
 				</div>
 				{chat}
 			</div>

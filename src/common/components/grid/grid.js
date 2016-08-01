@@ -60,6 +60,8 @@ export class Grid extends Component {
 				return this.updateDummyElements();
 			case 1:
 				return this.updatePositions();
+			case 2:
+				return this.registerResizeHandlers();
 		}
 	}
 	componentWillUnmount() {
@@ -125,7 +127,14 @@ export class Grid extends Component {
 	// Post-Step 1. Compute Heights
 	updateDummyElements() {
 		this.steps = 1;
+
+		if (this.resizeHandlers) {
+			console.log('unregister');
+			this.resizeHandlers.forEach(handler => handler.dispose());
+			delete this.resizeHandlers;
+		}
 		if (!this.props.children) return;
+		console.log('Update Dummy');
 
 		// Clear items
 		const containerWidth = findDOMNode(this).getBoundingClientRect().width;
@@ -155,6 +164,7 @@ export class Grid extends Component {
 	updatePositions() {
 		this.steps = 2;
 		if (this.state.elementSizes.length === 0) return;
+		console.log('Update Position');
 
 		const container = findDOMNode(this).getBoundingClientRect();
 		const positions = Children.toArray(this.props.children)
@@ -175,5 +185,26 @@ export class Grid extends Component {
 		this.setState({
 			positions,
 		});
+	}
+
+	// Post-Step 3. registerResizeHandlers
+	registerResizeHandlers() {
+		this.steps = 3;
+
+		if (this.state.elementSizes.length === 0) return;
+		console.log('Register Handlers');
+
+		this.resizeHandlers = Children.toArray(this.props.children)
+			.map(child => {
+				const node = findDOMNode(this.refs[`item-${child.props.id}`]);
+				const dummy = findDOMNode(this.refs[`item-${child.props.id}`]);
+
+				return Rx.Observable.interval(100)
+					.map(() => node.getBoundingClientRect().height)
+					.distinctUntilChanged()
+					.skip(1)
+					.debounce(100)
+					.subscribe(() => this.updateDummyElements());
+			});
 	}
 }

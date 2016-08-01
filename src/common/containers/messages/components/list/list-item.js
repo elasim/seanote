@@ -36,7 +36,9 @@ export default class ChatListItem extends Component {
 			),
 			onTouchTap: this.onClick,
 		};
-		return (<ListItem {...props} />);
+		return (<ListItem {...props} style={{
+			backgroundColor: '#fff'
+		}}/>);
 	}
 	onClick() {
 		browserHistory.push(`/messages/${this.props.item.id}`);

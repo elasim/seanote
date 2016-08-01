@@ -8,13 +8,14 @@
 		margin-bottom: 5px;
 	}
 	.who {
-		width: 30%;
+		font-size: 0.8em;
+		text-align: right;
 		white-space: nowrap;
+
 		text-overflow: ellipsis;
 		overflow: hidden;
 
 		float: right;
-		font-size: 0.8em;
-		text-align: right;
+		width: 30%;
 	}
 }

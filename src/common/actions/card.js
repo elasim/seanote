@@ -7,13 +7,15 @@ export default {
 	sort,
 	move,
 	load,
+	update,
 };
 
 export const ActionTypes = {
-	sort: 'CARD_SORT',
-	copy: 'CARD_COPY',
-	move: 'CARD_MOVE',
-	load: 'CARD_LOAD',
+	sort:		'CARD_SORT',
+	copy:		'CARD_COPY',
+	move:		'CARD_MOVE',
+	update:	'CARD_UPDATE',
+	load:		'CARD_LOAD',
 };
 
 export function sort(source, a, b) {
@@ -27,6 +29,13 @@ export function move(source, id, target) {
 	return {
 		type: ActionTypes.move,
 		payload: { source, id, target },
+	};
+}
+
+export function update(source, id, nextValue) {
+	return {
+		type: ActionTypes.update,
+		payload: { source, id, nextValue }
 	};
 }
 

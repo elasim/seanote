@@ -9,8 +9,8 @@ import { createResizeSpy, getViewportWidth } from '../../../../lib/dom-helpers';
 
 const NAV_HEADERS = [
 	{
-		label: 'My Boards',
-		icon: <FontIcon className="material-icons" color="#fff">&#xE8EF;</FontIcon>,
+		label: 'Boards',
+		icon: <FontIcon className="material-icons" color="#fff">&#xE871;</FontIcon>,
 		link: '/boards',
 	},
 	{
