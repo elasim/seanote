@@ -14,7 +14,7 @@ export default async function requireAuth(req, res, next) {
 	try {
 		const token = authorization.match(/Bearer (.+)/)[1];
 		const claim = await verifyToken(token);
-		const db = await Users.findById(claim.aud);
+		const db = await Users.findById(claim.id);
 		req.user = { claim, db };
 		req.token = token;
 		next();

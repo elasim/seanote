@@ -14,8 +14,8 @@ require('../views/error.html');
 
 export default (req, res) => {
 	const routes = configureRoutes(null, {
-		auth: {
-			token: !!req.user
+		app: {
+			token: req.user ? req.session.passport.user.token : null,
 		}
 	});
 	match({ routes, location: req.originalUrl }, (e, redirect, renderProps) => {

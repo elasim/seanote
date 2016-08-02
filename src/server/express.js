@@ -21,7 +21,7 @@ app.use(routes);
 app.get('/favicon.ico', (req, res) => res.status(404).end());
 app.use('/assets', express.static(path.join(__dirname, './assets')));
 //app.get('/assets/bundle.js', (req, res) => res.sendFile(path.join(__dirname, './client.js')));
-if (0) {
+if (1) {
 	app.get('*', require('./react-ssr').default);
 } else {
 	app.get('*', (req, res) => res.sendFile(debugViewPath));

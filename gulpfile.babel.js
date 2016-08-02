@@ -126,9 +126,9 @@ gulp.task('dev-server', ['clean:dev'], () => {
 				'./client/index.js'
 			]
 		};
-		clientConfigure.plugins.splice(1, 0, (
-			new webpack.HotModuleReplacementPlugin(),
-		));
+		clientConfigure.plugins.splice(1, 0,
+			new webpack.HotModuleReplacementPlugin()
+		);
 		const compiler = webpack(clientConfigure);
 
 		browserSync = require('browser-sync').create();

@@ -37,7 +37,7 @@ export async function veifySession(session) {
 		// but, It doesn't means about that the user is actually exist.
 		// User data could be deleted during session is still active.
 		// In this case, verification must be failed.
-		const user = await Users.findById(claim.aud);
+		const user = await Users.findById(claim.id);
 		if (!user) {
 			console.log('Token verified, but User not exists');
 			delete sessions[id];
@@ -54,8 +54,7 @@ export async function veifySession(session) {
 export function extendSessionLife(sessionInfo) {
 	try {
 		return sessions[sessionInfo.ssid] = createToken({
-			role: sessionInfo.claim.role,
-			id: sessionInfo.claim.aud,
+			...sessionInfo.claim
 		});
 	} catch (e) {
 		return false;
@@ -78,11 +77,14 @@ export function connectJwtSession(req, res, next) {
 }
 
 export function createToken(user) {
-	return jwt.sign({ role: user.role }, keyPair.key, {
+	return jwt.sign({
+		id: user.id,
+		pid: user.PublisherId,
+		role: user.role,
+	}, keyPair.key, {
 		algorithm: config.auth.jwt.algorithm,
 		expiresIn: config.auth.jwt.exp,
 		issuer: config.auth.jwt.iss,
-		audience: user.id
 	});
 }
 
