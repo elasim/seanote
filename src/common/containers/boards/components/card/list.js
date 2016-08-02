@@ -1,10 +1,10 @@
-import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import { Card, CardHeader, CardText } from 'material-ui/Card';
 import isEqual from 'lodash/isEqual';
 import Droppable from '../../../../components/dnd/droppable';
 import Draggable from '../../../../components/dnd/draggable';
 import Symbol from '../../../../lib/symbol-debug';
+import Overlay from './overlay';
 import Input from './input';
 import Button from './button';
 import CardItem from './card-item';
@@ -44,11 +44,9 @@ export default class CardList extends Component {
 	}
 	render() {
 		const { list, className, style } = this.props;
-		const { editable } = this.state;
+		const { editable, overlay } = this.state;
 		const items = this.renderItems();
-		const overlayClassName = cx(css.overlay, {
-			[css.active]: this.state.overlay,
-		});
+
 		return (
 			<Droppable delay={250}
 				onDragOver={this.onDragOver}
@@ -66,16 +64,11 @@ export default class CardList extends Component {
 								</div>}
 							/>
 							<CardText>
-								<ol className={css.list}>
-									{items}
-								</ol>
+								<ol className={css.list}>{items}</ol>
 								<Input id={list.id} onMessage={this.dispatchMessage} />
 							</CardText>
 						</Card>
-						<div className={overlayClassName}>
-							<i className="material-icons">&#xE154;</i>
-							<div className={css.background} />
-						</div>
+						<Overlay active={overlay} />
 					</div>
 				</Draggable>
 			</Droppable>

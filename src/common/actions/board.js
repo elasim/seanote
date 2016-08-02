@@ -64,9 +64,19 @@ export function rename(id, name) {
 }
 
 export function sort(a, b) {
-	return {
-		type: ActionTypes.sort,
-		payload: { a, b },
+	return async (dispatch, getState) => {
+		dispatch({
+			type: ActionTypes.sort,
+			payload: { a, b },
+		});
+		const state = getState();
+		const token = state.app.token;
+		const priority = state.board.dirty[a].priority;
+		try {
+			await request(dispatch, Boards.sort(a, priority, token));
+		} catch (e) {
+			dispatch(App.error(e));
+		}
 	};
 }
 

@@ -23,14 +23,12 @@ export default class Input extends ComponentEx {
 	render() {
 		return (
 			<div style={{ display: 'flex' }}>
-				<TextField rowsMax={3} fullWidth multiLine
-					style={{ flex: 1 }} hintText="What's in your mind about?"
-					ref="field" id="field"
-					onKeyDown={this.onKeyDown}
-				/>
+				<TextField rowsMax={3} fullWidth multiLine style={{ flex: 1 }}
+					ref="field" id="field" onKeyDown={this.onKeyDown} />
 				<IconButton style={{ flex: 0 }} iconStyle={{ color: '#999' }}
-					onClick={this.submit}
-					iconClassName="material-icons">add_circle</IconButton>
+					onClick={this.submit} iconClassName="material-icons">
+					add_circle
+				</IconButton>
 			</div>
 		);
 	}

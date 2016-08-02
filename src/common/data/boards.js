@@ -31,5 +31,13 @@ export default {
 			method: 'post',
 			token,
 		});
+	},
+	sort(id, value, token) {
+		return deferredSelectLast({
+			url: `${base}/_sort`,
+			method: 'post',
+			body: { id, value },
+			token,
+		});
 	}
 };

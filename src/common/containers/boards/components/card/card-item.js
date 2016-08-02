@@ -53,7 +53,7 @@ export default class CardItem extends ComponentEx {
 					preview={<CardItemPreview />}
 					onDragStart={this.onDragStart} onDragEnd={this.onDragEnd}>
 					<li ref="field" className={liClassName} style={style}>
-						<Card>
+						<Card style={{ transition: 'none' }}>
 							<CardText>
 								<CardContent data={data.value} onMessage={this.dispatchMessage} />
 							</CardText>
