@@ -1,21 +1,23 @@
 import flow from 'lodash/flow';
 import { deferrable, comparable, selectable, issuedAt } from './decorators';
 
+const stringify = onlyStringifyForKeys('url', 'method');
+
 export const deferredSelectFirst = flow(
 	deferrable(),
-	comparable(makeComparable('url', 'method')),
+	comparable(stringify),
 	selectable(selectFirst),
 	issuedAt(),
 );
 
 export const deferredSelectLast = flow(
 	deferrable(),
-	comparable(makeComparable('url', 'method')),
+	comparable(stringify),
 	selectable(selectLast),
 	issuedAt()
 );
 
-function makeComparable(...props) {
+function onlyStringifyForKeys(...props) {
 	return (obj) => {
 		const acc = {};
 		for (const key of props) {

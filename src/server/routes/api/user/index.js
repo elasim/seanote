@@ -1,9 +1,17 @@
-import query from './query';
 import user from './user';
-import token from './token';
+// import { extendSessionLife } from '../../../lib/session';
 
 export default {
-	'/': query,
-	'/token': token,
+	'/': {
+		get(req) {
+			return req.user.db.getUserProfile();
+		},
+	},
+	'/token': {
+		get: (req) => req.token,
+		post: (req) => {
+			// extendSessionLife();
+		},
+	},
 	'/:user': user,
 };

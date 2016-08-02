@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import browserHistory from 'react-router/lib/browserHistory';
 import flow from 'lodash/flow';
 import AppAction from '../../actions/app';
-import DataAction from '../../actions/data';
+import { prefetch } from '../../actions/prefetch';
 import withContext from '../with-context';
 import App from './components/app';
 
@@ -42,7 +42,7 @@ export default flow(
 			setHeaderVisibility: AppAction.setHeaderVisibility,
 			setDim: AppAction.setDim,
 			getToken: AppAction.getToken,
-			prefetch: DataAction.prefetch,
+			prefetch,
 		}
 	),
 	withContext

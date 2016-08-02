@@ -65,6 +65,7 @@ export class Grid extends Component {
 		}
 	}
 	componentWillUnmount() {
+		this.unregisterResizeHandlers();
 		this.resizeSpy.dispose();
 	}
 	render() {
@@ -129,9 +130,7 @@ export class Grid extends Component {
 		this.steps = 1;
 
 		if (this.resizeHandlers) {
-			console.log('unregister');
-			this.resizeHandlers.forEach(handler => handler.dispose());
-			delete this.resizeHandlers;
+			this.unregisterResizeHandlers();
 		}
 		if (!this.props.children) return;
 		console.log('Update Dummy');
@@ -206,5 +205,10 @@ export class Grid extends Component {
 					.debounce(100)
 					.subscribe(() => this.updateDummyElements());
 			});
+	}
+
+	unregisterResizeHandlers() {
+		this.resizeHandlers.forEach(handler => handler.dispose());
+		delete this.resizeHandlers;
 	}
 }

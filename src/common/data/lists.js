@@ -4,10 +4,11 @@ import { deferredSelectFirst, deferredSelectLast } from './lib/request';
 
 const base = '/api/board/';
 export default {
-	all(id) {
+	all(token, id) {
 		return deferredSelectFirst({
 			url: `${base}/${id}`,
 			method: 'get',
+			token,
 		});
 	}
 };

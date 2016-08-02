@@ -59,9 +59,11 @@ export default async function execute(req) {
 }
 
 async function executeNow(req) {
-	const { url, method, body } = req;
+	const { url, method, body, token } = req;
 	try {
-		const res = await request[method](url, body);
+		const res = await request[method](url, body, {
+			authorization: `Bearer ${token}`
+		});
 		return await handleResponse(res);
 	} catch (e) {
 		throw e;
@@ -69,11 +71,14 @@ async function executeNow(req) {
 }
 
 export async function bulkExecute(reqs) {
+	const token = reqs[0].token;
 	try {
 		const res = await request.bulk('/api/_bulk', reqs.map(req => {
 			const { url, method, body } = req;
 			return { [url.replace(/^\/api/, '')]: [method, body] };
-		}));
+		}), {
+			authorization: `Bearer ${token}`
+		});
 		return await handleResponse(res);
 	} catch (e) {
 		throw e;

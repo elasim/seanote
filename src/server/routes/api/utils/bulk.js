@@ -53,7 +53,11 @@ export default function (req, res, next) {
 					await executeMiddlewares(task.middlewares, taskReq, res);
 				}
 				DEBUG_LOG_BULK_REQUEST('Run', url);
-				return await task.api(taskReq);
+				try {
+					return await task.api(taskReq);
+				} catch (e) {
+					return { error: e };
+				}
 			}));
 			res.json({ results });
 		} catch (e) {

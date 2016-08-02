@@ -1,6 +1,6 @@
 import App from './app';
 import Boards from '../data/boards';
-import { request } from './data';
+import { request } from './request';
 
 export default {
 	create,
@@ -20,9 +20,13 @@ export const ActionTypes = {
 	load: 'BOARD_LOAD',
 };
 
-export function create(name) {
-	return async dispatch => {
-		const result = await request(dispatch, Boards.create(null, { name }));
+export function create(name, isPublic) {
+	return async (dispatch, getState) => {
+		const token = getState().app.token;
+		const result = await request(dispatch, Boards.create(token, {
+			name,
+			isPublic
+		}));
 		try {
 			dispatch({
 				type: ActionTypes.create,
@@ -38,9 +42,10 @@ export function create(name) {
 }
 
 export function remove(id) {
-	return async dispatch => {
+	return async (dispatch, getState) => {
+		const token = getState().app.token;
 		try {
-			await request(dispatch, Boards.remove(id));
+			await request(dispatch, Boards.remove(token, id));
 			dispatch({
 				type: ActionTypes.remove,
 				payload: id,
@@ -66,9 +71,10 @@ export function sort(a, b) {
 }
 
 export function load(offset = 0, limit = 10) {
-	return async dispatch => {
+	return async (dispatch, getState) => {
+		const token = getState().app.token;
 		try {
-			const result = await request(dispatch, Boards.find(null, {
+			const result = await request(dispatch, Boards.all(token, {
 				offset,
 				limit
 			}));

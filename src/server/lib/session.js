@@ -6,6 +6,7 @@ import { Users } from '../data';
 import config from './config';
 
 // @Refactors: Scalability, Security
+// The reason I store user's token in memory is,
 // Move this into external database to make server cluster
 // Also, It should be placed in reliable memcached database
 // to identify already used or not

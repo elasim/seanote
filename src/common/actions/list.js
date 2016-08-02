@@ -1,6 +1,6 @@
 import App from './app';
 import Lists from '../data/lists';
-import { request } from './data';
+import { request } from './request';
 
 export default {
 	load,
@@ -20,9 +20,10 @@ export function sort(source, a, b) {
 }
 
 export function load(id) {
-	return async dispatch => {
+	return async (dispatch, getState) => {
 		try {
-			const data = await request(dispatch, Lists.all(id));
+			const token = getState().app.token;
+			const data = await request(dispatch, Lists.all(token,  id));
 			dispatch({
 				type: ActionTypes.load,
 				payload: data

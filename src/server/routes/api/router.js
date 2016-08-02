@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import bodyParser from 'body-parser';
-import { requireAuth, cacheControl } from './middlewares';
+import { auth, cacheControl } from './middlewares';
 
 const router = new Router();
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(cacheControl('no-cache'));
-router.use(requireAuth);
+router.use(auth);
 
 export default router;

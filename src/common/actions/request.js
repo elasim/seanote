@@ -1,4 +1,4 @@
-import execute, { bulkExecute } from '../../data/execute';
+import execute, { bulkExecute } from '../data/execute';
 
 export const ActionTypes = {
 	beginRequest: 'DATA_BEGIN_REQUEST',

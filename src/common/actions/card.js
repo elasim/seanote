@@ -1,6 +1,6 @@
 import App from './app';
 import Cards from '../data/cards';
-import { request } from './data';
+import { request } from './request';
 
 export default {
 	copy,
@@ -50,9 +50,10 @@ export function copy(source, id, target) {
 }
 
 export function load(id) {
-	return async dispatch => {
+	return async (dispatch, getState) => {
 		try {
-			const data = await request(dispatch, Cards.find({
+			const token = getState().app.token;
+			const data = await request(dispatch, Cards.find(token, {
 				ListId: id
 			}));
 			dispatch({

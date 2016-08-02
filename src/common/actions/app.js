@@ -1,5 +1,5 @@
 import Users from '../data/users';
-import { request } from './data';
+import { request } from './request';
 
 export default {
 	setTitle,
@@ -36,12 +36,12 @@ export function setLocale(locale) {
 }
 
 export function getToken() {
-	return async dispatch => {
+	return async (dispatch) => {
 		try {
-			const user = await request(dispatch, Users.getToken());
+			const result = await request(dispatch, Users.getToken());
 			dispatch({
 				type: ActionTypes.getToken,
-				payload: user.token
+				payload: result.token
 			});
 		} catch (e) {
 			dispatch(error(e));

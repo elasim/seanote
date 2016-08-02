@@ -5,7 +5,7 @@ import { deferredSelectFirst, deferredSelectLast } from './lib/request';
 const base = '/api/board';
 
 export default {
-	all(offset, limit) {
+	all(token, offset, limit) {
 		if (!(Number.isInteger(limit) && limit >= 1 && limit <= 100)) {
 			throw new Error('validation failure');
 		}
@@ -19,15 +19,17 @@ export default {
 		return deferredSelectFirst({
 			url: `${base}?${q}`,
 			method: 'get',
+			token
 		});
 	},
-	create(name, isPublic) {
+	create(token, { name, isPublic }) {
 
 	},
-	renumber() {
+	renumber(token) {
 		return deferredSelectFirst({
 			url: `${base}/_renumber`,
 			method: 'post',
+			token,
 		});
 	}
 };

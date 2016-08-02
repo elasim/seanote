@@ -1,15 +1,16 @@
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
 import { Card, CardHeader, CardText } from 'material-ui/Card';
-import TextField from 'material-ui/TextField';
-import IconButton from 'material-ui/IconButton';
 import isEqual from 'lodash/isEqual';
 import Droppable from '../../../../components/dnd/droppable';
 import Draggable from '../../../../components/dnd/draggable';
 import Symbol from '../../../../lib/symbol-debug';
+import Input from './input';
 import Button from './button';
 import CardItem from './card-item';
 import css from './card.scss';
+
+const debug = require('debug')('Component::Card');
 
 const EventTypes = {
 	DragOver: Symbol('Card.DragOver'),
@@ -34,7 +35,8 @@ export default class CardList extends Component {
 		this.onDragEnd = ::this.onDragEnd;
 		this.onDrop = ::this.onDrop;
 		this.state = {
-			overlay: false
+			overlay: false,
+			editable: false,
 		};
 	}
 	shouldComponentUpdate(nextProps, nextState) {
@@ -42,6 +44,7 @@ export default class CardList extends Component {
 	}
 	render() {
 		const { list, className, style } = this.props;
+		const { editable } = this.state;
 		const items = this.renderItems();
 		const overlayClassName = cx(css.overlay, {
 			[css.active]: this.state.overlay,
@@ -59,20 +62,14 @@ export default class CardList extends Component {
 								style={{ padding: '16px 16px 0px 16px' }}
 								title={<div>
 									<Button style={{ float: 'right', margin: 0, padding: 0 }}/>
-									{list.name}
+									<div contentEditable={editable} dangerouslySetInnerHTML={{__html:list.name}} />
 								</div>}
 							/>
 							<CardText>
 								<ol className={css.list}>
 									{items}
 								</ol>
-								<div style={{ display: 'flex' }}>
-									<TextField id={list.id} rowsMax={3} fullWidth multiLine
-										style={{ flex: 1 }} hintText="Types"
-									/>
-									<IconButton style={{ flex: 0 }} iconStyle={{ color: '#999' }}
-										iconClassName="material-icons">add_circle</IconButton>
-								</div>
+								<Input id={list.id} onMessage={this.dispatchMessage} />
 							</CardText>
 						</Card>
 						<div className={overlayClassName}>
@@ -95,6 +92,10 @@ export default class CardList extends Component {
 	}
 	dispatchMessage(msg, args) {
 		switch (msg) {
+			case Input.EventTypes.Submit: {
+				debug(msg, args);
+				return;
+			}
 			case CardItem.EventTypes.DataChange: {
 				this.context.card.update(args.ListId, args.id, args.nextValue);
 				return;

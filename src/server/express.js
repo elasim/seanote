@@ -1,10 +1,7 @@
 import path from 'path';
 import express from 'express';
-import cookieSession from 'cookie-session';
 import helmet from 'helmet';
-import passport from 'passport';
 import { engine } from './lib/simple-template';
-import { connectJwtSession } from './lib/session';
 import routes from './routes';
 
 const assetDebugView = require('../views/without-template.html');
@@ -18,11 +15,7 @@ app.engine('html', engine);
 app.set('views', viewsDir);
 app.set('view engine', 'html');
 
-// app.use(helmet());
-app.use(cookieSession({	name: 'sid', keys: ['key'] }));
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(connectJwtSession);
+app.use(helmet());
 app.use(routes);
 
 app.get('/favicon.ico', (req, res) => res.status(404).end());

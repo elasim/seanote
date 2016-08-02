@@ -1,7 +1,7 @@
 import { handleActions } from 'redux-actions';
 import cloneDeep from 'lodash/cloneDeep';
-import { ActionTypes } from '../actions/board';
-import { ActionTypes as  DataActionTypes } from '../actions/data';
+import { ActionTypes as BoardActions } from '../actions/board';
+import { ActionTypes as  PrefetchActions } from '../actions/prefetch';
 import { mean, isNearlyZero } from './lib/sortable';
 
 const initialState = {
@@ -14,9 +14,9 @@ const initialState = {
 };
 
 export default handleActions({
-	[ActionTypes.sort]: sort,
-	[ActionTypes.load]: load,
-	[DataActionTypes.prefetch]: prefetch,
+	[BoardActions.sort]: sort,
+	[BoardActions.load]: load,
+	[PrefetchActions.prefetch]: prefetch,
 }, initialState);
 
 function sort(state, action) {

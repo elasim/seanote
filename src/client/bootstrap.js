@@ -12,6 +12,10 @@ import { configureStore } from '../common/store';
 import { configureRoutes } from '../common/routes';
 import { configureLocale } from './intl';
 
+if (process.env.NODE_ENV !== 'production') {
+	window.debug = require('debug');
+}
+
 const defaultState = {
 	app: {
 		headerVisibility: true,

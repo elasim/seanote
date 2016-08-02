@@ -13,10 +13,6 @@ router.get('/fb', passport.authenticate('facebook', {
 router.get('/fb-return', (req, res, next) => {
 	loginWithPassport('facebook', req, res, next);
 });
-router.get('/fb-revoke', (req, res) => {
-	debug('revoke');
-	res.status(200).end();
-});
 
 passport.use(new Strategy(
 	config.auth.facebook,

@@ -8,6 +8,9 @@ function request(method, url, data, headers) {
 		},
 		credentials: 'same-origin',
 	};
+	if (url.indexOf('/api') > -1) {
+		delete param.credentials;
+	}
 	if (data !== undefined) {
 		if (typeof data !== 'string') {
 			param.body = JSON.stringify(data);
@@ -23,11 +26,12 @@ export default {
 	post: request.bind(null, 'POST'),
 	put: request.bind(null, 'PUT'),
 	delete: request.bind(null, 'DELETE'),
-	bulk(url, reqArray) {
+	bulk(url, reqArray, headers) {
 		const data = reqArray.map(JSON.stringify).join('\n');
 		return request('POST', url, data, {
 			'Content-Type': 'application/vnd.seanote.stream+json',
 			'Content-Length': data.length,
+			...headers,
 		});
 	}
 };

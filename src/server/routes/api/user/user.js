@@ -1,12 +1,11 @@
-import { requireAuth } from '../middlewares';
 import { Users } from '../../../data';
 
 export default {
 	// whoami
-	get: [requireAuth, async (req) => {
+	get: async (req) => {
 		const profile = await req.user.db.getUserProfile();
 		return profile.toJSON();
-	}],
+	},
 	// put: [requireAuth, async (req) => {
 	// 	req.
 	// }],
@@ -21,11 +20,11 @@ export default {
 			gender,
 		} = res.body;
 	},
-	delete: [requireAuth, async (req) => {
+	delete: async (req) => {
 		await Users.delete({
 			where: {
 				id: req.user.db.id
 			}
 		});
-	}]
+	}
 };

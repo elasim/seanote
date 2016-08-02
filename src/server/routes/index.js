@@ -1,18 +1,26 @@
 import { Router } from 'express';
+import passport from 'passport';
+import cookieSession from 'cookie-session';
+import { connectJwtSession } from '../lib/session';
 import auth from './auth';
 import api from './api';
 
+const debug = require('debug')('app.route');
 const router = new Router();
 
 router.use('/api', api);
-router.use('/auth', auth);
 
+router.use(cookieSession({	name: 'sid', keys: ['key'] }));
+router.use(passport.initialize());
+router.use(passport.session());
+router.use(connectJwtSession);
+router.use('/auth', auth);
 router.get('/signin', redirectToDashboard);
 router.get('/setting', redirectToSignIn);
 router.get('/boards', redirectToSignIn);
 router.get('/boards/:id', redirectToSignIn);
-router.all('/logout', redirectToSignIn, (req, res) => {
-	req.session = null;
+router.get('/logout', redirectToSignIn, (req, res) => {
+	req.logout();
 	res.redirect('/');
 });
 

@@ -5,7 +5,7 @@ export default createModel({
 	methods: {
 		getToken() {
 			return {
-				url: '/api/user/token',
+				url: '/auth/token',
 				method: 'get',
 			};
 		},
