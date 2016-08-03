@@ -1,8 +1,13 @@
 import React from 'react';
 import Container from './container';
 
-export default (options) => WrappedComponent => (props) => (
-	<Container {...options}>
-		<WrappedComponent {...props}/>
-	</Container>
-);
+export default (options) => (WrappedComponent) => {
+	const HammerInjecter = (props) => (
+		<Container {...options}>
+			<WrappedComponent {...props}/>
+		</Container>
+	);
+	HammerInjecter.WrappedComponent = WrappedComponent;
+
+	return HammerInjecter;
+};

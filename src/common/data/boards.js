@@ -16,13 +16,30 @@ export default {
 		if (limit) queries.limit = limit;
 		if (offset) queries.offset = offset;
 		const q = queryString(queries);
-		return deferredSelectFirst({
+		return {
 			url: `${base}?${q}`,
 			method: 'get',
 			token
+		};
+	},
+	find(token, id) {
+		
+	},
+	create(token, id, { name, isPublic }) {
+
+	},
+	update(token, id, { name, isPublic }) {
+		return deferredSelectLast({
+			url: `${base}/${id}`,
+			method: 'post',
+			body: {
+				name,
+				public: isPublic ? 1 : 0
+			},
+			token,
 		});
 	},
-	create(token, { name, isPublic }) {
+	delete(token, id) {
 
 	},
 	renumber(token) {
@@ -34,9 +51,9 @@ export default {
 	},
 	sort(id, value, token) {
 		return deferredSelectLast({
-			url: `${base}/_sort`,
+			url: `${base}/${id}/_sort`,
 			method: 'post',
-			body: { id, value },
+			body: { value },
 			token,
 		});
 	}

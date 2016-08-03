@@ -1,10 +1,12 @@
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
+import pure from 'recompose/pure';
 import { Grid, GridItem } from '../../../../components/grid';
 import Droppable from '../../../../components/dnd/droppable';
 import List from '../card';
 import css from './board.scss';
 
+@pure
 export default class Board extends Component {
 	static contextTypes = {
 		setTitle: PropTypes.func.isRequired,

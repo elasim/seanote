@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { Card, CardHeader, CardText } from 'material-ui/Card';
 import isEqual from 'lodash/isEqual';
+import EditableContent from '../../../../components/editable-content';
 import Droppable from '../../../../components/dnd/droppable';
 import Draggable from '../../../../components/dnd/draggable';
 import Symbol from '../../../../lib/symbol-debug';
@@ -29,6 +30,7 @@ export default class CardList extends Component {
 	};
 	componentWillMount() {
 		this.dispatchMessage = ::this.dispatchMessage;
+		this.onTextChange = ::this.onTextChange;
 		this.onDragOver = ::this.onDragOver;
 		this.onDragOut = ::this.onDragOut;
 		this.onDragStart = ::this.onDragStart;
@@ -60,7 +62,7 @@ export default class CardList extends Component {
 								style={{ padding: '16px 16px 0px 16px' }}
 								title={<div>
 									<Button style={{ float: 'right', margin: 0, padding: 0 }}/>
-									<div contentEditable={editable} dangerouslySetInnerHTML={{__html:list.name}} />
+									<EditableContent value={list.name} onChanged={this.onTextChange} />
 								</div>}
 							/>
 							<CardText>
@@ -134,6 +136,10 @@ export default class CardList extends Component {
 		if (onMessage) {
 			onMessage(msg, args);
 		}
+	}
+	onTextChange(sender, nextValue) {
+		debug('text change', this.props.list.id, nextValue);
+		return true;
 	}
 	onDragStart(event) {
 

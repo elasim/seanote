@@ -84,12 +84,17 @@ class Boards extends Component {
 			boardActions.load(list.length, WINDOW_SIZE);
 		}
 	}
-	dispatchMessage(msg, arg) {
+	dispatchMessage(msg, args) {
 		switch (msg) {
 			case List.EventTypes.DragOver: {
-				const { descriptor, target } = arg;
+				const { descriptor, target } = args;
 				if (descriptor.data.id === target.id) return;
 				this.props.boardActions.sort(descriptor.data.id, target.id);
+				return;
+			}
+			case List.EventTypes.TextChange: {
+				const { id, name } = args;
+				this.props.boardActions.rename(id, name);
 				return;
 			}
 			case FAB.EventTypes.DragOver: {
@@ -99,8 +104,7 @@ class Boards extends Component {
 				});
 			}
 			case FAB.EventTypes.Drop: {
-				const { descriptor } = arg;
-				console.log('Drop', descriptor);
+				const { descriptor } = args;
 				return this.props.setDim(null);
 			}
 			case FAB.EventTypes.DragOut: {
@@ -108,7 +112,7 @@ class Boards extends Component {
 			}
 			case FAB.EventTypes.Open: {
 				this.props.setDim({
-					onClick: arg.dimClick,
+					onClick: args.dimClick,
 				});
 				this.setState({
 					fabFront: true,

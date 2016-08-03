@@ -57,9 +57,17 @@ export function remove(id) {
 }
 
 export function rename(id, name) {
-	return {
-		type: ActionTypes.rename,
-		payload: { id, name }
+	return async (dispatch, getState) => {
+		const token = getState().app.token;
+		try {
+			await request(dispatch, Boards.update(token, id, { name }));
+			dispatch({
+				type: ActionTypes.rename,
+				payload: { id, name }
+			});
+		} catch (e) {
+			dispatch(App.error(e));
+		}
 	};
 }
 

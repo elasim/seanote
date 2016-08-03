@@ -1,66 +1,29 @@
-import Rx from 'rx';
 import React, { PropTypes } from 'react';
+import EditableContent from '../../../../components/editable-content';
 import ComponentEx from '../../../component';
-import { findDOMNode } from 'react-dom';
+
+const debug = require('debug')('App.Components.CardContent');
 
 class Note extends ComponentEx {
 	static propTypes = {
 		data: PropTypes.object,
 	};
 	componentWillMount() {
-		this.state = {
-			editable: false
-		};
-		this.onClick = ::this.onClick;
-		this.onBlur = ::this.onBlur;
-	}
-	componentDidUpdate() {
-		if (this.state.editable) {
-			findDOMNode(this).focus();
-		}
+		this.onChanged = ::this.onChanged;
 	}
 	render() {
-		const { data } = this.props;
-		const { editable } = this.state;
 		return (
-			<div onClick={this.onClick} onBlur={this.onBlur}
-				contentEditable={editable}
-				dangerouslySetInnerHTML={{__html:data.text}}>
-			</div>
+			<EditableContent
+				value={this.props.data.text}
+				onChanged={this.onChanged}
+			/>
 		);
 	}
-	onClick() {
-		this.beginChange();
-	}
-	onBlur() {
-		this.endChange();
-	}
-	beginChange() {
-		const element = findDOMNode(this);
-		this.keyDown = Rx.Observable.fromEvent(element, 'keydown')
-			.subscribe(event => {
-				if (event.keyCode === 13) {
-					this.endChange();
-				}
-			});
-		this.setState({
-			editable: true,
-		});
-	}
-	endChange() {
-		this.keyDown.dispose();
-		delete this.keyDown;
-
-		const { data } = this.props;
-		const newText = findDOMNode(this).textContent;
-		if (data.text !== newText) {
-			this.sendMessage('change', {
-				...data,
-				text: newText
-			});
-		}
-		this.setState({
-			editable: false
+	onChanged(sender, value) {
+		debug('Note change', value);
+		this.sendMessage('change', {
+			...this.props.data,
+			text: value,
 		});
 	}
 }

@@ -1,12 +1,7 @@
-//import './params.js';
-import router from '../router';
-import configureParams from './param';
 import boardCtrl from '../../../controllers/board';
 import listCtrl from '../../../controllers/list';
 // import cardCtrl from '../../../controllers/card';
 import HttpError from '../utils/http-error';
-
-configureParams(router);
 
 export default {
 	'/': {
@@ -18,18 +13,10 @@ export default {
 		},
 		async put(req) {
 			return await boardCtrl.create(req.user.db, {
-				name: String(req.body.name),
+				name: req.body.name,
 				isPublic: parseInt(req.body.public),
 			});
 		}
-	},
-	'/_sort': {
-		async post(req) {
-			return await boardCtrl.sort(req.user.db, {
-				board: String(req.body.id),
-				priority: parseFloat(req.body.value),
-			});
-		},
 	},
 	'/_renumber': {
 		async post(req) {
@@ -46,13 +33,21 @@ export default {
 		async post(req) {
 			return await boardCtrl.update(req.user.db, {
 				board: req.params.board,
-				name: String(req.body.name),
+				name: req.body.name,
 				isPublic: parseInt(req.body.public),
 			});
 		},
 		async delete(req) {
 			return await boardCtrl.delete(req.user.db, {
 				board: req.params.board,
+			});
+		},
+	},
+	'/:board/_sort': {
+		async post(req) {
+			return await boardCtrl.sort(req.user.db, {
+				board: req.params.board,
+				priority: parseFloat(req.body.value),
 			});
 		},
 	},
@@ -86,12 +81,21 @@ export default {
 			});
 		}
 	},
-	// '/:board/_sort': {
-	// 	post: sortLists,
-	// },
-	// '/:board/_renumber': {
-	// 	post: renumberLists,
-	// },
+	'/:board/:list/_sort': {
+		async post(req) {
+			return await listCtrl.sort(req.user.db, {
+				list: req.body.id,
+				priority: parseFloat(req.body.value),
+			});
+		}
+	},
+	'/:board/:list/_renumber': {
+		async post(req) {
+			return await listCtrl.renumber(req.user.db, {
+				board: req.params.board
+			});
+		}
+	},
 	// '/:list': {
 	// 	get: getCards,
 	// 	put: createCard,

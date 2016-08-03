@@ -1,4 +1,5 @@
 import { handleActions } from 'redux-actions';
+import update from 'react/lib/update';
 import cloneDeep from 'lodash/cloneDeep';
 import { ActionTypes as BoardActions } from '../actions/board';
 import { ActionTypes as  PrefetchActions } from '../actions/prefetch';
@@ -16,6 +17,7 @@ const initialState = {
 export default handleActions({
 	[BoardActions.sort]: sort,
 	[BoardActions.load]: load,
+	[BoardActions.rename]: rename,
 	[PrefetchActions.prefetch]: prefetch,
 }, initialState);
 
@@ -32,16 +34,12 @@ function sort(state, action) {
 	list.splice(newIndex, 0, item);
 	item.priority = mean(list, newIndex, prev, next);
 
+	const nextDirty = makeDirty(state, a, 'priority', item.priority);
+
 	return {
 		...state,
 		list,
-		dirty: {
-			...state.dirty,
-			[a]: {
-				...state.dirty[a],
-				priority: item.priority,
-			}
-		},
+		dirty: nextDirty,
 		renumbering: isNearlyZero(item.priority),
 	};
 }
@@ -53,7 +51,7 @@ function load(state, { payload }) {
 		prev,
 		next,
 	} = payload;
-	const newDirty = { ...state.dirty };
+	const nextDirty = { ...state.dirty };
 
 	const newItems = [];
 	const have = Object.assign({}, ...state.list.map(item => ({
@@ -65,7 +63,7 @@ function load(state, { payload }) {
 			if (item.updatedAt >= have[item.id].updatedAt) {
 				newItems.push(item);
 				delete have[item.id];
-				delete newDirty[item.id];
+				delete nextDirty[item.id];
 			} else {
 				newItems.push(have[item.id]);
 				delete have[item.id];
@@ -83,15 +81,41 @@ function load(state, { payload }) {
 	return {
 		...state,
 		list: sortedList,
-		dirty: newDirty,
+		dirty: nextDirty,
 		counts: counts,
 		prev: Math.min(state.prev, prev),
 		next: Math.max(state.next, next),
 	};
 }
 
+function rename(state, { payload }) {
+	const { id, name } = payload;
+	const idx = state.list.findIndex(item => item.id == id);
+	const nextValue = {
+		...state.list[idx],
+		name,
+	};
+	const nextDirty = makeDirty(state, id, 'name', name);
+	return update(state, {
+		list: {
+			[idx]: { $set: nextValue }
+		},
+		dirty: { $set: nextDirty }
+	});
+}
+
 function prefetch(state, { payload }) {
 	return load(state, {
 		payload: payload.board
 	});
+}
+
+function makeDirty(state, id, prop, value) {
+	return {
+		...state.dirty,
+		[id]: {
+			...state.dirty[id],
+			[prop]: value,
+		}
+	};
 }

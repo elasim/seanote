@@ -4,8 +4,11 @@ import Prefixer from 'inline-style-prefixer';
 import isEqual from 'lodash/isEqual';
 import React, { Component, Children, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
+// import pure from 'recompose/pure';
 import { getViewportWidth } from '../../lib/dom-helpers';
 import css from './grid.scss';
+
+const debug = require('debug')('App.Component.Grid');
 
 export class GridItem extends Component {
 	static propTypes = {
@@ -31,15 +34,9 @@ export class Grid extends Component {
 		};
 		this.steps = 0;
 	}
-	// shouldComponentUpdate(nextProps, nextState) {
-	// 	for (const key in nextProps) {
-	// 		if (nextProps[key] !== this.props[key]) {
-	// 			if (this.steps >= 2 && key === 'children') continue;
-	// 			return true;
-	// 		}
-	// 	}
-	// 	return !isEqual(nextState, this.state);
-	// }
+	shouldComponentUpdate(nextProps, nextState) {
+		return !isEqual(this.props, nextProps) || isEqual(this.state, nextState);
+	}
 	componentWillReceiveProps() {
 		this.steps = 0;
 	}

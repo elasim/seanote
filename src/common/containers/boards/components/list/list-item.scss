@@ -8,7 +8,6 @@
 
 .root {
 	background-color: #fff;
-	cursor: default;
 	font-family: Roboto, sans-serif;
 
 	height: 48px;
@@ -35,6 +34,7 @@
 
 .primary {
 	@include hide-text-overflow;
+	cursor: text;
 
 	color: #212121;
 	font-size: 15px;
@@ -60,12 +60,13 @@
 	color: #fff;
 }
 
-.left-icon {
+.handle {
+	cursor: move;
 	padding: 12px 8px;
 	float: left;
 	height: 24px;
 }
 
-.right-icon {
+.menu {
 	float: right;
 }
