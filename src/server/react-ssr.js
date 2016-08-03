@@ -13,18 +13,24 @@ require('../views/index.html');
 require('../views/error.html');
 
 export default (req, res) => {
-	const routes = configureRoutes(null, {
+	let locale = undefined;
+	if (req.headers['accept-language']) {
+		locale = req.headers['accept-language'].match(/^[^,;]+/)[0];
+	}
+	const initialState = {
 		app: {
 			token: req.user ? req.session.passport.user.token : null,
-		}
-	});
+		},
+		locale,
+	};
+	const routes = configureRoutes(null, initialState);
 	match({ routes, location: req.originalUrl }, (e, redirect, renderProps) => {
 		if (e) {
 			res.status(500).render('error', { error: e.message });
 		} else if (redirect) {
 			res.redirect(302, redirect.pathname + redirect.search);
 		} else if (renderProps) {
-			render(req, res, renderProps);
+			render(req, res, renderProps, initialState);
 		} else {
 			res.status(404).render('error', {
 				error: 'Not found'
@@ -33,18 +39,8 @@ export default (req, res) => {
 	});
 };
 
-function render(req, res, renderProps) {
-	let locale = undefined;
-	if (req.headers['accept-language']) {
-		locale = req.headers['accept-language'].match(/^[^,;]+/)[0];
-	}
-	const store = configureStore({
-		app: {
-			locale,
-			token: req.user ? req.session.passport.user.token : null
-		},
-	});
-
+function render(req, res, renderProps, initialState) {
+	const store = configureStore(initialState);
 	const dispatching = findPreDispatches(renderProps.components)
 		.map(preDispatch => preDispatch(store.dispatch));
 	
