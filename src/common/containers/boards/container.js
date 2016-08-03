@@ -63,10 +63,15 @@ export default compose(
 	// connect(mapStateToProps, mapDispatchToProps),
 	asyncConnect([
 		{
-			key: 'asyncKey',
-			promise: (params, helpers)  => {
-				debug('TW?', params,  helpers);
-				return Promise.resolve(params.params);
+			key: 'fetch',
+			promise: async (params)  => {
+				debug('Promise?', params);
+				if (params.params.id) {
+					const a = ListActions.load(params.params.id);
+					const { getState, dispatch } = params.store;
+					debug('Run Action');
+					await a(dispatch, getState);
+				}
 			}
 		},
 	], mapStateToProps, mapDispatchToProps),

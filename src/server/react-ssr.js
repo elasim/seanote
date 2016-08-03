@@ -39,8 +39,10 @@ function render(req, res, renderProps) {
 		locale = req.headers['accept-language'].match(/^[^,;]+/)[0];
 	}
 	const store = configureStore({
-		app: { locale },
-		auth: { token: req.user ? req.session.passport.user.token : null },
+		app: {
+			locale,
+			token: req.user ? req.session.passport.user.token : null
+		},
 	});
 
 	const dispatching = findPreDispatches(renderProps.components)

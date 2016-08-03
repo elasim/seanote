@@ -38,7 +38,6 @@ export default class CardList extends Component {
 		this.onDrop = ::this.onDrop;
 		this.state = {
 			overlay: false,
-			editable: false,
 		};
 	}
 	shouldComponentUpdate(nextProps, nextState) {
@@ -46,7 +45,7 @@ export default class CardList extends Component {
 	}
 	render() {
 		const { list, className, style } = this.props;
-		const { editable, overlay } = this.state;
+		const { overlay } = this.state;
 		const items = this.renderItems();
 
 		return (

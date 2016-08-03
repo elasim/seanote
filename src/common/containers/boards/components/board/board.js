@@ -1,12 +1,12 @@
 import cx from 'classnames';
 import React, { Component, PropTypes } from 'react';
-import pure from 'recompose/pure';
 import { Grid, GridItem } from '../../../../components/grid';
 import Droppable from '../../../../components/dnd/droppable';
 import List from '../card';
 import css from './board.scss';
 
-@pure
+const debug = require('debug')('App.Component.Board');
+
 export default class Board extends Component {
 	static contextTypes = {
 		setTitle: PropTypes.func.isRequired,
@@ -31,14 +31,6 @@ export default class Board extends Component {
 		this.dispatchMessage = ::this.dispatchMessage;
 		this.onDrop = ::this.onDrop;
 	}
-	componentWillReceiveProps(nextProps) {
-		if (this.props.id !== nextProps.id) {
-			this.loadListData(nextProps.id);
-			if (typeof window !== 'undefined') {
-				window.scrollTo(0, 1);
-			}
-		}
-	}
 	componentDidMount() {
 		window.scrollTo(0, 1);
 		this.disposeDragHook = this.context.hammer.createHook(
@@ -46,7 +38,6 @@ export default class Board extends Component {
 			null,
 			::this.moveBackOverlay
 		);
-		this.loadListData(this.props.id);
 	}
 	componentWillUnmount() {
 		this.disposeDragHook();
@@ -54,7 +45,6 @@ export default class Board extends Component {
 	render() {
 		const { className } = this.props;
 		const { activeOverlay, frontOverlay } = this.state;
-		const items = this.renderItems();
 		const rootClassName = cx(className, css.root, {
 			[css.full]: this.props.full
 		});
@@ -62,6 +52,7 @@ export default class Board extends Component {
 			[css.front]: frontOverlay,
 			[css.active]: activeOverlay
 		});
+		const items = this.renderItems();
 		return (
 			<Droppable
 				onDragOver={this.toggleOverlay}

@@ -2,9 +2,9 @@ import Rx from 'rx';
 import cx from 'classnames';
 import Prefixer from 'inline-style-prefixer';
 import isEqual from 'lodash/isEqual';
+import isEqualWith from 'lodash/isEqualWith';
 import React, { Component, Children, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
-// import pure from 'recompose/pure';
 import { getViewportWidth } from '../../lib/dom-helpers';
 import css from './grid.scss';
 
@@ -31,14 +31,24 @@ export class Grid extends Component {
 			elementSizes: [],
 			positions: [],
 			columns: 0,
+			renderSteps: 0,
 		};
-		this.steps = 0;
 	}
 	shouldComponentUpdate(nextProps, nextState) {
-		return !isEqual(this.props, nextProps) || isEqual(this.state, nextState);
+		if (!isEqual(this.state, nextState)) {
+			return true;
+		}
+		if (!isEqualWith(this.props, nextProps, isEqualWith)) {
+			return true;
+		}
+		return false;
 	}
-	componentWillReceiveProps() {
-		this.steps = 0;
+	componentWillReceiveProps(nextProps) {
+		if (!isEqualWith(this.props, nextProps, isEqualWith)) {
+			this.setState({
+				renderSteps: 0,
+			});
+		}
 	}
 	componentDidMount() {
 		this.stylePrefixer = new Prefixer({ userAgent: navigator.userAgent });
@@ -47,22 +57,15 @@ export class Grid extends Component {
 			.map(() => getViewportWidth())
 			.distinctUntilChanged()
 			.subscribe(() => {
-				this.steps = 0;
-				this.setState({ positions: [] });
+				this.setState({ positions: [], renderSteps: 0 });
 			});
+		this.postRender();
 	}
 	componentDidUpdate() {
-		switch (this.steps) {
-			case 0:
-				return this.updateDummyElements();
-			case 1:
-				return this.updatePositions();
-			case 2:
-				return this.registerResizeHandlers();
-		}
+		this.postRender();
 	}
 	componentWillUnmount() {
-		this.unregisterResizeHandlers();
+		this.unregisterItemResizeHandlers();
 		this.resizeSpy.dispose();
 	}
 	render() {
@@ -78,18 +81,20 @@ export class Grid extends Component {
 	}
 	renderItems() {
 		const { children } = this.props;
-		if (!children) return null;
+		const { positions } = this.state;
+		if (!children) {
+			return null;
+		}
+		debug('No child?', children);
 
 		return Children.toArray(children)
 			.map((child, index) => {
-				let position = this.state.positions[index];
-
 				return React.cloneElement(child, {
 					key: child.props.id,
 					ref: `item-${child.props.id}`,
 					style: {
 						margin: 0,
-						...position,
+						...positions[index],
 						...child.props.style
 					},
 					className: cx(css.item, child.props.className),
@@ -100,6 +105,7 @@ export class Grid extends Component {
 		const { columnClassName } = this.props;
 		const { elementSizes, columns } = this.state;
 		if (elementSizes.length === 0) {
+			debug('Nothing to render');
 			return null;
 		}
 		const dummys = Array.apply(null, { length: columns }).map(() => []);
@@ -122,48 +128,56 @@ export class Grid extends Component {
 		});
 	}
 
-	// Post-Step 1. Compute Heights
-	updateDummyElements() {
-		this.steps = 1;
-
-		if (this.resizeHandlers) {
-			this.unregisterResizeHandlers();
+	postRender() {
+		debug('Post Render', this.state.renderSteps);
+		switch (this.state.renderSteps) {
+			case 0:
+				return this.updateDummyElements();
+			case 1:
+				return this.updatePositions();
+			case 2:
+				return this.registerItemResizeHandlers();
 		}
-		if (!this.props.children) return;
-		console.log('Update Dummy');
+	}
 
-		// Clear items
+	// Post-Step 1
+	updateDummyElements() {
+		this.unregisterItemResizeHandlers();
+
+		const nextState = { renderSteps: 1 };
+
+		if (!this.props.children) {
+			return this.setState(nextState);
+		}
+
 		const containerWidth = findDOMNode(this).getBoundingClientRect().width;
 		const items = Children.toArray(this.props.children)
 			.map(child => this.refs[`item-${child.props.id}`]);
 
-		if (!items.length) {
-			return;
+		if (items.length === 0) {
+			return this.setState(nextState);
 		}
 
 		const itemWidth = findDOMNode(items[0]).getBoundingClientRect().width;
-		const columns = Math.max(1, Math.floor(containerWidth / itemWidth));
+		nextState.columns = Math.max(1, Math.floor(containerWidth / itemWidth));
 
-		const elementSizes = items.map(refId => {
+		nextState.elementSizes = items.map(refId => {
 			const element = findDOMNode(refId);
 			const box = element.getBoundingClientRect();
 			return { width: box.width, height: box.height };
 		});
 
-		this.setState({
-			elementSizes,
-			columns,
-		});
+		this.setState(nextState);
 	}
 
-	// Post-Step 2. Set Transforms
+	// Post-Step 2
 	updatePositions() {
-		this.steps = 2;
-		if (this.state.elementSizes.length === 0) return;
-		console.log('Update Position');
-
+		const nextState = { renderSteps: 2 };
+		if (this.state.elementSizes.length === 0) {
+			return this.setState(nextState);
+		}
 		const container = findDOMNode(this).getBoundingClientRect();
-		const positions = Children.toArray(this.props.children)
+		nextState.positions = Children.toArray(this.props.children)
 			.map(child => findDOMNode(this.refs[`dummy-${child.props.id}`]))
 			.map((node, index) => {
 				const box = node.getBoundingClientRect();
@@ -174,27 +188,23 @@ export class Grid extends Component {
 				const transform = `translate3d(${x}px, ${y}px, 0)`;
 				return this.stylePrefixer.prefix({
 					transform,
-					// width: box.width,
-					// height: box.height,
 				});
 			});
-		this.setState({
-			positions,
-		});
+		this.setState(nextState);
 	}
 
-	// Post-Step 3. registerResizeHandlers
-	registerResizeHandlers() {
-		this.steps = 3;
+	// Post-Step 3
+	// this is last step, won't want to render again.
+	// So, I'll not change renderSteps
+	registerItemResizeHandlers() {
+		// dispose old handlers
+		this.unregisterItemResizeHandlers();
 
 		if (this.state.elementSizes.length === 0) return;
-		console.log('Register Handlers');
 
 		this.resizeHandlers = Children.toArray(this.props.children)
 			.map(child => {
 				const node = findDOMNode(this.refs[`item-${child.props.id}`]);
-				const dummy = findDOMNode(this.refs[`item-${child.props.id}`]);
-
 				return Rx.Observable.interval(100)
 					.map(() => node.getBoundingClientRect().height)
 					.distinctUntilChanged()
@@ -204,8 +214,10 @@ export class Grid extends Component {
 			});
 	}
 
-	unregisterResizeHandlers() {
-		this.resizeHandlers.forEach(handler => handler.dispose());
-		delete this.resizeHandlers;
+	unregisterItemResizeHandlers() {
+		if (this.resizeHandlers) {
+			this.resizeHandlers.forEach(handler => handler.dispose());
+			delete this.resizeHandlers;
+		}
 	}
 }

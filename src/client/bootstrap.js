@@ -1,9 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
+import { ReduxAsyncConnect } from 'redux-connect';
 import { Router, browserHistory } from 'react-router';
 import injectTapEventPlugin from 'react-tap-event-plugin';
-import emptyFunction from 'fbjs/lib/emptyFunction';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import appMuiTheme from '../common/themes/mui';
@@ -51,7 +51,7 @@ window.bootstrap = (serverSentState = {}) => {
 			render(
 				<Provider store={store}>
 					<MuiThemeProvider muiTheme={muiTheme}>
-						<Router routes={routes} history={browserHistory} />
+						<Router render={props => renderAsync(props)} routes={routes} history={browserHistory} />
 					</MuiThemeProvider>
 				</Provider>,
 				document.getElementById('app')
@@ -67,4 +67,8 @@ function getInitialState(serverSentState = {}) {
 	} else {
 		return { ...defaultState };
 	}
+}
+
+function renderAsync(props) {
+	return <ReduxAsyncConnect {...props} />;
 }
