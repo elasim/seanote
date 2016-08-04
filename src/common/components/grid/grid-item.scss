@@ -1,0 +1,8 @@
+.item {
+	will-change: transform, width, height;
+	transition:
+		transform 0.2s ease-in,
+		width 0.2s ease-in,
+		height 0.2s ease-in;
+	position: absolute;
+}

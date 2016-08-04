@@ -10,22 +10,12 @@ import css from './grid.scss';
 
 const debug = require('debug')('App.Component.Grid');
 
-export class GridItem extends Component {
+export default class Grid extends Component {
 	static propTypes = {
-		id: PropTypes.string,
+		columnClassName: PropTypes.string,
+		className: PropTypes.string,
+		style: PropTypes.object,
 	};
-	render() {
-		const { className, style } = this.props;
-		const rootClassName = cx(css.item, className);
-		return (
-			<div className={rootClassName} style={style}>
-				{this.props.children}
-			</div>
-		);
-	}
-}
-
-export class Grid extends Component {
 	componentWillMount() {
 		this.state = {
 			elementSizes: [],
@@ -82,10 +72,9 @@ export class Grid extends Component {
 	renderItems() {
 		const { children } = this.props;
 		const { positions } = this.state;
-		if (!children) {
+		if (!children || children.length === 0) {
 			return null;
 		}
-		debug('No child?', children);
 
 		return Children.toArray(children)
 			.map((child, index) => {
@@ -102,14 +91,14 @@ export class Grid extends Component {
 			});
 	}
 	renderDummys() {
-		const { columnClassName } = this.props;
+		const { columnClassName, children } = this.props;
 		const { elementSizes, columns } = this.state;
 		if (elementSizes.length === 0) {
 			debug('Nothing to render');
 			return null;
 		}
 		const dummys = Array.apply(null, { length: columns }).map(() => []);
-		Children.toArray(this.props.children).forEach((child, index) => {
+		Children.toArray(children).forEach((child, index) => {
 			const size = elementSizes[index];
 			const ref = `dummy-${child.props.id}`;
 			dummys[index % columns].push(
@@ -142,21 +131,18 @@ export class Grid extends Component {
 
 	// Post-Step 1
 	updateDummyElements() {
+		const { children } = this.props;
 		this.unregisterItemResizeHandlers();
 
 		const nextState = { renderSteps: 1 };
 
-		if (!this.props.children) {
+		if (!children || children.length === 0) {
 			return this.setState(nextState);
 		}
 
 		const containerWidth = findDOMNode(this).getBoundingClientRect().width;
-		const items = Children.toArray(this.props.children)
+		const items = Children.toArray(children)
 			.map(child => this.refs[`item-${child.props.id}`]);
-
-		if (items.length === 0) {
-			return this.setState(nextState);
-		}
 
 		const itemWidth = findDOMNode(items[0]).getBoundingClientRect().width;
 		nextState.columns = Math.max(1, Math.floor(containerWidth / itemWidth));
@@ -172,8 +158,9 @@ export class Grid extends Component {
 
 	// Post-Step 2
 	updatePositions() {
+		const { columns, elementSizes } = this.state;
 		const nextState = { renderSteps: 2 };
-		if (this.state.elementSizes.length === 0) {
+		if (elementSizes.length === 0) {
 			return this.setState(nextState);
 		}
 		const container = findDOMNode(this).getBoundingClientRect();
@@ -181,8 +168,8 @@ export class Grid extends Component {
 			.map(child => findDOMNode(this.refs[`dummy-${child.props.id}`]))
 			.map((node, index) => {
 				const box = node.getBoundingClientRect();
-				const offsetX = Math.floor(index % this.state.columns) * 5;
-				const offsetY = Math.floor(index / this.state.columns) * 0;
+				const offsetX = Math.floor(index % columns) * 5;
+				const offsetY = Math.floor(index / columns) * 0;
 				const x = box.left + offsetX - container.left;
 				const y = box.top + offsetY - container.top;
 				const transform = `translate3d(${x}px, ${y}px, 0)`;
