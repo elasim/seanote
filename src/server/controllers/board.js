@@ -1,6 +1,8 @@
 import Sequelize from 'sequelize';
 import Validator from 'validator';
 import validate from './validation';
+import isUndefined from 'lodash/isUndefined';
+import { $or, $not, $bindRight } from '../lib/functional';
 import { Boards, BoardSorts, BoardPrivacySettings } from '../data/schema/board';
 import sequelize from '../data/sequelize';
 import { beginTransaction, commit, rollback } from './helpers';
@@ -61,12 +63,8 @@ export default new class BoardController {
 	async all(user, { offset=0, limit=10 }, options = {}) {
 		debug('all()', 'offset', offset, typeof offset);
 		debug('all()', 'limit', limit, typeof limit);
-		await validate(value => {
-			return Number.isInteger(value) && value >= 0;
-		}, offset);
-		await validate(value => {
-			return Number.isInteger(value) && value >= 1 && value <= 100;
-		}, limit);
+		await validate(value => value >= 0, offset);
+		await validate(value => value >= 1 && value <= 100, limit);
 
 		const paging = {
 			offset: offset + (offset > 0 ? -1 : 0),
@@ -227,13 +225,13 @@ export default new class BoardController {
 		debug('update()', id, typeof id);
 		debug('update()', name, typeof name);
 		debug('update()', isPublic, typeof isPublic);
-		await validate(value => {
-			return value === undefined
-			|| Validator.isLength(value, {
+		await validate($or(
+			$not(isUndefined),
+			$bindRight(Validator.isLength, {
 				min: 1,
 				max: VALID_NAME_MAX
-			});
-		}, name);
+			}),
+		), name);
 		await validate(checkIsPublic, isPublic);
 
 		try {
@@ -262,7 +260,7 @@ export default new class BoardController {
 				throw new Error('permission error');
 			}
 			if (name) boardDb.name = name;
-			if (validate.isOneOf(isPublic, [0, 1])) boardDb.isPublic = 1;
+			if (validate.isOneOf(isPublic, [0, 1])) boardDb.isPublic = isPublic;
 
 			return boardDb.save({
 				transaction: options.transaction
@@ -299,10 +297,10 @@ export default new class BoardController {
 		debug('getMode()', id, typeof id);
 		debug('getMode()', users, typeof rules);
 		await validate(Validator.isUUID, id, 4);
-		await validate(value => {
-			return validate.isArrayWith(value, Validator.isUUID, 4)
-			|| Validator.isUUID(value, 4);
-		}, users);
+		await validate($or(
+			$bindRight(validate.isArrayWith, Validator.isUUID, 4),
+			$bindRight(Validator.isUUID, 4)
+		), users);
 		const userPubIds = [].concat(users);
 		const boardData = await Boards.find({
 			where: {
@@ -333,20 +331,17 @@ export default new class BoardController {
 		debug('setMode()', id, typeof id);
 		debug('setMode()', rule, typeof rule);
 		await validate(Validator.isUUID, id, 4);
-		await validate(value => {
-			debug('setMode().validate', value);
-			return validate.isArrayWith(value, checkPermissionRule)
-			|| checkPermissionRule(value);
-		}, rule);
-		await validate(() => {
-			return [].concat(rule)
-				.filter(rule => rule.user === user.PublisherId).length === 0;
-		});
-		debug('setMode()', validate.isArrayWith(rule, checkPermissionRule)
-			|| checkPermissionRule(rule));
-
+		await validate($or(
+			$bindRight(validate.isArrayWith, checkPermissionRule),
+			checkPermissionRule
+		), rule);
 		const rules = [].concat(rule);
 		const results = [];
+
+		if (rules.filter(rule => rule.user === user.PublisherId).length > 0) {
+			throw new Error('owners permission cannot be changed');
+		}
+
 		const transaction = await beginTransaction(options);
 		try {
 			const managedGroups = await user.getManagedGroups({
@@ -455,13 +450,11 @@ export default new class BoardController {
 			throw e;
 		}
 	}
-	async sort(user, { id, priority }, options = {}) {
+	async sort(user, { id, value }, options = {}) {
 		debug('sort()', id, typeof id);
-		debug('sort()', priority, typeof priority);
+		debug('sort()', value, typeof value);
 		await validate(Validator.isUUID, id, 4);
-		await validate(value => {
-			return !Number.isNaN(value) && value >= VALID_PRIORITY_MIN;
-		}, priority);
+		await validate(v => v >= VALID_PRIORITY_MIN, value);
 
 		const transaction = await beginTransaction(options);
 		let renumber = false;
@@ -472,7 +465,7 @@ export default new class BoardController {
 					roleId: user.PublisherId
 				},
 				defaults: {
-					priority: priority
+					priority: value
 				},
 				transaction,
 			});
@@ -487,15 +480,15 @@ export default new class BoardController {
 				transaction
 			});
 			if (!created) {
-				await debug('sort()', sort.priority, priority);
-				sort.priority = priority;
+				await debug('sort()', sort.priority, value);
+				sort.priority = value;
 				await sort.save({ transaction });
 			}
 			// Fall-Safe
 			const equals = await BoardSorts.count({
 				where: {
 					UserId: user.id,
-					priority
+					priority: value,
 				},
 				transaction,
 			});
@@ -508,7 +501,7 @@ export default new class BoardController {
 			}
 			await commit(transaction, options);
 			return {
-				priority,
+				priority: value,
 				renumber,
 			};
 		} catch (e) {

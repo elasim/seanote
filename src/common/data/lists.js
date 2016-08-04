@@ -6,7 +6,7 @@ const base = '/api/board';
 export default {
 	all(token, id) {
 		return {
-			url: `${base}/${id}`,
+			url: `${base}/${id}/lists`,
 			method: 'get',
 			token,
 		};

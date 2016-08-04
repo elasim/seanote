@@ -310,7 +310,7 @@ describe('Board Controller', () => {
 					const before = await BoardController.all(user1, {}, t);
 					const result = await BoardController.sort(user1, {
 						id: before.items[0].id,
-						priority: before.items[1].priority,
+						value: before.items[1].priority,
 					}, t);
 					const after = await BoardController.all(user1, {}, t);
 					assert(result.renumber);
@@ -331,7 +331,7 @@ describe('Board Controller', () => {
 					const boards = await BoardController.all(user1, {});
 					const result = await BoardController.sort(user1, {
 						id: boards.items[0].id,
-						priority: 11.0,
+						value: 11.0,
 					});
 					assert(result.renumber === false);
 					done();
@@ -355,7 +355,7 @@ describe('Board Controller', () => {
 					}, t);
 					await BoardController.sort(user1, {
 						id: boards.items[2].id,
-						priority: 11.0,
+						value: 11.0,
 					}, t);
 					await transaction.commit();
 					done();
@@ -370,7 +370,7 @@ describe('Board Controller', () => {
 				const boards = await BoardController.all(user2, {});
 				const sort = BoardController.sort(user1, {
 					id: boards.items[0].id,
-					priority: 11.0,
+					value: 11.0,
 				});
 				return assert.isRejected(sort, /permission error/);
 			}
@@ -387,7 +387,7 @@ describe('Board Controller', () => {
 					const before = await BoardController.all(user1, {}, t);
 					const result = await BoardController.sort(user1, {
 						id: before.items[0].id,
-						priority: 100,
+						value: 100,
 					}, t);
 					await BoardController.renumber(user1, t);
 					const after = await BoardController.all(user1, {}, t);
