@@ -24,6 +24,7 @@ function request(method, url, data, headers) {
 export default {
 	get: request.bind(null, 'GET'),
 	post: request.bind(null, 'POST'),
+	patch: request.bind(null, 'PATCH'),
 	put: request.bind(null, 'PUT'),
 	delete: request.bind(null, 'DELETE'),
 	bulk(url, reqArray, headers) {

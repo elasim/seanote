@@ -66,7 +66,7 @@ describe('Board Controller', () => {
 					const boards = await BoardController.all(user1, {});
 					const sharedItemId = boards.items[0].id;
 					await BoardController.setMode(user1, {
-						board: sharedItemId,
+						id: sharedItemId,
 						rule: [{
 							user: user2.PublisherId,
 							mode: BoardController.Mode.READ
@@ -89,7 +89,7 @@ describe('Board Controller', () => {
 				try {
 					const boards = await user2.getBoards();
 					await BoardController.setMode(user1, {
-						board: boards[0].id,
+						id: boards[0].id,
 						rule: {
 							user: user3.PublisherId,
 							mode: BoardController.Mode.READ,
@@ -111,7 +111,7 @@ describe('Board Controller', () => {
 				try {
 					const boards = await user3.getBoards();
 					await BoardController.setMode(user3, {
-						board: boards[0].id,
+						id: boards[0].id,
 						rule: {
 							user: user1.PublisherId,
 							mode: 4,
@@ -126,7 +126,7 @@ describe('Board Controller', () => {
 					});
 					assert(before !== null);
 					await BoardController.setMode(user3, {
-						board: boards[0].id,
+						id: boards[0].id,
 						rule: {
 							user: user1.PublisherId,
 							mode: 0,
@@ -255,7 +255,7 @@ describe('Board Controller', () => {
 				try {
 					const boards = await user1.getBoards();
 					await BoardController.delete(user1, {
-						board: boards[3].id
+						id: boards[3].id
 					});
 					assert.ok(1);
 					done();
@@ -270,7 +270,7 @@ describe('Board Controller', () => {
 				try {
 					const boards = await user2.getBoards();
 					await BoardController.delete(user1, {
-						board: boards[0].id
+						id: boards[0].id
 					});
 					done(new Error('permission error not thrown'));
 				} catch (e) {
@@ -290,7 +290,7 @@ describe('Board Controller', () => {
 				try {
 					const boards = await user1.getBoards();
 					const result = await BoardController.update(user1, {
-						board: boards[0].id,
+						id: boards[0].id,
 						name: 'user have write permission',
 						isPublic: 1,
 					});
@@ -308,7 +308,7 @@ describe('Board Controller', () => {
 				try {
 					const boards = await user2.getBoards();
 					await BoardController.update(user1, {
-						board: boards[0].id,
+						id: boards[0].id,
 						name: 'user not have write permission',
 						isPublic: 0,
 					});
@@ -333,7 +333,7 @@ describe('Board Controller', () => {
 				try {
 					const before = await BoardController.all(user1, {}, t);
 					const result = await BoardController.sort(user1, {
-						board: before.items[0].id,
+						id: before.items[0].id,
 						priority: before.items[1].priority,
 					}, t);
 					const after = await BoardController.all(user1, {}, t);
@@ -354,7 +354,7 @@ describe('Board Controller', () => {
 				try {
 					const boards = await BoardController.all(user1, {});
 					const result = await BoardController.sort(user1, {
-						board: boards.items[0].id,
+						id: boards.items[0].id,
 						priority: 11.0,
 					});
 					assert(result.renumber === false);
@@ -371,14 +371,14 @@ describe('Board Controller', () => {
 				try {
 					const boards = await BoardController.all(user2, {}, t);
 					await BoardController.setMode(user2, {
-						board: boards.items[2].id,
+						id: boards.items[2].id,
 						rule: {
 							user: user1.PublisherId,
 							mode: BoardController.Mode.READ,
 						},
 					}, t);
 					await BoardController.sort(user1, {
-						board: boards.items[2].id,
+						id: boards.items[2].id,
 						priority: 11.0,
 					}, t);
 					await transaction.commit();
@@ -394,7 +394,7 @@ describe('Board Controller', () => {
 				try {
 					const boards = await BoardController.all(user2, {});
 					await BoardController.sort(user1, {
-						board: boards.items[0].id,
+						id: boards.items[0].id,
 						priority: 11.0,
 					});
 					done(new Error('permission error not thrown'));
@@ -418,7 +418,7 @@ describe('Board Controller', () => {
 				try {
 					const before = await BoardController.all(user1, {}, t);
 					const result = await BoardController.sort(user1, {
-						board: before.items[0].id,
+						id: before.items[0].id,
 						priority: 100,
 					}, t);
 					await BoardController.renumber(user1, t);

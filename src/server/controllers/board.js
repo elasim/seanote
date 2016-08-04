@@ -30,14 +30,14 @@ const MODE = BoardPrivacySettings.Mode;
 
 export default new class BoardController {
 	Mode = MODE;
-	async havePermission(user, board, mode, options = {}) {
-		debug('can()', user.id, board, mode);
-		await validate(Validator.isUUID, board, 4);
+	async havePermission(user, id, mode, options = {}) {
+		debug('can()', user.id, id, mode);
+		await validate(Validator.isUUID, id, 4);
 		await validate(checkPermissionValue, mode);
 
 		const count = await BoardPrivacySettings.count({
 			where: {
-				BoardId: board,
+				BoardId: id,
 				roleId: {
 					$in: [
 						user.PublisherId,
@@ -50,6 +50,15 @@ export default new class BoardController {
 			transaction: options.transaction
 		});
 		return count === 1;
+	}
+	async get(user, { id }, options = {}) {
+		debug('get()', 'id', id, typeof id);
+		await validate(Validator.isUUID, id, 4);
+		await validate(() => {
+			return this.havePermission(user, id, MODE.READ, options);
+		});
+
+		return Boards.findById(id);
 	}
 	async all(user, { offset=0, limit=10 }, options = {}) {
 		debug('all()', 'offset', offset, typeof offset);
@@ -80,15 +89,13 @@ export default new class BoardController {
 						as: 'PrivacySettings',
 						where: {
 							roleId: { $in: readables },
-							mode: {
-								$gte: 1
-							}
+							mode: { $gt: 0 }, // any permission
 						},
 					},
 					{
 						model: BoardSorts,
 						where: { UserId: user.id },
-						required: false,
+						required: false, // lazy creation policy
 					},
 				],
 				order: [
@@ -227,8 +234,8 @@ export default new class BoardController {
 			throw e;
 		}
 	}
-	async update(user, { board, name, isPublic }, options = {}) {
-		debug('update()', board, typeof board);
+	async update(user, { id, name, isPublic }, options = {}) {
+		debug('update()', id, typeof id);
 		debug('update()', name, typeof name);
 		debug('update()', isPublic, typeof isPublic);
 		await validate(value => {
@@ -244,13 +251,13 @@ export default new class BoardController {
 			const boardDb = await Boards.find(
 				{
 					where: {
-						id: board,
+						id,
 					},
 					include: [{
 						model: BoardPrivacySettings,
 						as: 'PrivacySettings',
 						where: {
-							BoardId: board,
+							BoardId: id,
 							roleId: user.PublisherId,
 							mode: sequelize.where(
 								sequelize.literal(`mode & ${MODE.WRITE}`),
@@ -276,15 +283,15 @@ export default new class BoardController {
 			throw e;
 		}
 	}
-	async delete(user, { board }, options = {}) {
-		debug('delete()', board, typeof board);
-		await validate(Validator.isUUID, board, 4);
+	async delete(user, { id }, options = {}) {
+		debug('delete()', id, typeof id);
+		await validate(Validator.isUUID, id, 4);
 		
 		const transaction = await beginTransaction(options);
 		try {
 			const rows = await Boards.destroy({
 				where: {
-					id: board,
+					id,
 					AuthorId: user.id,
 				},
 				cascade: true,
@@ -305,10 +312,10 @@ export default new class BoardController {
 			throw e;
 		}
 	}
-	async getMode(user, { board, users }, options = {}) {
-		debug('getMode()', boardData, typeof boardData);
+	async getMode(user, { id, users }, options = {}) {
+		debug('getMode()', id, typeof id);
 		debug('getMode()', users, typeof rules);
-		await validate(Validator.isUUID, boardData, 4);
+		await validate(Validator.isUUID, id, 4);
 		await validate(value => {
 			return validate.isArrayWith(value, Validator.isUUID, 4)
 			|| Validator.isUUID(value, 4);
@@ -316,7 +323,7 @@ export default new class BoardController {
 		const userPubIds = [].concat(users);
 		const boardData = await Boards.find({
 			where: {
-				id: boardData,
+				id,
 				AuthorId: user.id,
 			},
 			include: [
@@ -339,10 +346,10 @@ export default new class BoardController {
 			modes: boardData.PrivacySettings,
 		};
 	}
-	async setMode(user, { board, rule }, options = {}) {
-		debug('setMode()', board, typeof board);
+	async setMode(user, { id, rule }, options = {}) {
+		debug('setMode()', id, typeof id);
 		debug('setMode()', rule, typeof rule);
-		await validate(Validator.isUUID, board, 4);
+		await validate(Validator.isUUID, id, 4);
 		await validate(value => {
 			debug('setMode().validate', value);
 			return validate.isArrayWith(value, checkPermissionRule)
@@ -364,7 +371,7 @@ export default new class BoardController {
 			});
 			const boardData = await Boards.find({
 				where: {
-					id: board,
+					id,
 					$or: [
 						{ AuthorId: user.id },
 						{
@@ -388,7 +395,7 @@ export default new class BoardController {
 				}
 				const [rule, created] = await BoardPrivacySettings.findOrCreate({
 					where: {
-						BoardId: board,
+						BoardId: id,
 						roleId: rules[i].user,
 					},
 					defaults: {
@@ -405,7 +412,7 @@ export default new class BoardController {
 			for (let i = 0; i < deleteRules.length; ++i) {
 				await BoardPrivacySettings.destroy({
 					where: {
-						BoardId: board,
+						BoardId: id,
 						roleId: {
 							$in: deleteRules.map(rule => rule.user),
 						}
@@ -474,10 +481,10 @@ export default new class BoardController {
 			throw e;
 		}
 	}
-	async sort(user, { board, priority }, options = {}) {
-		debug('sort()', board, typeof board);
+	async sort(user, { id, priority }, options = {}) {
+		debug('sort()', id, typeof id);
 		debug('sort()', priority, typeof priority);
-		await validate(Validator.isUUID, board, 4);
+		await validate(Validator.isUUID, id, 4);
 		await validate(value => {
 			return !Number.isNaN(value) && value >= VALID_PRIORITY_MIN;
 		}, priority);
@@ -487,7 +494,7 @@ export default new class BoardController {
 		try {
 			const permissions = await BoardPrivacySettings.count({
 				where: {
-					BoardId: board,
+					BoardId: id,
 					roleId: user.PublisherId
 				},
 				defaults: {
@@ -500,7 +507,7 @@ export default new class BoardController {
 			}
 			const [sort, created] = await BoardSorts.findOrCreate({
 				where: {
-					BoardId: board,
+					BoardId: id,
 					UserId: user.id
 				},
 				transaction
