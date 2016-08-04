@@ -1,11 +1,10 @@
 import Sequelize from 'sequelize';
 import Validator from 'validator';
-import flatMap from 'lodash/flatMap';
 import validate from './validation';
 import { Boards, BoardSorts, BoardPrivacySettings } from '../data/schema/board';
 import sequelize from '../data/sequelize';
+import { beginTransaction, commit, rollback } from './helpers';
 
-const IS_DEBUG = process.env.NODE_ENV !== 'production';
 const debug = require('debug')('app.BoardController');
 
 const VALID_NAME_MAX = 140;
@@ -30,7 +29,7 @@ const MODE = BoardPrivacySettings.Mode;
 
 export default new class BoardController {
 	Mode = MODE;
-	async havePermission(user, id, mode, options = {}) {
+	async test(user, id, mode, options = {}) {
 		debug('can()', user.id, id, mode);
 		await validate(Validator.isUUID, id, 4);
 		await validate(checkPermissionValue, mode);
@@ -46,7 +45,6 @@ export default new class BoardController {
 				},
 				mode: Sequelize.where(Sequelize.literal(`mode & ${mode}`), mode),
 			},
-			benchmark: IS_DEBUG,
 			transaction: options.transaction
 		});
 		return count === 1;
@@ -55,7 +53,7 @@ export default new class BoardController {
 		debug('get()', 'id', id, typeof id);
 		await validate(Validator.isUUID, id, 4);
 		await validate(() => {
-			return this.havePermission(user, id, MODE.READ, options);
+			return this.test(user, id, MODE.READ, options);
 		});
 
 		return Boards.findById(id);
@@ -124,14 +122,10 @@ export default new class BoardController {
 					);
 				}
 			}
-			if (!options.transaction) {
-				await transaction.commit();
-			}
+
+			await commit(transaction, options);
 		} catch (e) {
-			//debug('all()', e);
-			if (!options.transaction) {
-				await transaction.rollback();
-			}
+			await rollback(transaction, options);
 			throw e;
 		}
 
@@ -219,18 +213,13 @@ export default new class BoardController {
 					}
 				],
 			});
-			if (!options.transaction) {
-				await transaction.commit();
-			}
+			await commit(transaction, options);
 			return {
 				...board.toJSON(),
 				priority: board.BoardSorts[0].priority,
 			};
 		} catch (e) {
-			//debug(e);
-			if (!options.transaction) {
-				await transaction.rollback();
-			}
+			await rollback(transaction, options);
 			throw e;
 		}
 	}
@@ -279,7 +268,6 @@ export default new class BoardController {
 				transaction: options.transaction
 			});
 		} catch (e) {
-			//debug('update()', e);
 			throw e;
 		}
 	}
@@ -300,15 +288,10 @@ export default new class BoardController {
 			if (rows !== 1) {
 				throw new Error('permission error');
 			}
-			if (!options.transaction) {
-				await transaction.commit();
-			}
+			await commit(transaction, options);
 			return true;
 		} catch (e) {
-			//debug(e);
-			if (!options.transaction) {
-				await transaction.rollback();
-			}
+			await rollback(transaction, options);
 			throw e;
 		}
 	}
@@ -420,15 +403,10 @@ export default new class BoardController {
 					transaction
 				});
 			}
-			if (!options.transaction) {
-				await transaction.commit();
-			}
+			await commit(transaction, options);
 			return;
 		} catch (e) {
-			//debug('share()', e);
-			if (!options.transaction) {
-				await transaction.rollback();
-			}
+			await rollback(transaction, options);
 			throw e;
 		}
 	}
@@ -459,8 +437,8 @@ export default new class BoardController {
 			.split(/;/g)
 			.map(query => query.trim())
 			.filter(query => query.length > 0);
-		const transaction = await beginTransaction(options);
 
+		const transaction = await beginTransaction(options);
 		try {
 			for (let i = 0; i < queries.length; ++i) {
 				await sequelize.query(queries[i], {
@@ -470,14 +448,10 @@ export default new class BoardController {
 					transaction,
 				});
 			}
-			if (!options.transaction) {
-				await transaction.commit();
-			}
+			await commit(transaction, options);
 			return;
 		} catch (e) {
-			if (!options.transaction) {
-				await transaction.rollback();
-			}
+			await rollback(transaction, options);
 			throw e;
 		}
 	}
@@ -503,7 +477,7 @@ export default new class BoardController {
 				transaction,
 			});
 			if (permissions === 0) {
-				throw new Error('invalid parameter');
+				throw new Error('permission error');
 			}
 			const [sort, created] = await BoardSorts.findOrCreate({
 				where: {
@@ -532,24 +506,14 @@ export default new class BoardController {
 				});
 				renumber = true;
 			}
-			if (!options.transaction) {
-				await transaction.commit();
-			}
+			await commit(transaction, options);
 			return {
 				priority,
 				renumber,
 			};
 		} catch (e) {
-			if (!options.transaction) {
-				await transaction.rollback();
-			}
+			await rollback(transaction, options);
 			throw e;
 		}
 	}
 };
-
-function beginTransaction(opt) {
-	debug(opt.transaction
-		? 'use extern transaction' : 'use internal transaction');
-	return opt.transaction || sequelize.transaction();
-}

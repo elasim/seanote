@@ -72,7 +72,7 @@ describe('Board Controller', () => {
 							mode: BoardController.Mode.READ
 						}],
 					});
-					const canRead = await BoardController.havePermission(
+					const canRead = await BoardController.test(
 						user2,
 						sharedItemId,
 						BoardController.Mode.READ);
@@ -85,24 +85,16 @@ describe('Board Controller', () => {
 		);
 		it('throws permission error when user granting permission \n'
 			+ '\t which does not have ownership',
-			async (done) => {
-				try {
-					const boards = await user2.getBoards();
-					await BoardController.setMode(user1, {
-						id: boards[0].id,
-						rule: {
-							user: user3.PublisherId,
-							mode: BoardController.Mode.READ,
-						},
-					});
-					done(new Error('permission error not thrown'));
-				} catch (e) {
-					if (!/permission error/.test(e.message)) {
-						done(e);
-					} else {
-						done();
-					}
-				}
+			async () => {
+				const boards = await user2.getBoards();
+				const chmod = BoardController.setMode(user1, {
+					id: boards[0].id,
+					rule: {
+						user: user3.PublisherId,
+						mode: BoardController.Mode.READ,
+					},
+				});
+				return assert.isRejected(chmod, /permission error/);
 			}
 		);
 		it('mode 0 must have to delete rule on database',
@@ -266,20 +258,12 @@ describe('Board Controller', () => {
 		);
 		it('throws permission error when user deleting board \n'
 			+ '\t which does not have ownership',
-			async (done) => {
-				try {
-					const boards = await user2.getBoards();
-					await BoardController.delete(user1, {
-						id: boards[0].id
-					});
-					done(new Error('permission error not thrown'));
-				} catch (e) {
-					if (!/permission error/.test(e.message)) {
-						done(e);
-					} else {
-						done();
-					}
-				}
+			async () => {
+				const boards = await user2.getBoards();
+				const deletion = BoardController.delete(user1, {
+					id: boards[0].id
+				});
+				assert.isRejected(deletion, /permission error/);
 			}
 		);
 	});
@@ -304,22 +288,14 @@ describe('Board Controller', () => {
 		);
 		it('throws permission error If user trying to update board\n'
 			+ '\t which does not have permission',
-			async (done) => {
-				try {
-					const boards = await user2.getBoards();
-					await BoardController.update(user1, {
-						id: boards[0].id,
-						name: 'user not have write permission',
-						isPublic: 0,
-					});
-					done(new Error('permission error not thrown'));
-				} catch (e) {
-					if (!/permission error/.test(e.message)) {
-						done(e);
-					} else {
-						done();
-					}
-				}
+			async () => {
+				const boards = await user2.getBoards();
+				const update = BoardController.update(user1, {
+					id: boards[0].id,
+					name: 'user not have write permission',
+					isPublic: 0,
+				});
+				return assert.isRejected(update, /permission error/);
 			}
 		);
 	});
@@ -390,21 +366,13 @@ describe('Board Controller', () => {
 			}
 		);
 		it('throws invalid parameter error if user does not have any permission',
-			async (done) => {
-				try {
-					const boards = await BoardController.all(user2, {});
-					await BoardController.sort(user1, {
-						id: boards.items[0].id,
-						priority: 11.0,
-					});
-					done(new Error('permission error not thrown'));
-				} catch (e) {
-					if (!/invalid parameter/.test(e.message)) {
-						done(e);
-					} else {
-						done();
-					}
-				}
+			async () => {
+				const boards = await BoardController.all(user2, {});
+				const sort = BoardController.sort(user1, {
+					id: boards.items[0].id,
+					priority: 11.0,
+				});
+				return assert.isRejected(sort, /permission error/);
 			}
 		);
 	});
