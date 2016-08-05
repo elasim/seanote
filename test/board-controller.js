@@ -63,7 +63,7 @@ describe('Board Controller', () => {
 		it('grant read permission to another your',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1, {});
+					const boards = await BoardController.all(user1);
 					const sharedItemId = boards.items[0].id;
 					await BoardController.setMode(user1, {
 						id: sharedItemId,
@@ -146,7 +146,7 @@ describe('Board Controller', () => {
 		it('user must have permission or ownership for all retrieved items',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1, {});
+					const boards = await BoardController.all(user1);
 					boards.items.forEach(item => {
 						assert(item.permissions.mode > 0 || item.AuthorId === user1.id);
 					});
@@ -159,7 +159,7 @@ describe('Board Controller', () => {
 		it('all retrieved items must be ordered by priority',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1, {});
+					const boards = await BoardController.all(user1);
 					let last = 0;
 					boards.items.forEach(item => {
 						assert(item.priority > last);
@@ -174,7 +174,7 @@ describe('Board Controller', () => {
 		it('all retrieved items should have to contain all those properties',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1, {});
+					const boards = await BoardController.all(user1);
 
 					for (let i = 0; i < boards.items.length; ++i) {
 						const item =boards.items[i];
@@ -217,7 +217,7 @@ describe('Board Controller', () => {
 			+'\t last priority values, If it contains last item.',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1, {});
+					const boards = await BoardController.all(user1);
 					assert.equal(boards.items[5].priority, 6);
 					assert.equal(boards.next, 7);
 					done();
@@ -328,7 +328,7 @@ describe('Board Controller', () => {
 		it('set new priority',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1, {});
+					const boards = await BoardController.all(user1);
 					const result = await BoardController.sort(user1, {
 						id: boards.items[0].id,
 						value: 11.0,
@@ -367,7 +367,7 @@ describe('Board Controller', () => {
 		);
 		it('throws invalid parameter error if user does not have any permission',
 			async () => {
-				const boards = await BoardController.all(user2, {});
+				const boards = await BoardController.all(user2);
 				const sort = BoardController.sort(user1, {
 					id: boards.items[0].id,
 					value: 11.0,

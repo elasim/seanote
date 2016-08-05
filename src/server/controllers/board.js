@@ -2,7 +2,7 @@ import Sequelize from 'sequelize';
 import Validator from 'validator';
 import validate from './validation';
 import isUndefined from 'lodash/isUndefined';
-import { $or, $not, $bindRight } from '../lib/functional';
+import { $or, $bindRight } from '../lib/functional';
 import { Boards, BoardSorts, BoardPrivacySettings } from '../data/schema/board';
 import sequelize from '../data/sequelize';
 import { beginTransaction, commit, rollback } from './helpers';
@@ -60,7 +60,7 @@ export default new class BoardController {
 
 		return Boards.findById(id);
 	}
-	async all(user, { offset=0, limit=10 }, options = {}) {
+	async all(user, { offset=0, limit=10 }={}, options = {}) {
 		debug('all()', 'offset', offset, typeof offset);
 		debug('all()', 'limit', limit, typeof limit);
 		await validate(value => value >= 0, offset);
@@ -226,7 +226,7 @@ export default new class BoardController {
 		debug('update()', name, typeof name);
 		debug('update()', isPublic, typeof isPublic);
 		await validate($or(
-			$not(isUndefined),
+			isUndefined,
 			$bindRight(Validator.isLength, {
 				min: 1,
 				max: VALID_NAME_MAX
@@ -500,13 +500,13 @@ export default new class BoardController {
 				renumber = true;
 			}
 			await commit(transaction, options);
-			return {
-				priority: value,
-				renumber,
-			};
 		} catch (e) {
 			await rollback(transaction, options);
 			throw e;
 		}
+		return {
+			priority: value,
+			renumber,
+		};
 	}
 };

@@ -31,8 +31,11 @@ export const BoardSorts = sequelize.define('BoardSort', {
 });
 
 const MODE = {
+	// board (share, delete)
 	EXECUTE: 1,
+	// list,card (create, update, delete, sort, renumber)
 	WRITE: 2,
+	// board,list,card (read, all)
 	READ: 4,
 	ALL: 7,
 };
