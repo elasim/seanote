@@ -21,12 +21,12 @@
 	],
 	"rules": {
 		"indent": [
-			"error",
+			2,
 			"tab",
 			{ "SwitchCase": 1 }
 		],
-		"quotes": ["error", "single"],
-		"semi": ["error",	"always"],
+		"quotes": [2, "single"],
+		"semi": [2,	"always"],
 		"comma-dangle": 0,
 		"no-console": 1,
 		"no-constant-condition": 1,
