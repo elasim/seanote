@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { Strategy } from 'passport-local';
-import UserController from '../../controllers/user';
+import User from '../../models/user';
 import router from './router';
 import { loginWithPassport } from './auth-passport';
 
@@ -17,9 +17,9 @@ passport.use(new Strategy({
 }, async (email, password, done) => {
 	try {
 		// I used email as login name for local-strategy
-		const user = await UserController.getByLogin(email.trim(), password);
+		const user = await User.getByLogin(email.trim(), password);
 		if (!user) {
-			const user = await UserController.createWithLogin(email.trim(), password);
+			const user = await User.createWithLogin(email.trim(), password);
 			done(null, user);
 		} else {
 			done(null, user);

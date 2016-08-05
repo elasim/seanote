@@ -7,12 +7,12 @@ import { Lists } from '../data/schema/list';
 import { Users, UserClaims, UserLogins, UserProfiles } from '../data/schema/user';
 import Validator from 'validator';
 import validate from './validation';
-import boardCtrl from './board';
+import Board from './board';
 import UserDataTemplate from './user.template';
 
-const debug = require('debug')('app.UserController');
+const debug = require('debug')('app.model.User');
 
-export default new class UserController {
+export default new class User {
 	getHash(key, salt) {
 		const hasher = crypto.createHash('sha256');
 		hasher.update(key);
@@ -112,7 +112,7 @@ async function createUserData(t, profiles, template) {
 	});
 	for (let i = 0; i < template.board.length; ++i) {
 		const { list, ...props } = template.board[i];
-		await boardCtrl.create(user, {
+		await Board.create(user, {
 			name: props.name,
 			isPublic: 0,
 			Lists: list.map((listTemplate, listTemplateIndex) => {

@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { OAuth2Strategy as Strategy } from 'passport-google-oauth';
-import UserController from '../../controllers/user';
+import User from '../../models/user';
 import router from './router';
 import { loginWithPassport } from './auth-passport';
 import config from '../../lib/config';
@@ -27,9 +27,9 @@ passport.use(new Strategy(
 	config.auth.google,
 	async (accessToken, refreshToken, profiles, done) => {
 		try {
-			const user = await UserController.getByClaim('goobal', profiles.id);
+			const user = await User.getByClaim('goobal', profiles.id);
 			if (!user) {
-				const user = await UserController.createWithClaim(
+				const user = await User.createWithClaim(
 					'google',
 					profiles.id,
 					{

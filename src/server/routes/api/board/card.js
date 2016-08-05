@@ -1,4 +1,4 @@
-import CardController from '../../../controllers/card';
+import Card from '../../../models/card';
 import isUndefined from 'lodash/isUndefined';
 import isNaN from 'lodash/isNaN';
 import { assignWith, $not, $select, $selects } from '../utils/functional';
@@ -31,11 +31,11 @@ const selectList = $select({
 const selectListAndId = $selects(selectId, selectList);
 
 function findAll(req) {
-	return CardController.all(req.user.db, selectList(req));
+	return Card.all(req.user.db, selectList(req));
 }
 
 function create(req) {
-	return CardController.create(req.user.db, {
+	return Card.create(req.user.db, {
 		...selectList(req),
 		type: req.body.type,
 		value: req.body.value
@@ -43,26 +43,26 @@ function create(req) {
 }
 
 function renumber(req) {
-	return CardController.renumber(req.user.db, selectList(req));
+	return Card.renumber(req.user.db, selectList(req));
 }
 
 function get(req) {
-	return CardController.get(req.user.db, selectListAndId(req));
+	return Card.get(req.user.db, selectListAndId(req));
 }
 
 function update(req) {
 	const params = selectListAndId(req);
 	assignWith(params, 'type', req.body.type, $not(isUndefined));
 	assignWith(params, 'value', req.body.value, $not(isNaN));
-	return CardController.update(req.user.db, params);
+	return Card.update(req.user.db, params);
 }
 
 function delete_(req) {
-	return CardController.delete(req.user.db, selectListAndId(req));
+	return Card.delete(req.user.db, selectListAndId(req));
 }
 
 function sort(req) {
-	return CardController.sort(req.user.db, {
+	return Card.sort(req.user.db, {
 		...selectListAndId(req),
 		value: parseFloat(req.body.value),
 	});

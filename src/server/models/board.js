@@ -7,7 +7,7 @@ import { Boards, BoardSorts, BoardPrivacySettings } from '../data/schema/board';
 import sequelize from '../data/sequelize';
 import { beginTransaction, commit, rollback } from './helpers';
 
-const debug = require('debug')('app.BoardController');
+const debug = require('debug')('app.model.Board');
 
 const VALID_NAME_MAX = 140;
 const VALID_PRIORITY_MIN = Number.EPSILON * 1000;
@@ -29,7 +29,7 @@ function checkIsPublic(value) {
 
 const MODE = BoardPrivacySettings.Mode;
 
-export default new class BoardController {
+export default new class Board {
 	Mode = MODE;
 	async test(user, id, mode, options = {}) {
 		debug('can()', user.id, id, mode);
@@ -419,12 +419,12 @@ export default new class BoardController {
 				SELECT BoardId FROM ${TBL_BOARD_SORTS}
 					WHERE UserId=:UserId
 					ORDER BY priority;
-			UPDATE BoardSorts
+			UPDATE ${TBL_BOARD_SORTS}
 				SET priority=(
 					SELECT T.seq
 					FROM :UserId T
 					WHERE
-						T.id = BoardSorts.BoardId
+						T.id = ${TBL_BOARD_SORTS}.BoardId
 				)
 				WHERE
 					UserId=:UserId;

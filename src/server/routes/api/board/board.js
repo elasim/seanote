@@ -1,4 +1,4 @@
-import BoardController from '../../../controllers/board';
+import Board from '../../../models/board';
 import HttpError from '../utils/http-error';
 import { $select } from '../utils/functional';
 
@@ -30,29 +30,29 @@ const selectId = $select({
 });
 
 function findAll(req) {
-	return BoardController.all(req.user.db, {
+	return Board.all(req.user.db, {
 		offset: parseInt(req.query.offset, 10) || 0,
 		limit: parseInt(req.query.limit, 10) || 10,
 	});
 }
 
 function create(req) {
-	return BoardController.create(req.user.db, {
+	return Board.create(req.user.db, {
 		name: req.body.name,
 		isPublic: parseInt(req.body.public),
 	});
 }
 
 function renumber(req) {
-	return BoardController.renumber(req.user.db);
+	return Board.renumber(req.user.db);
 }
 
 function get(req) {
-	return BoardController.get(req.user.db, selectId(req));
+	return Board.get(req.user.db, selectId(req));
 }
 
 function update(req) {
-	return BoardController.update(req.user.db, {
+	return Board.update(req.user.db, {
 		...selectId(req),
 		name: req.body.name,
 		isPublic: parseInt(req.body.public)
@@ -60,11 +60,11 @@ function update(req) {
 }
 
 function delete_(req) {
-	return BoardController.delete(req.user.db, selectId(req));
+	return Board.delete(req.user.db, selectId(req));
 }
 
 function sort(req) {
-	return BoardController.sort(req.user.db, {
+	return Board.sort(req.user.db, {
 		...selectId(req),
 		value: parseFloat(req.body.value),
 	});
@@ -74,7 +74,7 @@ function getMode(req) {
 	const users = (req.query.users || req.user.db.PublisherId)
 		.split(/,/g)
 		.filter(x => x.length);
-	return BoardController.getMode(req.user.db, {
+	return Board.getMode(req.user.db, {
 		...selectId(req),
 		user: users,
 	});
@@ -94,7 +94,7 @@ function setMode(req) {
 				mode: parseInt(matched[2], 10),
 			};
 		});
-	return BoardController.setMode(req.user.db, {
+	return Board.setMode(req.user.db, {
 		...selectId(req),
 		rule: rules,
 	});

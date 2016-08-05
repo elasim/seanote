@@ -1,4 +1,3 @@
-import Sequelize from 'sequelize';
 import Validator from 'validator';
 import validate from './validation';
 import { assign, $bindRight, $or, $not } from '../lib/functional';
@@ -6,17 +5,17 @@ import isUndefined from 'lodash/isUndefined';
 import { Lists } from '../data/schema/list';
 import { Cards } from '../data/schema/card';
 import sequelize from '../data/sequelize';
-import BoardController from './board';
+import Board from './board';
 import { beginTransaction, commit, rollback, } from './helpers';
 
-const debug = require('debug')('app.ListController');
+const debug = require('debug')('app.model.List');
 
 const VALID_NAME_MAX = 140;
 const VALID_PRIORITY_MIN = Number.EPSILON * 1000;
 
-const MODE = BoardController.Mode;
+const MODE = Board.Mode;
 
-export default new class ListController {
+export default new class List {
 	async all(user, { board }, options = {}) {
 		debug('all(): %s %s', board, typeof board);
 		await validate(Validator.isUUID, board);
@@ -237,7 +236,7 @@ export default new class ListController {
 };
 
 async function test(user, board, mode, options) {
-	if (!await BoardController.test(user, board, mode, options)) {
+	if (!await Board.test(user, board, mode, options)) {
 		throw new Error('permission error');
 	}
 }

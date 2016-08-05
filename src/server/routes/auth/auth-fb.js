@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { Strategy } from 'passport-facebook';
-import UserController from '../../controllers/user';
+import User from '../../models/user';
 import router from './router';
 import { loginWithPassport } from './auth-passport';
 import config from '../../lib/config';
@@ -18,10 +18,10 @@ passport.use(new Strategy(
 	config.auth.facebook,
 	async (accessToken, refreshToken, profiles, done) => {
 		try {
-			const user = await UserController.getByClaim('facebook', profiles.id);
+			const user = await User.getByClaim('facebook', profiles.id);
 			if (!user) {
 				debug('create new user with facebook claim: ', profiles.id);
-				const user = await UserController.createWithClaim(
+				const user = await User.createWithClaim(
 					'facebook',
 					profiles.id,
 					{

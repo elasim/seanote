@@ -1,6 +1,6 @@
 import sequelize from '../data/sequelize';
 
-const debug = require('debug')('app.controllers.helper');
+const debug = require('debug')('app.model.helper');
 
 export function commit(t, opt) {
 	return opt.transaction ? null : t.commit();

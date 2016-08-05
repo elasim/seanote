@@ -12,20 +12,20 @@ config.sequelize.logging = false;
 // Prevent of Hositing
 const sequelize = require('../src/server/data/sequelize').default;
 const { Boards, BoardPrivacySettings } = require('../src/server/data');
-const UserController = require('../src/server/controllers/user').default;
-const BoardController = require('../src/server/controllers/board').default;
+const User = require('../src/server/models/user').default;
+const Board = require('../src/server/models/board').default;
 
 /* globals describe, before, it */
-describe('Board Controller', () => {
+describe('Board', () => {
 	let user1, user2, user3;
 
 	before('prepare fixtures', async function (done) {
 		this.timeout(0);
 		try {
 			await sequelize.sync({ force: true });
-			user1 = await UserController.createWithLogin('test1', 'test1');
-			user2 = await UserController.createWithLogin('test2', 'test2');
-			user3 = await UserController.createWithLogin('test3', 'test3');
+			user1 = await User.createWithLogin('test1', 'test1');
+			user2 = await User.createWithLogin('test2', 'test2');
+			user3 = await User.createWithLogin('test3', 'test3');
 			const count = await Boards.count();
 			assert.equal(count, 9);
 			done();
@@ -37,15 +37,15 @@ describe('Board Controller', () => {
 	describe('create()', () => {
 		it('created items priority must be sequential value', async (done) => {
 			try {
-				const a = await BoardController.create(user1, {
+				const a = await Board.create(user1, {
 					name: 'Test Board',
 					isPublic: 0
 				});
-				const b = await BoardController.create(user1, {
+				const b = await Board.create(user1, {
 					name: 'Test Board',
 					isPublic: 0
 				});
-				const c = await BoardController.create(user1, {
+				const c = await Board.create(user1, {
 					name: 'Test Board',
 					isPublic: 0
 				});
@@ -63,19 +63,19 @@ describe('Board Controller', () => {
 		it('grant read permission to another your',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1);
+					const boards = await Board.all(user1);
 					const sharedItemId = boards.items[0].id;
-					await BoardController.setMode(user1, {
+					await Board.setMode(user1, {
 						id: sharedItemId,
 						rule: [{
 							user: user2.PublisherId,
-							mode: BoardController.Mode.READ
+							mode: Board.Mode.READ
 						}],
 					});
-					const canRead = await BoardController.test(
+					const canRead = await Board.test(
 						user2,
 						sharedItemId,
-						BoardController.Mode.READ);
+						Board.Mode.READ);
 					assert(canRead);
 					done();
 				} catch (e) {
@@ -87,11 +87,11 @@ describe('Board Controller', () => {
 			+ '\t which does not have ownership',
 			async () => {
 				const boards = await user2.getBoards();
-				const chmod = BoardController.setMode(user1, {
+				const chmod = Board.setMode(user1, {
 					id: boards[0].id,
 					rule: {
 						user: user3.PublisherId,
-						mode: BoardController.Mode.READ,
+						mode: Board.Mode.READ,
 					},
 				});
 				return assert.isRejected(chmod, /permission error/);
@@ -102,7 +102,7 @@ describe('Board Controller', () => {
 				const transaction = await sequelize.transaction();
 				try {
 					const boards = await user3.getBoards();
-					await BoardController.setMode(user3, {
+					await Board.setMode(user3, {
 						id: boards[0].id,
 						rule: {
 							user: user1.PublisherId,
@@ -117,7 +117,7 @@ describe('Board Controller', () => {
 						transaction
 					});
 					assert(before !== null);
-					await BoardController.setMode(user3, {
+					await Board.setMode(user3, {
 						id: boards[0].id,
 						rule: {
 							user: user1.PublisherId,
@@ -146,7 +146,7 @@ describe('Board Controller', () => {
 		it('user must have permission or ownership for all retrieved items',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1);
+					const boards = await Board.all(user1);
 					boards.items.forEach(item => {
 						assert(item.permissions.mode > 0 || item.AuthorId === user1.id);
 					});
@@ -159,7 +159,7 @@ describe('Board Controller', () => {
 		it('all retrieved items must be ordered by priority',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1);
+					const boards = await Board.all(user1);
 					let last = 0;
 					boards.items.forEach(item => {
 						assert(item.priority > last);
@@ -174,7 +174,7 @@ describe('Board Controller', () => {
 		it('all retrieved items should have to contain all those properties',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1);
+					const boards = await Board.all(user1);
 
 					for (let i = 0; i < boards.items.length; ++i) {
 						const item =boards.items[i];
@@ -203,7 +203,7 @@ describe('Board Controller', () => {
 		it('when retrieving at offset 0, previous value must be 0',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1, {
+					const boards = await Board.all(user1, {
 						offset: 0,
 					});
 					assert.equal(boards.prev, 0);
@@ -217,7 +217,7 @@ describe('Board Controller', () => {
 			+'\t last priority values, If it contains last item.',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1);
+					const boards = await Board.all(user1);
 					assert.equal(boards.items[5].priority, 6);
 					assert.equal(boards.next, 7);
 					done();
@@ -229,7 +229,7 @@ describe('Board Controller', () => {
 		it('specific number of item must be retrived If limit value provided',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1, {
+					const boards = await Board.all(user1, {
 						limit: 3,
 					});
 					assert.equal(boards.items.length, 3);
@@ -246,7 +246,7 @@ describe('Board Controller', () => {
 			async (done) => {
 				try {
 					const boards = await user1.getBoards();
-					await BoardController.delete(user1, {
+					await Board.delete(user1, {
 						id: boards[3].id
 					});
 					assert.ok(1);
@@ -260,7 +260,7 @@ describe('Board Controller', () => {
 			+ '\t which does not have ownership',
 			async () => {
 				const boards = await user2.getBoards();
-				const deletion = BoardController.delete(user1, {
+				const deletion = Board.delete(user1, {
 					id: boards[0].id
 				});
 				assert.isRejected(deletion, /permission error/);
@@ -273,7 +273,7 @@ describe('Board Controller', () => {
 			async (done) => {
 				try {
 					const boards = await user1.getBoards();
-					const result = await BoardController.update(user1, {
+					const result = await Board.update(user1, {
 						id: boards[0].id,
 						name: 'user have write permission',
 						isPublic: 1,
@@ -290,7 +290,7 @@ describe('Board Controller', () => {
 			+ '\t which does not have permission',
 			async () => {
 				const boards = await user2.getBoards();
-				const update = BoardController.update(user1, {
+				const update = Board.update(user1, {
 					id: boards[0].id,
 					name: 'user not have write permission',
 					isPublic: 0,
@@ -307,12 +307,12 @@ describe('Board Controller', () => {
 				const transaction = await sequelize.transaction();
 				const t = { transaction };
 				try {
-					const before = await BoardController.all(user1, {}, t);
-					const result = await BoardController.sort(user1, {
+					const before = await Board.all(user1, {}, t);
+					const result = await Board.sort(user1, {
 						id: before.items[0].id,
 						value: before.items[1].priority,
 					}, t);
-					const after = await BoardController.all(user1, {}, t);
+					const after = await Board.all(user1, {}, t);
 					assert(result.renumber);
 					after.items.forEach((item, index) => {
 						assert.equal(item.priority, index + 1);
@@ -328,8 +328,8 @@ describe('Board Controller', () => {
 		it('set new priority',
 			async (done) => {
 				try {
-					const boards = await BoardController.all(user1);
-					const result = await BoardController.sort(user1, {
+					const boards = await Board.all(user1);
+					const result = await Board.sort(user1, {
 						id: boards.items[0].id,
 						value: 11.0,
 					});
@@ -345,15 +345,15 @@ describe('Board Controller', () => {
 				const transaction = await sequelize.transaction();
 				const t = { transaction };
 				try {
-					const boards = await BoardController.all(user2, {}, t);
-					await BoardController.setMode(user2, {
+					const boards = await Board.all(user2, {}, t);
+					await Board.setMode(user2, {
 						id: boards.items[2].id,
 						rule: {
 							user: user1.PublisherId,
-							mode: BoardController.Mode.READ,
+							mode: Board.Mode.READ,
 						},
 					}, t);
-					await BoardController.sort(user1, {
+					await Board.sort(user1, {
 						id: boards.items[2].id,
 						value: 11.0,
 					}, t);
@@ -367,8 +367,8 @@ describe('Board Controller', () => {
 		);
 		it('throws invalid parameter error if user does not have any permission',
 			async () => {
-				const boards = await BoardController.all(user2);
-				const sort = BoardController.sort(user1, {
+				const boards = await Board.all(user2);
+				const sort = Board.sort(user1, {
 					id: boards.items[0].id,
 					value: 11.0,
 				});
@@ -384,13 +384,13 @@ describe('Board Controller', () => {
 				const transaction = await sequelize.transaction();
 				const t = { transaction };
 				try {
-					const before = await BoardController.all(user1, {}, t);
-					const result = await BoardController.sort(user1, {
+					const before = await Board.all(user1, {}, t);
+					const result = await Board.sort(user1, {
 						id: before.items[0].id,
 						value: 100,
 					}, t);
-					await BoardController.renumber(user1, t);
-					const after = await BoardController.all(user1, {}, t);
+					await Board.renumber(user1, t);
+					const after = await Board.all(user1, {}, t);
 					assert(result.renumber === false);
 					after.items.forEach((item, index) => {
 						assert.equal(item.priority, index + 1);
