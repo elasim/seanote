@@ -11,8 +11,7 @@ router.get('/logout', (req, res) => {
 	res.redirect('/');
 });
 router.get('/token', (req, res) => {
-	debug(req.session);
-	if (req.session && req.session.passport) {
+	if (req.session.passport && req.session.passport.user) {
 		res.json({
 			token: req.session.passport.user.token
 		});

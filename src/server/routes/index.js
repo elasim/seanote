@@ -19,10 +19,6 @@ router.get('/signin', redirectToDashboard);
 router.get('/setting', redirectToSignIn);
 router.get('/boards', redirectToSignIn);
 router.get('/boards/:id', redirectToSignIn);
-router.get('/logout', redirectToSignIn, (req, res) => {
-	req.logout();
-	res.redirect('/');
-});
 
 function redirectToDashboard(req, res, next) {
 	if (req.user) return res.redirect('/');

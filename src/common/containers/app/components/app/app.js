@@ -56,7 +56,7 @@ export default class App extends Component {
 					<List>
 						<Subheader>USER NAME</Subheader>
 						<ListItem primaryText="Setting"/>
-						<a href="/logout"><ListItem primaryText="Logout"/></a>
+						<a href="/auth/logout"><ListItem primaryText="Logout"/></a>
 						<Subheader>Developer</Subheader>
 						<ListItem primaryText="Prefetch" onClick={this.props.prefetch}/>
 						<Subheader>Supports</Subheader>
