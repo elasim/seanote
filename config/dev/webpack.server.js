@@ -14,8 +14,7 @@ module.exports = {
 		libraryTarget: 'commonjs2',
 	},
 	externals: [
-		//nodeExternals(),
-		/^[@a-z][a-z\/\.\-0-9]*$/i
+		nodeExternals(),
 	],
 	devtool: 'source-map',
 	debug: true,

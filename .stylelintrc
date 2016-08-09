@@ -1,6 +1,9 @@
 {
 	"extends": "stylelint-config-standard",
 	"rules": {
-		"indentation": "tab"
+		"indentation": "tab",
+		"selector-no-type": [true, {
+			ignore: ["compounded"]
+		}]
 	}
 }
