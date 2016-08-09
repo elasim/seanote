@@ -27,7 +27,7 @@ passport.use(new Strategy(
 	config.auth.google,
 	async (accessToken, refreshToken, profiles, done) => {
 		try {
-			const user = await User.getByClaim('goobal', profiles.id);
+			const user = await User.getByClaim('google', profiles.id);
 			if (!user) {
 				const user = await User.createWithClaim(
 					'google',
