@@ -35,10 +35,10 @@ export default class EditableContent extends Component {
 		const { style, className, value } = this.props;
 		const { editable } = this.state;
 		// @issue: (hotfix) prevent crash with ellipsis
-		const rootStyle = editable ? {
-			...style,
-			textOverflow: 'clip'
-		} : style;
+		const rootStyle = editable
+			? { ...style, textOverflow: 'clip' } : { ...style };
+		rootStyle.cursor = 'text';
+
 		return (
 			<div style={rootStyle} className={className}
 				dangerouslySetInnerHTML={{__html:value}}

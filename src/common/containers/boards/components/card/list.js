@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { Card, CardHeader, CardText } from 'material-ui/Card';
+import { Card, CardHeader, CardText, CardActions } from 'material-ui/Card';
 import isEqual from 'lodash/isEqual';
 import EditableContent from '../../../../components/editable-content';
 import Droppable from '../../../../components/dnd/droppable';
@@ -64,10 +64,12 @@ export default class CardList extends Component {
 									<EditableContent value={list.name} onChanged={this.onTextChange} />
 								</div>}
 							/>
-							<CardText>
+							<CardText style={{ paddingBottom: 0 }}>
 								<ol className={css.list}>{items}</ol>
-								<Input id={list.id} onMessage={this.dispatchMessage} />
 							</CardText>
+							<CardActions>
+								<Input id={list.id} onMessage={this.dispatchMessage} />
+							</CardActions>
 						</Card>
 						<Overlay active={overlay} />
 					</div>

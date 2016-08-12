@@ -43,7 +43,7 @@ export default class Board extends Component {
 		this.disposeDragHook();
 	}
 	render() {
-		const { className } = this.props;
+		const { className, lists } = this.props;
 		const { activeOverlay, frontOverlay } = this.state;
 		const rootClassName = cx(className, css.root, {
 			[css.full]: this.props.full
@@ -53,15 +53,18 @@ export default class Board extends Component {
 			[css.active]: activeOverlay
 		});
 		const items = this.renderItems();
+		const content = lists ? (
+			<Grid columnClassName={css.topic}>
+				{items}
+			</Grid>
+		) : 'Invalid Board';
 		return (
 			<Droppable
 				onDragOver={this.toggleOverlay}
 				onDragOut={this.toggleOverlay}
 				onDrop={this.onDrop} >
 				<div className={rootClassName}>
-					<Grid columnClassName={css.topic}>
-						{items}
-					</Grid>
+					{content}
 					<div className={overlayClassName} />
 				</div>
 			</Droppable>

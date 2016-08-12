@@ -21,7 +21,7 @@ export function sort(state, { payload: { source, a, b } }) {
 		return state;
 	}
 	const items = cloneDeep(state[source].items);
-	const dirty = { ...state.dirty };
+	const nextDirty = { ...state.dirty };
 
 	const oldIndex = items.findIndex(item => item.id === a);
 	const newIndex = items.findIndex(item => item.id === b);
@@ -31,14 +31,14 @@ export function sort(state, { payload: { source, a, b } }) {
 
 	item.priority = mean(items, newIndex, 0, items.length + 1);
 
-	dirty[a] = {
-		...dirty[a],
+	nextDirty[a] = {
+		...state.dirty[a],
 		priority: item.priority,
 	};
 
 	return {
 		...state,
-		dirty,
+		dirty: nextDirty,
 		[source]: {
 			...state[source],
 			items: items,

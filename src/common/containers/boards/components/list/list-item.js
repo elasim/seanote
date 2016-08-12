@@ -3,10 +3,10 @@ import isEqual from 'lodash/isEqual';
 import React, { PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
 import Link from 'react-router/lib/Link';
-import FontIcon from 'material-ui/FontIcon';
+import MenuItem from 'material-ui/MenuItem';
 import IconMenu from 'material-ui/IconMenu';
 import IconButton from 'material-ui/IconButton';
-import MenuItem from 'material-ui/MenuItem';
+import FontIcon from 'material-ui/FontIcon';
 import ComponentEx from '../../../../components/component';
 import EditableContent from '../../../../components/editable-content';
 import Droppable from '../../../../components/dnd/droppable';
@@ -18,6 +18,9 @@ import css from './list-item.scss';
 const EventTypes = {
 	DragOver: Symbol('BoardListItem.DragOver'),
 	TextChange: Symbol('BoardListItem.TextChange'),
+	DeleteMenuClick: Symbol('BoardListItem.DeleteMenuClick'),
+	ShareMenuClick: Symbol('BoardListItem.ShareMenuClick'),
+	SettingsMenuClick: Symbol('BoardListItem.SettingMenuClick'),
 };
 
 class NoteListItem extends ComponentEx {
@@ -38,12 +41,14 @@ class NoteListItem extends ComponentEx {
 		};
 		this.onDragOver = ::this.onDragOver;
 		this.onTextChanged = ::this.onTextChanged;
+		this.onSettingMenuClick = ::this.onSettingMenuClick;
+		this.onDeleteMenuClick = ::this.onDeleteMenuClick;
+		this.onShareMenuClick = ::this.onShareMenuClick;
 	}
 	componentDidMount() {
 		const { width, height } = this.state;
 		const rect = findDOMNode(this).getBoundingClientRect();
 		if (rect.width !== width || rect.height !== height) {
-			console.log('update preview window');
 			this.setState({
 				width: rect.width,
 				height: rect.height,
@@ -80,21 +85,29 @@ class NoteListItem extends ComponentEx {
 				<FontIcon className="material-icons">&#xE5D4;</FontIcon>
 			</IconButton>
 		);
+		const menuStyle = {
+			cursor: 'pointer'
+		};
 		return (
+			<Droppable onDragOver={this.onDragOver}>
 				<div style={style} className={rootClassName}>
-					<Droppable onDragOver={this.onDragOver}>
-						<Draggable data={data} preview={preview} type="board">
-							<div className={css.handle}>
-								<FontIcon className="material-icons">&#xE25D;</FontIcon>
-							</div>
-						</Draggable>
-					</Droppable>
+					<Draggable data={data} preview={preview} type="board">
+						<div className={css.handle}>
+							<FontIcon className="material-icons">&#xE25D;</FontIcon>
+						</div>
+					</Draggable>
 					<div className={css.menu}>
 						<IconMenu iconButtonElement={iconButtonElement}
 							useLayerForClickAway={true}>
-							<MenuItem style={{ WebkitAppearance: 'none' }}>Setting</MenuItem>
-							<MenuItem style={{ WebkitAppearance: 'none' }}>Share</MenuItem>
-							<MenuItem style={{ WebkitAppearance: 'none' }}>Delete</MenuItem>
+							<MenuItem style={menuStyle} onClick={this.onSettingMenuClick}>
+								Setting
+							</MenuItem>
+							<MenuItem style={menuStyle} onClick={this.onShareMenuClick}>
+								Share
+							</MenuItem>
+							<MenuItem style={menuStyle} onClick={this.onDeleteMenuClick}>
+								Delete
+							</MenuItem>
 						</IconMenu>
 					</div>
 					<Link to={`/boards/${data.id}`}>
@@ -105,7 +118,23 @@ class NoteListItem extends ComponentEx {
 						</p>
 					</Link>
 				</div>
+			</Droppable>
 		);
+	}
+	onShareMenuClick() {
+		this.sendMessage(EventTypes.ShareMenuClick, {
+			id: this.props.data.id
+		});
+	}
+	onDeleteMenuClick() {
+		this.sendMessage(EventTypes.DeleteMenuClick, {
+			id: this.props.data.id
+		});
+	}
+	onSettingMenuClick() {
+		this.sendMessage(EventTypes.SettingMenuClick, {
+			id: this.props.data.id
+		});
 	}
 	onDragOver(event, descriptor) {
 		this.sendMessage(EventTypes.DragOver, {

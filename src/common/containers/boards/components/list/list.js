@@ -10,6 +10,9 @@ const EventTypes = {
 	DragOver: Symbol('BoardList.DragOver'),
 	Drop: Symbol('BoardList.Drop'),
 	TextChange: Symbol('BoardList.TextChange'),
+	Delete: Symbol('BoardList.Delete'),
+	Share: Symbol('BoardList.Share'),
+	Setting: Symbol('BoardList.Setting'),
 };
 
 @pure
@@ -47,6 +50,15 @@ class BoardList extends ComponentEx {
 			}
 			case ListItem.EventTypes.TextChange: {
 				return EventTypes.TextChange;
+			}
+			case ListItem.EventTypes.DeleteMenuClick: {
+				return EventTypes.Delete;
+			}
+			case ListItem.EventTypes.ShareMenuClick: {
+				return EventTypes.Share;
+			}
+			case ListItem.EventTypes.SettingsMenuClick: {
+				return EventTypes.Setting;
 			}
 		}
 	}

@@ -13,6 +13,27 @@ import Board from './components/boards';
 
 const debug = require('debug')('App.Component.BoardContainer');
 
+class BoardContainer extends Component {
+	static childContextTypes = {
+		board: PropTypes.object,
+		list: PropTypes.object,
+		card: PropTypes.object,
+	};
+	getChildContext() {
+		return {
+			board: this.props.boardActions,
+			list: this.props.listActions,
+			card: this.props.cardActions,
+		};
+	}
+	render() {
+		return <Board {...this.props} />;
+	}
+	onDimChanged(dim) {
+		this.props.setDim(dim);
+	}
+}
+
 const getLists = (state, props) => state.list[props.params.id];
 const getCards = (state) => state.card;
 
@@ -34,50 +55,6 @@ const selectCards = createSelector(
 		}));
 	});
 
-
-class BoardContainer extends Component {
-	static childContextTypes = {
-		board: PropTypes.object,
-		list: PropTypes.object,
-		card: PropTypes.object,
-	};
-	// static reduxAsyncConnect(params, store, helpers) {
-	// 	debug('reduxAsyncConnect');
-	// }
-	getChildContext() {
-		return {
-			board: this.props.boardActions,
-			list: this.props.listActions,
-			card: this.props.cardActions,
-		};
-	}
-	render() {
-		return <Board {...this.props} />;
-	}
-	onDimChanged(dim) {
-		this.props.setDim(dim);
-	}
-}
-
-export default compose(
-	// connect(mapStateToProps, mapDispatchToProps),
-	asyncConnect([
-		{
-			key: 'fetch',
-			promise: async (params)  => {
-				debug('Promise?', params);
-				if (params.params.id) {
-					const a = ListActions.load(params.params.id);
-					const { getState, dispatch } = params.store;
-					debug('Run Action');
-					await a(dispatch, getState);
-				}
-			}
-		},
-	], mapStateToProps, mapDispatchToProps),
-	injectHammer(),
-)(BoardContainer);
-
 function mapStateToProps(state, props) {
 	return {
 		headerVisibility: state.app.headerVisibility,
@@ -95,3 +72,21 @@ function mapDispatchToProps(dispatch) {
 		cardActions: bindActionCreators(CardActions, dispatch),
 	};
 }
+
+export default compose(
+	asyncConnect([
+		{
+			key: 'Board.ViewData',
+			promise: async (params)  => {
+				if (params.params.id) {
+					const command = ListActions.load(params.params.id);
+					const { getState, dispatch } = params.store;
+					debug('Run Action');
+					await command(dispatch, getState);
+				}
+			}
+		},
+	]),
+	connect(mapStateToProps, mapDispatchToProps),
+	injectHammer(),
+)(BoardContainer);

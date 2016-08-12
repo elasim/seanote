@@ -19,14 +19,22 @@ export default {
 		return {
 			url: `${base}?${q}`,
 			method: 'get',
-			token
+			token,
 		};
 	},
 	find(token, id) {
 		
 	},
 	create(token, id, { name, isPublic }) {
-
+		return {
+			url: `${base}`,
+			method: 'put',
+			body: {
+				name,
+				public: isPublic ? 1 : 0,
+			},
+			token,
+		};
 	},
 	update(token, id, { name, isPublic }) {
 		return deferredSelectLast({
@@ -34,13 +42,17 @@ export default {
 			method: 'post',
 			body: {
 				name,
-				public: isPublic ? 1 : 0
+				public: isPublic ? 1 : 0,
 			},
 			token,
 		});
 	},
-	delete(token, id) {
-
+	remove(token, id) {
+		return {
+			url: `${base}/${id}`,
+			method: 'delete',
+			token
+		};
 	},
 	renumber(token) {
 		return deferredSelectFirst({
@@ -49,7 +61,7 @@ export default {
 			token,
 		});
 	},
-	sort(id, value, token) {
+	sort(token, id, { value }) {
 		return deferredSelectLast({
 			url: `${base}/${id}/_sort`,
 			method: 'post',

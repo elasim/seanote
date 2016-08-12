@@ -18,7 +18,8 @@ export default {
 		delete: delete_,
 	},
 	'/:list/_sort': {
-		post: sort
+		post: sort,
+		patch: sort,
 	}
 };
 

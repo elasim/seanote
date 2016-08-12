@@ -1,5 +1,9 @@
 @import "./common.scss";
 
+.item {
+	cursor: move;
+}
+
 .float {
 	visibility: hidden;
 }

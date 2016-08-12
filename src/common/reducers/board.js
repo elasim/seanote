@@ -5,6 +5,8 @@ import { ActionTypes as BoardActions } from '../actions/board';
 import { ActionTypes as  PrefetchActions } from '../actions/prefetch';
 import { mean, isNearlyZero } from './lib/sortable';
 
+const debug = require('debug')('App.Reducer.Board');
+
 const initialState = {
 	list: [],
 	dirty: {},
@@ -18,6 +20,7 @@ export default handleActions({
 	[BoardActions.sort]: sort,
 	[BoardActions.load]: load,
 	[BoardActions.rename]: rename,
+	[BoardActions.remove]: remove,
 	[PrefetchActions.prefetch]: prefetch,
 }, initialState);
 
@@ -90,7 +93,7 @@ function load(state, { payload }) {
 
 function rename(state, { payload }) {
 	const { id, name } = payload;
-	const idx = state.list.findIndex(item => item.id == id);
+	const idx = state.list.findIndex(item => item.id === id);
 	const nextValue = {
 		...state.list[idx],
 		name,
@@ -99,6 +102,26 @@ function rename(state, { payload }) {
 	return update(state, {
 		list: {
 			[idx]: { $set: nextValue }
+		},
+		dirty: { $set: nextDirty }
+	});
+}
+
+function remove(state, { payload }) {
+	const id = payload;
+	const idx = state.list.findIndex(item => item.id === id);
+	if (idx === -1) {
+		return state;
+	}
+	const nextDirty = {
+		...state.dirty,
+		[id]: { deleted: true }
+	};
+	return update(state, {
+		list: {
+			$splice: [
+				[idx, 1]
+			]
 		},
 		dirty: { $set: nextDirty }
 	});

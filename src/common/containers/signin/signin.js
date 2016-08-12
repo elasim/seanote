@@ -80,6 +80,12 @@ export default class SignInView extends Component {
 		setTitle: PropTypes.func.isRequired,
 		intl: PropTypes.object,
 	};
+	constructor(...args) {
+		super(...args);
+		// @TODO: REMOVE AFTER DEVELOPMENT
+		this.__testID = `tester${Math.random().toString(16).substr(2, 8)}@whitenull.com`;
+		this.__testPW = Math.random().toString(16);
+	}
 	render() {
 		const { intl } = this.context;
 		const textfieldProps = {
@@ -109,9 +115,11 @@ export default class SignInView extends Component {
 					<form method="post" action="/auth/local">
 						<div className={css.row}>
 							<TextField hintText={intl.formatMessage(messages.email)}
-								type="email" {...textfieldProps} name="email" id="email"/>
+								type="email" {...textfieldProps} name="email" id="email"
+								defaultValue={this.__testID}/>
 							<TextField hintText={intl.formatMessage(messages.password)}
-								type="password" {...textfieldProps} name="password" id="password" />
+								type="password" {...textfieldProps} name="password" id="password"
+								defaultValue={this.__testPW}/>
 						</div>
 						<RaisedButton type="submit"
 							label={intl.formatMessage(messages.signin)}

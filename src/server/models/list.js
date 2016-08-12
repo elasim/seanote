@@ -168,7 +168,8 @@ export default new class List {
 				where: {
 					BoardId: board,
 					priority: value
-				}
+				},
+				transaction,
 			});
 			debug('sort() fail-safe, equal counts: ', equals);
 			if (equals > 1) {

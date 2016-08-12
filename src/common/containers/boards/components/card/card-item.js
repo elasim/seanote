@@ -1,7 +1,7 @@
 import cx from 'classnames';
 import React, { PropTypes } from 'react';
 import isEqual from 'lodash/isEqual';
-import { Card, CardText } from 'material-ui/Card';
+import { Card, CardTitle } from 'material-ui/Card';
 import ComponentEx from '../../../component';
 import Draggable from '../../../../components/dnd/draggable';
 import Droppable from '../../../../components/dnd/droppable';
@@ -42,7 +42,7 @@ export default class CardItem extends ComponentEx {
 	}
 	render() {
 		const { style, className, data } = this.props;
-		const liClassName = cx(className, {
+		const liClassName = cx(className, css.item, {
 			[css.float]: this.state.isDragging,
 		});
 		return (
@@ -53,10 +53,12 @@ export default class CardItem extends ComponentEx {
 					preview={<CardItemPreview />}
 					onDragStart={this.onDragStart} onDragEnd={this.onDragEnd}>
 					<li ref="field" className={liClassName} style={style}>
-						<Card style={{ transition: 'none' }}>
-							<CardText>
+						<Card style={{ transition: 'none' }} containerStyle={{
+							paddingBottom: 0
+						}}>
+							<CardTitle>
 								<CardContent data={data.value} onMessage={this.dispatchMessage} />
-							</CardText>
+							</CardTitle>
 						</Card>
 					</li>
 				</Draggable>

@@ -18,10 +18,12 @@ export default {
 	},
 	'/:board/_sort': {
 		post: sort,
+		patch: sort,
 	},
 	'/:board/mode': {
 		get: getMode,
 		post: setMode,
+		patch: setMode,
 	},
 };
 
@@ -59,8 +61,12 @@ function update(req) {
 	});
 }
 
-function delete_(req) {
-	return Board.delete(req.user.db, selectId(req));
+async function delete_(req) {
+	try {
+		await Board.delete(req.user.db, selectId(req));
+	} catch (e) {
+		throw e;
+	}
 }
 
 function sort(req) {

@@ -1,26 +1,33 @@
 import cx from 'classnames';
 import React, { Component, PropTypes, } from 'react';
 import { findDOMNode } from 'react-dom';
+import ContentAddIcon from 'material-ui/svg-icons/content/add';
 import ContentCopyIcon from 'material-ui/svg-icons/content/content-copy';
+import FAB from 'material-ui/FloatingActionButton';
 import DragPreview from '../../../../components/dnd/preview';
+import Droppable from '../../../../components/dnd/droppable';
 import { createScrollSpy } from '../../../../lib/dom-helpers';
 import List from '../list';
 import Board from '../board';
-import FAB from '../fab';
 import css from './boards.scss';
 
 class Boards extends Component {
 	static contextTypes = {
 		setTitle: PropTypes.func,
 		hammer: PropTypes.object,
+		router: PropTypes.object,
+		intl: PropTypes.object,
 	};
 	componentWillMount() {
 		this.context.setTitle('Boards');
 		this.state = {
-			fabIcon: null,
+			fabIcon: 'add',
 			fabFront: false,
 		};
 		this.dispatchMessage = (::this.dispatchMessage);
+		this.onFABDragOut = ::this.onFABDragOut;
+		this.onFABDragOver = ::this.onFABDragOver;
+		this.onFABDrop = ::this.onFABDrop;
 	}
 	componentDidMount() {
 		this.disposeDragHook = this.context.hammer.createHook(
@@ -45,13 +52,13 @@ class Boards extends Component {
 			cards,
 			lists,
 		} = this.props;
-		const { fabIcon, fabFront } = this.state;
 		let view;
 		if (id) {
 			view = <Board full={!headerVisibility} id={id} lists={lists} cards={cards} />;
 		} else {
 			view = <div>Select item</div>;
 		}
+		const fab = this.renderFAB();
 		return (
 			<div className={cx(css.root, {
 				[css.viewer]: !!id,
@@ -66,11 +73,12 @@ class Boards extends Component {
 				<div className={css.content}>
 					{view}
 				</div>
-				<FAB className={cx(css.fab, { [css.front]: fabFront })}
-					icon={fabIcon} onMessage={this.dispatchMessage}/>
+				{fab}
 				<DragPreview className={css.preview} />
 			</div>
 		);
+				// <FAB className={cx(css.fab, { [css.front]: fabFront })}
+				// 	icon={fabIcon} onMessage={this.dispatchMessage}/>
 	}
 	listLoadMore() {
 		const listElement = findDOMNode(this.refs.list);
@@ -83,6 +91,35 @@ class Boards extends Component {
 		if (list.length < counts) {
 			boardActions.load(list.length, WINDOW_SIZE);
 		}
+	}
+	renderFAB() {
+		const { fabIcon, fabFront } = this.state;
+		
+		let icon = null;
+		switch (fabIcon) {
+			case 'add':
+				icon = <ContentAddIcon />;
+				break;
+			case 'copy':
+				icon = <ContentCopyIcon />;
+				break;
+			default:
+				console.warn('Unknown Icon');
+		}
+		const fabClassName = cx(css.fab, {
+			[css.front]: fabFront
+		});
+
+		return (
+			<Droppable
+				onDragOver={this.onFABDragOver}
+				onDragOut={this.onFABDragOut}
+				onDrop={this.onFABDrop}>
+				<FAB className={fabClassName} onClick={this.onFABClick}>
+					{icon}
+				</FAB>
+			</Droppable>
+		);
 	}
 	dispatchMessage(msg, args) {
 		switch (msg) {
@@ -97,33 +134,12 @@ class Boards extends Component {
 				this.props.boardActions.rename(id, name);
 				return;
 			}
-			case FAB.EventTypes.DragOver: {
-				return this.props.setDim({
-					icon: null,
-					text: 'Copying a this item',
-				});
-			}
-			case FAB.EventTypes.Drop: {
-				const { descriptor } = args;
-				return this.props.setDim(null);
-			}
-			case FAB.EventTypes.DragOut: {
-				return this.props.setDim(null);
-			}
-			case FAB.EventTypes.Open: {
-				this.props.setDim({
-					onClick: args.dimClick,
-				});
-				this.setState({
-					fabFront: true,
-				});
-				return;
-			}
-			case FAB.EventTypes.Close: {
-				this.props.setDim(null);
-				this.setState({
-					fabFront: false,
-				});
+			case List.EventTypes.Delete: {
+				const { id } = args;
+				this.props.boardActions.remove(id);
+				if (this.props.params.id === id) {
+					this.context.router.push('/boards');
+				}
 				return;
 			}
 			default: {
@@ -131,15 +147,35 @@ class Boards extends Component {
 			}
 		}
 	}
+	onFABClick() {
+		const { params, listActions, boardActions } = this.props;
+
+		if (params.id) {
+			this.props.listActions.create();
+		} else {
+			this.props.boardActions.create();
+		}
+	}
+	onFABDragOver() {
+		this.props.setDim({
+			text: 'Copy into new list'
+		});
+	}
+	onFABDragOut() {
+		this.props.setDim(null);
+	}
+	onFABDrop() {
+		this.props.setDim(null);
+	}
 	onDragStart() {
 		this.setState({
-			fabIcon: ContentCopyIcon,
+			fabIcon: 'copy',
 			fabFront: true,
 		});
 	}
 	onDragEnd() {
 		this.setState({
-			fabIcon: null,
+			fabIcon: 'add',
 			fabFront: false,
 		});
 	}

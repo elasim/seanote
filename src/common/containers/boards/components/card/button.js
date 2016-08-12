@@ -18,7 +18,6 @@ function renderButton() {
 export default function MenuButton(props) {
 	return (
 		<IconMenu iconButtonElement={renderButton()} style={props.style}>
-			<MenuItem primaryText="Add Card"/>
 			<MenuItem primaryText="Close"/>
 			<MenuItem primaryText="Delete"/>
 		</IconMenu>
